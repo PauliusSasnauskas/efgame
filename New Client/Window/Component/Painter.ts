@@ -7,4 +7,5 @@ export default interface Painter {
 	drawText(x : number, y : number, text : string, fontSize : number, fontColor : string) : void;
 	registerClickListener(listener : (e : MouseEvent) => void) : void;
 	unregisterClickListener(listener : (e : MouseEvent) => void) : void;
+	unregisterAllListeners() : void;
 }

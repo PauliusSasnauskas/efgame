@@ -6,6 +6,8 @@ export default class CanvasPainter implements Painter {
 
     private fontFamily = "bmgermar";
 
+    private clickListeners : Set<(e : MouseEvent) => void> = new Set();
+
     constructor(canvas : HTMLCanvasElement) {
         this.canvas = canvas;
         const context = this.canvas.getContext("2d");
@@ -16,9 +18,17 @@ export default class CanvasPainter implements Painter {
     }
     registerClickListener(listener: (e : MouseEvent) => void): void {
         this.canvas.addEventListener("click", listener);
+        this.clickListeners.add(listener);
     }
     unregisterClickListener(listener: (e : MouseEvent) => void): void {
         this.canvas.removeEventListener("click", listener);
+        this.clickListeners.delete(listener);
+    }
+    unregisterAllListeners() : void {
+        this.clickListeners.forEach((listener) => {
+            this.canvas.removeEventListener("click", listener);
+        });
+        this.clickListeners.clear();
     }
 
     drawRect(x: number, y: number, w: number, h: number, color: string): void {
