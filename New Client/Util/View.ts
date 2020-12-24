@@ -1,4 +1,4 @@
-import Painter from "./Painter.js";
+import Painter from "./Painter";
 
 export default abstract class View {
     x : number;

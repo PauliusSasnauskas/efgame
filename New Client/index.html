@@ -8,6 +8,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<style>
+		/* @font-face {
+			font-family: bmgermar;
+			src: url("./fonts/bmgermar.ttf") format("truetype");
+		} */
 		html, body {
 			margin: 0;
 			padding: 0;
@@ -16,17 +20,22 @@
 		}
 		body {
 			display: flex;
+			flex-direction: column;
 			justify-content: center;
 			align-items: center;
 		}
 		canvas {
 			/* debug */ background-color: lightgray;
 		}
+		p { /* debug */
+			font-family: bmgermar;
+			font-size: 16px;
+		}
 	</style>
 </head>
 
 <body>
-	<canvas id="gameCanvas" width="960" height="540">
+	<canvas id="gameCanvas" width="640" height="480">
 		To play this game your browser must support the HTML5 Canvas element and JavaScript.
 		Check out <a href="https://caniuse.com/#feat=canvas">https://caniuse.com/#feat=canvas</a>
 	</canvas>
@@ -34,7 +43,10 @@
 	<script type="module">
 		import main from "./dist/index.js";
 
-		main();
+		document.fonts.add(new FontFace("bmgermar", "url(./fonts/bmgermar.ttf)"));
+		document.fonts.load("16px bmgermar").then(() => {
+			main();
+		});
 	</script>
 </body>
 

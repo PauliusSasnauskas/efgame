@@ -1,9 +1,9 @@
-import View from "./View.js";
-import Painter from "./Painter.js";
+import View from "./View";
+import Painter from "./Painter";
 
 export default class TextView extends View {
     private text : string;
-    private fontSize : number = 8;
+    private fontSize : number = 16;
     private fontColor : string = "#fff";
 
     constructor(x : number, y : number, text : string) {
@@ -15,6 +15,18 @@ export default class TextView extends View {
     }
     setFontColor(fontColor : string): void {
         this.fontColor = fontColor;
+    }
+    getFontSize() : number {
+        return this.fontSize;
+    }
+    getFontColor() : string {
+        return this.fontColor;
+    }
+    setX(x : number) {
+        this.x = x;
+    }
+    setY(y : number) {
+        this.y = y;
     }
     draw(painter: Painter): void {
         painter.drawText(this.getDrawX(), this.getDrawY(), this.text, this.fontSize, this.fontColor);

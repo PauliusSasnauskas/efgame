@@ -1,5 +1,5 @@
-import View from "./View.js";
-import Painter from "./Painter.js";
+import View from "./View";
+import Painter from "./Painter";
 
 export default class ImageView extends View {
     private img : HTMLImageElement | string;

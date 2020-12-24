@@ -1,5 +1,5 @@
-import View from "./View.js";
-import Painter from "./Painter.js";
+import View from "./View";
+import Painter from "./Painter";
 
 export default class ContainerView extends View {
     private padding : number;
@@ -39,5 +39,11 @@ export default class ContainerView extends View {
     }
     getDrawY() : number {
         return (this.parent?.getDrawY() ?? 0) + this.padding + this.y;
+    }
+    getW() : number {
+        return this.width;
+    }
+    getH() : number {
+        return this.height;
     }
 }

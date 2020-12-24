@@ -1,10 +1,10 @@
-import Painter from "./Painter.js";
+import Painter from "./Painter";
 
 export default class CanvasPainter implements Painter {
     private canvas : HTMLCanvasElement;
     private c : CanvasRenderingContext2D;
 
-    private fontFamily = "";
+    private fontFamily = "bmgermar";
 
     constructor(canvas : HTMLCanvasElement) {
         this.canvas = canvas;
@@ -13,6 +13,12 @@ export default class CanvasPainter implements Painter {
             throw new Error("Canvas cannot get a 2D context.");
         }
         this.c = context;
+    }
+    registerClickListener(listener: (e : MouseEvent) => void): void {
+        this.canvas.addEventListener("click", listener);
+    }
+    unregisterClickListener(listener: (e : MouseEvent) => void): void {
+        this.canvas.removeEventListener("click", listener);
     }
 
     drawRect(x: number, y: number, w: number, h: number, color: string): void {
