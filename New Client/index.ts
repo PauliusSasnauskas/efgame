@@ -1,5 +1,5 @@
-import ButtonView from "./Util/ButtonView";
-import { CanvasPainter, ContainerView, TextView, ImageView } from "./Util/index";
+import ButtonView from "./Window/ButtonView";
+import { CanvasPainter, ContainerView, TextView, ImageView } from "./Window/index";
 
 const WINDOW_WIDTH = 640;
 const WINDOW_HEIGHT = 480;
