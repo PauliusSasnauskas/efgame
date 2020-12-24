@@ -4,12 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && static-https-server",
+    "build": "tsc && node _addJsExtension.js",
+    "start": "tsc && node _addJsExtension.js && static-https-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Paulius Sasnauskas",
   "license": "MIT",
   "devDependencies": {
+    "filehound": "^1.17.4",
     "typescript": "^3.9.7"
   }
 }
