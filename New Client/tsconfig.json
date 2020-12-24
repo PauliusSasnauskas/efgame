@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+
+    "target": "es5",
+    "module": "ES2020",
+    "lib": ["DOM", "ES2019"],
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "removeComments": true,
+
+    "strict": true,
+
+    "baseUrl": "./",
+    "rootDirs": ["./"],
+    "esModuleInterop": true,
+
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["./**/*"],
+  "exclude": ["./dist/**/*"]
+}

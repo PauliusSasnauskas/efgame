@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>EF Game</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			width: 100vw;
+			height: 100vh;
+		}
+		body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		canvas {
+			/* debug */ background-color: lightgray;
+		}
+	</style>
+</head>
+
+<body>
+	<canvas id="gameCanvas" width="960" height="540">
+		To play this game your browser must support the HTML5 Canvas element and JavaScript.
+		Check out <a href="https://caniuse.com/#feat=canvas">https://caniuse.com/#feat=canvas</a>
+	</canvas>
+	<script src="./dist/index.js" type="module"></script>
+	<script type="module">
+		import main from "./dist/index.js";
+
+		main();
+	</script>
+</body>
+
+</html>
