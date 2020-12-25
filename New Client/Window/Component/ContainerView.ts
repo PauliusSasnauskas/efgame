@@ -18,15 +18,23 @@ export default class ContainerView implements ViewGroup {
         this.padding = padding ?? {top: 0, left: 0};
     }
 
-    appendChild(child : View, x : number, y : number): void{
+    setPadding(padding : TopLeft) : void {
+        this.padding = padding;
+    }
+
+    getPadding() : TopLeft {
+        return this.padding;
+    }
+
+    appendChild(child : View, x : number, y : number): void {
         this.children.push({v: child, x, y});
     }
 
-    setBackgroundColor(backgroundColor : string){
+    setBackgroundColor(backgroundColor : string) : void {
         this.backgroundColor = backgroundColor;
     }
 
-    setBackgroundImage(bgImg : PainterImage){
+    setBackgroundImage(bgImg : PainterImage) : void {
         this.backgroundImage = bgImg;
     }
 

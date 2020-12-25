@@ -7,6 +7,7 @@ export default class ButtonView implements View {
     private containerView : ContainerView;
     private textView : TextView;
     private listener?: () => void;
+    private icon? : PainterImage;
 
     constructor(w : number, h : number, text : string, padding? : TopLeft) {
         this.textView = new TextView(text);
@@ -16,7 +17,7 @@ export default class ButtonView implements View {
     setBackgroundColor(backgroundColor: string): void {
         this.containerView.setBackgroundColor(backgroundColor);
     }
-    setBackgroundImage(bgImg : PainterImage){
+    setBackgroundImage(bgImg : PainterImage) : void {
         this.containerView.setBackgroundImage(bgImg);
     }
     setFontSize(fontSize : number): void {
@@ -25,8 +26,15 @@ export default class ButtonView implements View {
     setFontColor(fontColor : string): void {
         this.textView.setFontColor(fontColor);
     }
-    draw(painter : Painter, x : number, y : number): void{
+    setIcon(icon : PainterImage) : void {
+        this.icon = icon;
+        const oldPadding = this.containerView.getPadding();
+        this.containerView.setPadding({left: oldPadding.left + 26, top: oldPadding.top});
+    }
+    draw(painter : Painter, x : number, y : number): void {
         this.containerView.draw(painter, x, y);
+        const padding = this.containerView.getPadding();
+        if (this.icon){ painter.drawImg(x + padding.left - 32, y - 2 + padding.top, this.icon) }
 
         if (this.listener === undefined) { return; }
 
@@ -40,7 +48,7 @@ export default class ButtonView implements View {
             }
         });
     }
-    setOnClick(listener : () => void){
+    setOnClick(listener : () => void) : void {
         this.listener = listener;
     }
 }
