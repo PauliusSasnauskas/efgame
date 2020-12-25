@@ -2,7 +2,7 @@
   "name": "efgame-client",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.html",
   "scripts": {
     "build": "tsc && node _addJsExtension.js",
     "start": "tsc && node _addJsExtension.js && static-https-server",
@@ -12,6 +12,7 @@
   "license": "MIT",
   "devDependencies": {
     "filehound": "^1.17.4",
+    "static-https-server": "^1.0.1",
     "typescript": "^3.9.7"
   }
 }
