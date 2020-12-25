@@ -1,6 +1,6 @@
 import { CanvasPainter } from "./Window/Component/index";
 import App from "./App";
-import MainScreen from "./Window/Screen/MainScreen";
+import LoadScreen from "./Window/Screen/LoadScreen";
 
 export default function main(windowWidth : number, windowHeight : number){
 	const canvasElement = document.getElementById("gameCanvas") as HTMLCanvasElement;
@@ -9,6 +9,6 @@ export default function main(windowWidth : number, windowHeight : number){
 	
 	App.init(windowWidth, windowHeight,
 		new CanvasPainter(canvasElement),
-		MainScreen
+		LoadScreen
 	);
 }

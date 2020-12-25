@@ -21,6 +21,11 @@
 			align-items: center;
 		}
 		canvas {
+			image-rendering: pixelated;
+			font-smooth: never;
+    		-webkit-font-smoothing: none;
+			-moz-osx-font-smoothing: none;
+			text-rendering: geometricPrecision;
 			/* debug */ background-color: lightgray;
 		}
 	</style>
@@ -34,11 +39,7 @@
 	<script src="./dist/index.js" type="module"></script>
 	<script type="module">
 		import main from "./dist/index.js";
-
-		document.fonts.add(new FontFace("bmgermar", "url(./fonts/bmgermar.ttf)"));
-		document.fonts.load("16px bmgermar").then(() => {
-			main(640, 480);
-		});
+		main(640, 480);
 	</script>
 </body>
 

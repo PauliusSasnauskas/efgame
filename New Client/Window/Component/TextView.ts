@@ -1,5 +1,4 @@
-import View from "./View";
-import Painter from "./Painter";
+import { Painter, View } from "../Screen/index";
 
 export default class TextView implements View {
     private text : string;

@@ -1,4 +1,4 @@
-import { Painter, ViewGroup } from "./Window/Component/index";
+import { Painter, ViewGroup } from "./Window/Screen/index";
 
 declare type Class<T = any> = new (...args: any[]) => T;
 
@@ -9,6 +9,12 @@ export default class App {
 
     private w : number;
     private h : number;
+
+    private fontLoaded = false;
+    private imagesLoaded = 0;
+    private imagesToLoad = ["bar", "bg2"];
+    private loadedImages : Map<string, CanvasImageSource> = new Map();
+    private onLoadResources? : (() => void);
 
     private constructor(width : number, height : number, painter: Painter, InitialScreen : Class<ViewGroup>)  {
         this.w = width;
@@ -42,5 +48,35 @@ export default class App {
             throw new Error("App not started?");
         }
         return this._ref;
+    }
+
+    setOnLoadResources(callback : (() => void)){
+        this.onLoadResources = callback;
+    }
+    
+    loadResources() {
+        if (this.imagesLoaded && this.fontLoaded) return;
+        for (const image of this.imagesToLoad){
+            const imageObj = new Image();
+            imageObj.src = "img/" + image + ".png";
+            this.loadedImages.set(image, imageObj);
+            imageObj.onload = ()=>{
+                this.imagesLoaded++;
+                if (this.imagesLoaded !== this.imagesToLoad.length || this.onLoadResources === undefined || this.fontLoaded === false){ return }
+                this.onLoadResources();
+            };
+        }
+        (document as any).fonts.add(new (window as any).FontFace("nokiafc22", "url(./fonts/nokiafc22.ttf)"));
+		(document as any).fonts.load("12px nokiafc22").then(() => {
+            this.fontLoaded = true;
+            if (this.imagesLoaded !== this.imagesToLoad.length || this.onLoadResources === undefined){ return }
+            this.onLoadResources();
+		});
+    }
+    getImage(name : string) : CanvasImageSource {
+        if (this.imagesLoaded === 0) throw new Error("Images not loaded");
+        const getImage = this.loadedImages.get(name);
+        if (getImage === undefined) throw new Error("Image not loaded");
+        return getImage;
     }
 }

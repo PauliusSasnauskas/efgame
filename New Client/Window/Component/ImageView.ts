@@ -1,10 +1,9 @@
-import View from "./View";
-import Painter from "./Painter";
+import { Painter, PainterImage, View } from "../Screen/index";
 
 export default class ImageView implements View {
-    private img : HTMLImageElement | string;
+    private img : PainterImage;
 
-    constructor(img : HTMLImageElement | string) {
+    constructor(img : PainterImage) {
         this.img = img;
     }
     draw(painter: Painter, x : number, y : number): void {

@@ -1,5 +1,5 @@
-import View from "./View";
-import Painter from "./Painter";
+import { Painter, PainterImage, View } from "../Screen/index";
+import { TopLeft } from "./ContainerView";
 import { ContainerView, TextView } from "./index";
 
 export default class ButtonView implements View {
@@ -8,13 +8,16 @@ export default class ButtonView implements View {
     private textView : TextView;
     private listener?: () => void;
 
-    constructor(w : number, h : number, text : string, padding? : number) {
+    constructor(w : number, h : number, text : string, padding? : TopLeft) {
         this.textView = new TextView(text);
-        this.containerView = new ContainerView(w, h, padding ?? 0);
+        this.containerView = new ContainerView(w, h, padding);
         this.containerView.appendChild(this.textView, 0, this.textView.getFontSize());
     }
     setBackgroundColor(backgroundColor: string): void {
         this.containerView.setBackgroundColor(backgroundColor);
+    }
+    setBackgroundImage(bgImg : PainterImage){
+        this.containerView.setBackgroundImage(bgImg);
     }
     setFontSize(fontSize : number): void {
         this.textView.setFontSize(fontSize);

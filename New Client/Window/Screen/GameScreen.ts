@@ -8,7 +8,7 @@ export default class GameScreen extends ContainerView {
 
         this.setBackgroundColor("#8f6");
 
-        const buttonBack = new ButtonView(192, 32, "< Back", 5);
+        const buttonBack = new ButtonView(192, 32, "< Back", {top: 5, left: 10});
         buttonBack.setFontSize(16);
         buttonBack.setBackgroundColor("#333");
         buttonBack.setOnClick(()=>{
