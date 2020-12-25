@@ -1,44 +1,34 @@
-import View from "./View";
-import Painter from "./Painter";
+import { Painter, View, ViewGroup } from ".";
 
-export default class ContainerView extends View {
+export default class ContainerView implements ViewGroup {
     private padding : number;
-    private children : Array<View> = [];
+    private children : Array<{v : View, x : number, y : number}> = [];
 
     private width : number;
     private height : number;
 
-    private backgroundColor : string | undefined = undefined;
+    private backgroundColor? : string;
 
-    constructor(x : number, y : number, width : number, height : number, padding? : number) {
-        super(x, y);
+    constructor(width : number, height : number, padding? : number) {
         this.width = width;
         this.height = height;
         this.padding = padding ?? 0;
     }
 
-    appendChild(child : View): void{
-        this.children.push(child);
-        child.parent = this;
+    appendChild(child : View, x : number, y : number): void{
+        this.children.push({v: child, x, y});
     }
 
     setBackgroundColor(backgroundColor : string){
         this.backgroundColor = backgroundColor;
     }
 
-    draw(painter: Painter): void {
-        if (this.backgroundColor) painter.drawRect(this.x, this.y, this.width, this.height, this.backgroundColor);
-        // TODO: draw frame
+    draw(painter: Painter, x : number, y : number): void {
+        if (this.backgroundColor) { painter.drawRect(x, y, this.width, this.height, this.backgroundColor); }
+        // TODO: add frame and/or background
         for (let child of this.children){
-            child.draw(painter);
+            child.v.draw(painter, x+this.padding+child.x, y+this.padding+child.y);
         }
-    }
-    
-    getDrawX() : number {
-        return (this.parent?.getDrawX() ?? 0) + this.padding + this.x;
-    }
-    getDrawY() : number {
-        return (this.parent?.getDrawY() ?? 0) + this.padding + this.y;
     }
     getW() : number {
         return this.width;

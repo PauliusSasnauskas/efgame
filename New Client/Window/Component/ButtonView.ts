@@ -2,59 +2,42 @@ import View from "./View";
 import Painter from "./Painter";
 import { ContainerView, TextView } from "./index";
 
-export default class ButtonView extends View {
+export default class ButtonView implements View {
 
     private containerView : ContainerView;
     private textView : TextView;
-    private unregisterListener?: (e : MouseEvent) => void;
-    private listener?: (e : MouseEvent) => void;
-    private isDrawn : boolean = false;
+    private listener?: () => void;
 
-    constructor(x : number, y : number, w : number, h : number, text : string, padding? : number) {
-        super(x, y);
-        this.textView = new TextView(0, 0, text);
-        this.textView.setY(this.textView.getFontSize());
-        this.containerView = new ContainerView(x, y, w, h, padding ?? 0);
-        this.containerView.appendChild(this.textView);
-    }
-    appendChild(child: View): void {
-        this.containerView.appendChild(child);
+    constructor(w : number, h : number, text : string, padding? : number) {
+        this.textView = new TextView(text);
+        this.containerView = new ContainerView(w, h, padding ?? 0);
+        this.containerView.appendChild(this.textView, 0, this.textView.getFontSize());
     }
     setBackgroundColor(backgroundColor: string): void {
         this.containerView.setBackgroundColor(backgroundColor);
     }
     setFontSize(fontSize : number): void {
         this.textView.setFontSize(fontSize);
-        this.textView.setY(fontSize);
     }
     setFontColor(fontColor : string): void {
         this.textView.setFontColor(fontColor);
     }
-    draw(painter: Painter): void {
-        if (this.unregisterListener !== undefined){
-            painter.unregisterClickListener(this.unregisterListener);
-            this.unregisterListener = undefined;
-        }
-        this.containerView.draw(painter);
-        if (this.listener !== undefined){
-            painter.registerClickListener(this.listener);
-            this.isDrawn = true;
-        }
+    draw(painter : Painter, x : number, y : number): void{
+        this.containerView.draw(painter, x, y);
+
+        if (this.listener === undefined) { return; }
+
+        const listenerCopy = this.listener;
+        painter.registerClickListener((e : MouseEvent) => {
+            if (   e.offsetX >= x
+                && e.offsetX <= x + this.containerView.getW()
+                && e.offsetY >= y
+                && e.offsetY <= y + this.containerView.getH()) {
+                listenerCopy();
+            }
+        });
     }
     setOnClick(listener : () => void){
-        if (this.isDrawn && listener !== undefined){
-            this.unregisterListener = listener;
-            this.isDrawn = false;
-        }
-        this.listener = (e : MouseEvent) => {
-            const cX = this.containerView.getDrawX();
-            const cY = this.containerView.getDrawY();
-            if (   e.offsetX >= cX
-                && e.offsetX <= cX + this.containerView.getW()
-                && e.offsetY >= cY
-                && e.offsetY <= cY + this.containerView.getH()) {
-                listener();
-            }
-        };
+        this.listener = listener;
     }
 }

@@ -15,6 +15,7 @@ export default class CanvasPainter implements Painter {
             throw new Error("Canvas cannot get a 2D context.");
         }
         this.c = context;
+        this.c.imageSmoothingEnabled = false;
     }
     registerClickListener(listener: (e : MouseEvent) => void): void {
         this.canvas.addEventListener("click", listener);

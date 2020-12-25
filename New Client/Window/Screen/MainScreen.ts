@@ -1,20 +1,22 @@
 import App from "../../App";
-import { ButtonView, CanvasScreen, TextView, Painter } from "../Component/index";
+import { ButtonView, TextView, ContainerView } from "../Component/index";
 import GameScreen from "./GameScreen";
 
-export default class MainScreen extends CanvasScreen {
-    show(painter : Painter): void {
-        painter.drawRect(0, 0, 640, 480, "#c53");
+export default class MainScreen extends ContainerView {
+    constructor(w : number, h : number) {
+        super(w, h);
 
-        const button1 = new ButtonView(32, 224, 192, 32, "Play", 5);
-        button1.setBackgroundColor("#333");
-        button1.setOnClick(()=>{
+        this.setBackgroundColor("#c53");
+
+        const buttonPlay = new ButtonView(192, 32, "Play", 5);
+        buttonPlay.setBackgroundColor("#333");
+        buttonPlay.setOnClick(()=>{
             App.getInstance().showScreen(GameScreen);
         });
-        button1.draw(painter);
+        this.appendChild(buttonPlay, 32, 224);
 
-        const titleText = new TextView(32, 192, "EFGame");
+        const titleText = new TextView("EFGame");
         titleText.setFontSize(32);
-        titleText.draw(painter);
+        this.appendChild(titleText, 32, 192);
     }
 }

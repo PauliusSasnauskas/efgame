@@ -1,13 +1,12 @@
 import View from "./View";
 import Painter from "./Painter";
 
-export default class TextView extends View {
+export default class TextView implements View {
     private text : string;
     private fontSize : number = 16;
     private fontColor : string = "#fff";
 
-    constructor(x : number, y : number, text : string) {
-        super(x, y);
+    constructor(text : string) {
         this.text = text;
     }
     setFontSize(fontSize : number): void {
@@ -22,13 +21,7 @@ export default class TextView extends View {
     getFontColor() : string {
         return this.fontColor;
     }
-    setX(x : number) {
-        this.x = x;
-    }
-    setY(y : number) {
-        this.y = y;
-    }
-    draw(painter: Painter): void {
-        painter.drawText(this.getDrawX(), this.getDrawY(), this.text, this.fontSize, this.fontColor);
+    draw(painter: Painter, x : number, y : number): void {
+        painter.drawText(x, y, this.text, this.fontSize, this.fontColor);
     }
 }

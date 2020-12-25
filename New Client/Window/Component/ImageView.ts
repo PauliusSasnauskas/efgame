@@ -1,14 +1,13 @@
 import View from "./View";
 import Painter from "./Painter";
 
-export default class ImageView extends View {
+export default class ImageView implements View {
     private img : HTMLImageElement | string;
 
-    constructor(x : number, y : number, img : HTMLImageElement | string) {
-        super(x, y);
+    constructor(img : HTMLImageElement | string) {
         this.img = img;
     }
-    draw(painter: Painter): void {
-        painter.drawImg(this.getDrawX(), this.getDrawY(), this.img);
+    draw(painter: Painter, x : number, y : number): void {
+        painter.drawImg(x, y, this.img);
     }
 }

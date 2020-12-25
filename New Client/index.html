@@ -8,10 +8,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<style>
-		/* @font-face {
-			font-family: bmgermar;
-			src: url("./fonts/bmgermar.ttf") format("truetype");
-		} */
 		html, body {
 			margin: 0;
 			padding: 0;
@@ -27,10 +23,6 @@
 		canvas {
 			/* debug */ background-color: lightgray;
 		}
-		p { /* debug */
-			font-family: bmgermar;
-			font-size: 16px;
-		}
 	</style>
 </head>
 
@@ -45,7 +37,7 @@
 
 		document.fonts.add(new FontFace("bmgermar", "url(./fonts/bmgermar.ttf)"));
 		document.fonts.load("16px bmgermar").then(() => {
-			main();
+			main(640, 480);
 		});
 	</script>
 </body>
