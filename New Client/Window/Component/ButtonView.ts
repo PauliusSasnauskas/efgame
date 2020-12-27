@@ -34,12 +34,12 @@ export default class ButtonView implements View {
     draw(painter : Painter, x : number, y : number): void {
         this.containerView.draw(painter, x, y);
         const padding = this.containerView.getPadding();
-        if (this.icon){ painter.drawImg(x + padding.left - 32, y - 2 + padding.top, this.icon) }
+        if (this.icon){ painter.drawImg(x + padding.left - 30, y - 4 + padding.top, this.icon) }
 
         if (this.listener === undefined) { return; }
-
         const listenerCopy = this.listener;
         painter.registerClickListener((e : MouseEvent) => {
+            // console.log(e.offsetX, e.offsetY);
             if (   e.offsetX >= x
                 && e.offsetX <= x + this.containerView.getW()
                 && e.offsetY >= y

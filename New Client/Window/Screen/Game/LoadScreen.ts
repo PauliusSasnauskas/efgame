@@ -1,5 +1,5 @@
-import App from "../../App";
-import { ContainerView, TextView } from "../Component/index";
+import App from "../../../App";
+import { ContainerView, TextView } from "../../Component/index";
 import MainScreen from "./MainScreen";
 
 export default class GameScreen extends ContainerView {

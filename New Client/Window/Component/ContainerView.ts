@@ -1,10 +1,11 @@
 import { PainterImage, Painter, View, ViewGroup } from "../Screen/index";
 
 export declare type TopLeft = {top : number, left : number}
+export declare type ViewAndPosition = {v : View, x : number, y : number};
 
 export default class ContainerView implements ViewGroup {
     private padding : TopLeft;
-    private children : Array<{v : View, x : number, y : number}> = [];
+    private children : Array<ViewAndPosition> = [];
 
     private width : number;
     private height : number;

@@ -12,7 +12,7 @@ export default class App {
 
     private fontLoaded = false;
     private imagesLoaded = 0;
-    private imagesToLoad = ["bar", "bg2", "menubuttons"];
+    private imagesToLoad = ["bars", "bg6", "bg7", "bg8", "menuIcons"];
     private loadedImages : Map<string, CanvasImageSource> = new Map();
     private onLoadResources? : (() => void);
 
