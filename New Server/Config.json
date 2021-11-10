@@ -1,0 +1,9 @@
+{
+	"name": "Test server",
+	"port": 7777,
+	"maxPlayers": 8,
+	
+	"modules": [
+		"Vanilla"
+	]
+}
