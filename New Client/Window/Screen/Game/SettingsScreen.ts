@@ -1,7 +1,8 @@
 import { PainterImage } from "../index";
 import App from "../../../App";
-import { ButtonView, ContainerView } from "../../Component/index";
+import { ContainerView } from "../../Component/index";
 import MainScreen from "./MainScreen";
+import CommonComponents from "./CommonComponents";
 
 export default class SettingsScreen extends ContainerView {
     constructor(w : number, h : number) {
@@ -10,13 +11,8 @@ export default class SettingsScreen extends ContainerView {
         this.setBackgroundColor("#888");
         this.setBackgroundImage(new PainterImage("bg7", {sx: 0, sy: 0, w: App.getInstance().getW(), h: App.getInstance().getH()}));
 
-        const buttonBack = new ButtonView(192, 32, "< Back", {top: 5, left: 10});
-        buttonBack.setFontSize(16);
-        buttonBack.setBackgroundColor("#333");
-        buttonBack.setOnClick(()=>{
+        this.appendChild(CommonComponents.makeButton("< Back", ()=>{
             App.getInstance().showScreen(MainScreen);
-        });
-        
-        this.appendChild(buttonBack, 32, 384);
+        }), 32, 640);
     }
 }

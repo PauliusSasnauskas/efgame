@@ -13,6 +13,6 @@
   "devDependencies": {
     "filehound": "^1.17.4",
     "static-https-server": "^1.0.1",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.9"
   }
 }
