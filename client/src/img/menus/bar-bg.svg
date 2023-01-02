@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -0.5 104 10" shape-rendering="crispEdges">
+<metadata>Made with Pixels to Svg https://codepen.io/shshaw/pen/XbxvNj</metadata>
+<path stroke="#404040" d="M0 0h9M12 0h1M14 0h5M20 0h8M30 0h7M39 0h6M48 0h19M72 0h6M80 0h7M89 0h14M0 1h5M6 1h3M12 1h2M15 1h16M32 1h6M40 1h4M46 1h25M72 1h3M76 1h2M80 1h7M89 1h5M95 1h9M2 2h6M12 2h2M15 2h4M20 2h8M29 2h5M35 2h3M40 2h2M45 2h11M58 2h13M72 2h5M79 2h8M90 2h11M0 3h1M3 3h4M8 3h5M15 3h23M41 3h1M45 3h11M58 3h31M90 3h11M103 3h1M0 4h1M3 4h1M5 4h9M15 4h22M38 4h1M41 4h2M45 4h11M58 4h3M62 4h10M73 4h8M82 4h11M94 4h6M102 4h2M0 5h2M4 5h14M19 5h5M25 5h13M39 5h8M50 5h1M52 5h18M71 5h7M80 5h2M84 5h6M91 5h10M0 6h2M4 6h20M25 6h3M29 6h6M36 6h11M49 6h15M65 6h5M72 6h3M77 6h1M80 6h1M85 6h16M103 6h1M0 7h1M3 7h21M25 7h8M34 7h12M49 7h1M51 7h1M53 7h11M65 7h6M73 7h3M77 7h1M80 7h1M83 7h1M85 7h16M103 7h1M0 8h11M13 8h2M17 8h6M25 8h18M44 8h1M47 8h20M68 8h3M74 8h6M82 8h5M88 8h3M93 8h11M0 9h1M4 9h11M17 9h6M25 9h6M32 9h13M47 9h13M61 9h8M70 9h2M74 9h6M82 9h2M85 9h7M94 9h10" />
+<path stroke="#464646" d="M9 0h1M13 3h1" />
+<path stroke="#2c2f35" d="M10 0h1M37 0h2M45 0h1M70 0h1M78 0h1M9 1h1M38 1h1M44 1h1M78 1h1M87 1h1M0 2h1M8 2h1M10 2h1M38 2h1M43 2h1M56 2h1M71 2h1M77 2h1M87 2h2M101 2h2M1 3h1M14 3h1M38 3h2M56 3h1M101 3h1M1 4h1M14 4h1M39 4h1M43 4h1M100 4h1M2 5h1M24 5h1M48 5h1M70 5h1M78 5h1M83 5h1M2 6h1M47 6h1M71 6h1M78 6h1M81 6h1M84 6h1M101 6h1M1 7h1M46 7h1M71 7h1M78 7h1M81 7h1M101 7h1M15 8h1M23 8h1M45 8h1M71 8h2M80 8h1M91 8h1M23 9h1M45 9h1M72 9h1M80 9h1M92 9h1" />
+<path stroke="#84806a" d="M11 0h1M46 0h2M68 0h2M71 0h1M79 0h1M88 0h1M10 1h2M14 1h1M39 1h1M45 1h1M71 1h1M79 1h1M88 1h1M1 2h1M9 2h1M11 2h1M14 2h1M39 2h1M44 2h1M57 2h1M78 2h1M89 2h1M103 2h1M2 3h1M44 3h1M57 3h1M89 3h1M102 3h1M2 4h1M40 4h1M44 4h1M101 4h1M3 5h1M49 5h1M79 5h1M102 5h1M3 6h1M48 6h1M70 6h1M82 6h2M102 6h1M2 7h1M47 7h1M72 7h1M79 7h1M82 7h1M84 7h1M102 7h1M16 8h1M24 8h1M46 8h1M73 8h1M81 8h1M92 8h1M16 9h1M46 9h1M73 9h1M81 9h1M93 9h1" />
+<path stroke="#313131" d="M13 0h1" />
+<path stroke="#575656" d="M19 0h1M29 0h1M35 6h1" />
+<path stroke="#46464c" d="M28 0h1" />
+<path stroke="#3d4045" d="M67 0h1" />
+<path stroke="#2f3139" d="M87 0h1" />
+<path stroke="#353535" d="M103 0h1" />
+<path stroke="#373737" d="M5 1h1" />
+<path stroke="#585756" d="M31 1h1M61 4h1" />
+<path stroke="#585857" d="M75 1h1M34 2h1" />
+<path stroke="#2c2c2c" d="M94 1h1" />
+<path stroke="#565655" d="M19 2h1M38 5h1M52 7h1" />
+<path stroke="#272a32" d="M28 2h1" />
+<path stroke="#36373e" d="M42 2h1" />
+<path stroke="#2d2d2d" d="M7 3h1" />
+<path stroke="#8d8a76" d="M40 3h1" />
+<path stroke="#555454" d="M42 3h1M64 6h1M50 7h1M60 9h1" />
+<path stroke="#44464a" d="M43 3h1" />
+<path stroke="#2b2b2b" d="M4 4h1" />
+<path stroke="#424449" d="M37 4h1" />
+<path stroke="#2d3337" d="M56 4h1" />
+<path stroke="#201f26" d="M57 4h1" />
+<path stroke="#17191e" d="M72 4h1" />
+<path stroke="#2a2b32" d="M81 4h1" />
+<path stroke="#2f2f2f" d="M93 4h1" />
+<path stroke="#545453" d="M18 5h1M76 7h1" />
+<path stroke="#595958" d="M47 5h1" />
+<path stroke="#32353b" d="M51 5h1" />
+<path stroke="#424448" d="M82 5h1" />
+<path stroke="#393939" d="M90 5h1" />
+<path stroke="#4e4e4e" d="M101 5h1" />
+<path stroke="#3b3b3b" d="M103 5h1" />
+<path stroke="#47494d" d="M24 6h1" />
+<path stroke="#33363d" d="M28 6h1" />
+<path stroke="#35383e" d="M75 6h1" />
+<path stroke="#2e3036" d="M76 6h1" />
+<path stroke="#3b3c42" d="M79 6h1" />
+<path stroke="#2c2f34" d="M24 7h1" />
+<path stroke="#434a4e" d="M33 7h1" />
+<path stroke="#5e6064" d="M48 7h1" />
+<path stroke="#1c1f26" d="M64 7h1" />
+<path stroke="#6d6d6d" d="M11 8h1" />
+<path stroke="#444444" d="M12 8h1" />
+<path stroke="#1b1f25" d="M43 8h1" />
+<path stroke="#20252b" d="M67 8h1" />
+<path stroke="#42464c" d="M87 8h1" />
+<path stroke="#424242" d="M1 9h1" />
+<path stroke="#616161" d="M2 9h1" />
+<path stroke="#222222" d="M3 9h1" />
+<path stroke="#2e3035" d="M15 9h1" />
+<path stroke="#23272b" d="M24 9h1" />
+<path stroke="#525252" d="M31 9h1" />
+<path stroke="#24242a" d="M69 9h1" />
+<path stroke="#3c4143" d="M84 9h1" />
+</svg>

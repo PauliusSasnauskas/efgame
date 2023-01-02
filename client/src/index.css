@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: nokiafc22;
+  src: url('./img/nokiafc22.ttf');
+}
+
+@layer components {
+  .flexc {
+    @apply flex items-center justify-center
+  }
+
+  .m-item {
+    @apply text-white flexc gap-2 h-9.5 pt-1 pl-1
+  }
+
+  .border-box-all * {
+    box-sizing: border-box;
+  }
+  
+  /* m - menu components */
+
+  .m-bar {
+    @apply border-6;
+    background: url('./img/menus/bar-bg.svg') 0 / 168px repeat padding-box;
+    border-image: url('./img/menus/bar-border.svg') 25% / 8px round;
+  }
+  .m-box {
+    @apply border-8 p-1;
+    background: url('./img/menus/box-bg.svg') 0 / 112px repeat padding-box;
+    border-image: url('./img/menus/box-border.svg') 20.8333% / 8px round;
+  }
+  .m-panel {
+    @apply border-8 p-1 pt-1.5 relative;
+    background: url('./img/menus/panel-bg.svg') 0 / 112px repeat padding-box;
+    border-image: url('./img/menus/panel-border.svg') 18.1818% / 8px round;
+  }
+  .m-panel::before {
+    @apply block w-12 h-6 absolute -top-4 left-1/2 -translate-x-1/2;
+    content: '';
+    background: url('./img/menus/panel-top.svg') center no-repeat;
+  }
+  .m-button {
+    background: url('./img/menus/button.svg') no-repeat center center;
+  }
+  .m-button:hover {
+    background: url('./img/menus/button-hover.svg') no-repeat center center;
+  }
+  .m-colorsbg {
+    background: url('./img/menus/colorsbg.svg') no-repeat center center;
+    width: 244px;
+    height: 232px;
+  }
+  .m-colorbox {
+    border-image: url('./img/menus/frame.svg') 8;
+  }
+  .m-playerbox {
+    background: url('./img/menus/player/player.svg') no-repeat;
+  }
+}
+
+/* Images converted with Pixels to SVG https://codepen.io/shshaw/pen/XbxvNj */
+
+body {
+  background-color: black;
+}
+
+.bg6 {
+  background: url('./img/menus/bg6.png') 0 / cover no-repeat;
+}
+.bg1 {
+  background: url('./img/menus/bg1.svg') 0 / 90px repeat;
+}
+.bg7 {
+  background: url('./img/menus/bg7.png') 0 / cover no-repeat;
+}
+.bg8 {
+  background: url('./img/menus/bg8.png') 0 / cover no-repeat;
+}
+
+/* s - screens */
+
+.s-game {
+  @apply grid;
+  grid-template-columns: 224px auto 224px;
+  grid-template-rows: auto auto;
+}
