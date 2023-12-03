@@ -1,10 +1,10 @@
 import { useContext } from 'react'
-import { GameContext, GameScreen } from '../App'
+import { MenuContext, GameScreen } from '../App'
 import { Button } from '../components/Button'
 import { Bar } from '../components/Bar'
 
 export function Lobby (): JSX.Element {
-  const gameContext = useContext(GameContext)
+  const gameContext = useContext(MenuContext)
 
   return (
     <div className='bg1 w-full p-16'>

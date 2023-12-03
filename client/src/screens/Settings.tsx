@@ -1,13 +1,14 @@
 import clsx from 'clsx'
 import { MouseEventHandler, useContext } from 'react'
-import { GameContext, GameScreen } from '../App'
+import { MenuContext, GameScreen } from '../App'
 import { Button } from '../components/Button'
 import { Bar } from '../components/Bar'
+import useSound from 'use-sound'
 
 const userColors = ['255,255,255', '255,110,0', '255,0,0', '187,0,0', '187,255,0', '0,255,0', '0,192,0', '0,255,141', '0,255,255', '0,148,255', '0,38,255', '0,18,127', '255,250,0', '255,0,151', '255,0,255', '187,0,255']
 
 export function Settings (): JSX.Element {
-  const gameContext = useContext(GameContext)
+  const gameContext = useContext(MenuContext)
 
   return (
     <div className='bg7 w-full flex flex-col items-start px-16 pt-60 gap-2'>
@@ -34,7 +35,14 @@ export function Settings (): JSX.Element {
 }
 
 function ColorButton ({ color, onClick }: { color: string, onClick: (color: string) => void }): JSX.Element {
-  return <ColorBox color={color} onClick={() => onClick(color)} />
+  const [playClick] = useSound('sound/menu-click.wav') as any;
+
+  const onClickFull = (color: string) => {
+    playClick()
+    onClick(color)
+  }
+  
+  return <ColorBox color={color} onClick={() => onClickFull(color)} />
 }
 
 function ColorBox ({ color, onClick }: { color: string, onClick?: MouseEventHandler }): JSX.Element {

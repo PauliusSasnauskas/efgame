@@ -22,7 +22,7 @@ const screens: { [k: string | GameScreen]: FunctionComponent } = {
   [GameScreen.GAME]: Game
 }
 
-export const GameContext = createContext<{ setGameScreen: Function, settings: { color: string, name: string }, setSettings: Function }>({ setGameScreen: () => {}, settings: { color: '127,127,127', name: 'player' }, setSettings: () => {} })
+export const MenuContext = createContext<{ setGameScreen: Function, settings: { color: string, name: string }, setSettings: Function }>({ setGameScreen: () => {}, settings: { color: '127,127,127', name: 'player' }, setSettings: () => {} })
 
 function App (): JSX.Element {
   const [gameScreen, setGameScreen] = useState(GameScreen.TITLE)
@@ -31,10 +31,10 @@ function App (): JSX.Element {
   const ScreenElement = screens[gameScreen]
 
   return (
-    <div className='mt-8 mx-auto text-white bg-gray-500 flex items-stretch justify-items-stretch overflow-hidden w-240 h-180 font-nokiafc22 border-box-all cursor-default relative'>
-      <GameContext.Provider value={{ setGameScreen, settings, setSettings }}>
+    <div className='app mt-8 mx-auto text-white bg-gray-500 flex items-stretch justify-items-stretch overflow-hidden w-240 h-180 font-nokiafc22 border-box-all cursor-default relative'>
+      <MenuContext.Provider value={{ setGameScreen, settings, setSettings }}>
         <ScreenElement />
-      </GameContext.Provider>
+      </MenuContext.Provider>
     </div>
   )
 }
