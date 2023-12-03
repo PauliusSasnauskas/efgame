@@ -1,7 +1,7 @@
 import { Bush1Decoration, Mountain1Decoration, Rock1Decoration, Tree1Decoration, Tree2Decoration, Tree3Decoration } from "./vanilla/Decorations";
 import { GoldResource } from "./vanilla/GoldResource";
 import { BarracksBuilding, CapitolBuilding, MineBuilding, StoneWall, TowerBuilding, WoodWall } from "./vanilla/Building";
-import { ActionStat } from "./vanilla/Stats";
+import { ActionStat, ArmyStat, GoldStat, TerritoryStat, XpStat } from "./vanilla/Stats";
 
 const config = {
   actions: [
@@ -31,11 +31,11 @@ const config = {
   } as { [k: string]: any },
   stats: {
     'v:action': ActionStat,
-    // 'v:army': ArmyStat,
-    // 'v:gold': GoldStat,
-    // 'v:territory': TerritoryStat,
-    // 'v:xp': XpStat,
-  },
+    'v:gold': GoldStat,
+    'v:army': ArmyStat,
+    'v:territory': TerritoryStat,
+    'v:xp': XpStat,
+  } as { [k: string]: any },
 }
 
 export default config

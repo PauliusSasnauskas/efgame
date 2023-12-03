@@ -52,9 +52,11 @@
     background: url('./img/menus/panel-top.svg') center no-repeat;
   }
   .m-button {
+    @apply w-56;
     background: url('./img/menus/button.svg') no-repeat center center;
   }
-  .m-button:hover {
+  .m-button:hover, .m-button-hover {
+    @apply w-56;
     background: url('./img/menus/button-hover.svg') no-repeat center center;
   }
   .m-colorsbg {
@@ -66,10 +68,12 @@
     border-image: url('./img/menus/frame.svg') 8;
   }
   .m-playerbox {
+    @apply w-56 h-9;
     background: url('./img/menus/player/player.svg') no-repeat;
   }
-  .m-spectatorbox {
-    background: url('./img/menus/player/spectator.svg') no-repeat;
+  .m-darkbox {
+    @apply w-56 h-9;
+    background: url('./img/menus/darkbox.svg') no-repeat;
   }
   .m-map {
     @apply border-2 border-black bg-neutral-800 w-full h-full grid;

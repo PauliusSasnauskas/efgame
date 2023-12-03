@@ -4,5 +4,10 @@ export interface Player {
   eliminated?: boolean
   team?: 'spectator' | string
   controllable: boolean
-  stats?: {[k: string]: { val: number, max: number }}
+  stats?: {[k: string]: Stat}
+}
+
+export interface Stat { 
+  val: number,
+  max?: number
 }

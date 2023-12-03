@@ -8,6 +8,7 @@ import { Map } from '../components/game/Map'
 import { Tile } from '../components/game/Tile'
 import { Player } from '../components/game/Player'
 import { PlayerBox } from '../components/PlayerBox'
+import config from '../components/game/Config'
 
 const mockSize = 4
 const mockTiles: Tile[] = [
@@ -30,7 +31,7 @@ const mockTiles: Tile[] = [
 ]
 
 const mockPlayers: Player[] = [
-  { name: 'paul', color: '255,127,0', eliminated: false, team: 'greencross', controllable: true, stats: {} },
+  { name: 'paul', color: '255,127,0', eliminated: false, team: 'greencross', controllable: true, stats: { 'v:action': { val: 8, max: 12 }, 'v:gold': { val: 174 }, 'v:army': { val: 43 }, 'v:territory': { val: 12 }, 'v:xp': { val: 4 } } },
   { name: 'richard', color: '0,127,255', eliminated: false, controllable: false },
   { name: 'bot2', color: '127,127,127', eliminated: false, controllable: true, stats: {} },
   { name: 'bot3', color: '255,100,100', eliminated: true, team: 'bluetriangle', controllable: false },
@@ -40,12 +41,15 @@ const mockPlayers: Player[] = [
 export function Game (): JSX.Element {
   const gameContext = useContext(MenuContext)
 
-  const gameState = { size: mockSize, tiles: mockTiles, players: mockPlayers, turn: 'paul', turnNumber: 7 }
   
   const [menuVisible, setMenuVisible] = useState(false)
   const [chatActive, setChatActive] = useState(false)
   const [selected, select] = useState<[number, number]>([0, 0])
+  
+  const gameState = { size: mockSize, tiles: mockTiles, players: mockPlayers, turn: 'paul', turnNumber: 7 }
+  let lastPlayerControlled = 'paul'
 
+  const stats = gameState.players.find((player) => player.name === lastPlayerControlled && (!player.eliminated || true) && player.team !== 'spectator')?.stats
   
   const trySelect = (newx: number, newy: number) => {
     if (newx < 0 || newx >= gameState.size || newy < 0 || newy >= gameState.size) return
@@ -111,7 +115,10 @@ export function Game (): JSX.Element {
       </div>
       <div className='row-span-2'>
         <Bar>Turn: {gameState.turnNumber}</Bar>
-        stats panel
+        {stats !== undefined && Object.entries(stats).map(([statName, stat]) => (
+          config.stats[statName](stat)
+        ))}
+
         <br />
         actions panel
       </div>

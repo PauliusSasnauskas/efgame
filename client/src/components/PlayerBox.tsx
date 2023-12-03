@@ -18,14 +18,14 @@ const getTeamIcon: { [k: string]: string } = {
 export function PlayerBox ({ player, className, myTurn }: { player: Player, className?: string, myTurn: boolean }): JSX.Element {
   if (player.team === 'spectator') {
     return (
-      <div className={clsx('m-item m-spectatorbox w-56 pb-1 justify-start pl-10 relative', className, 'text-gray-500')}>
+      <div className={clsx('m-item m-darkbox pb-0.25 justify-start pl-10 relative', className, 'text-gray-500')}>
         {player.name}
       </div>
     )
   }
 
   return (
-    <div className={clsx('m-item m-playerbox w-56 pb-1 justify-start pl-10 relative', className, player.eliminated && 'text-gray-500')}>
+    <div className={clsx('m-item m-playerbox pb-0.25 justify-start pl-10 relative', className, player.eliminated && 'text-gray-500')}>
       <span className='absolute left-4 top-3 w-3 h-3' style={{ backgroundColor: `rgb(${player.color})` }}>
         {player.eliminated && <img src={eliminated} alt='' />}
       </span>

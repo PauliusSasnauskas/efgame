@@ -20,7 +20,7 @@ export function Title (): JSX.Element {
   const [playBgm] = useSound('sound/bgm01.wav') as any;
 
   return (
-    <div className='bg6 w-full pt-40 pl-16 flex flex-col gap'>
+    <div className='bg6 w-full pt-36 pl-16 flex flex-col gap'>
       <img src={banner} alt='banner' className='w-60 -translate-x-1' />
       <Button onClick={changeScreen(GameScreen.LOBBY)} icon={findIcon}>Join Game</Button>
       <Button onClick={() => console.log('Not Implemented!')} icon={mapEditorIcon}>Map Editor</Button>
@@ -28,7 +28,7 @@ export function Title (): JSX.Element {
       <Button onClick={changeScreen(GameScreen.ABOUT)} icon={aboutIcon}>About</Button>
       <Button onClick={() => document.location.assign('https://github.com/PauliusSasnauskas/efgame/')} icon={exitIcon}>Exit</Button>
       <br/>
-      <p>
+      <p className='ml-1'>
         <img src={noteGlyph} alt='' className='w-[10px] inline mr-4 align-baseline cursor-pointer' onClick={playBgm}/>
         v2.0.0a1
       </p>
