@@ -1,6 +1,7 @@
 import { ReactNode, useState } from "react";
-import { Tile } from "../../model/Tile";
-import clsx from "clsx";
+import { Tile } from "./Tile";
+import MapTile from "./MapTile";
+
 
 function range (n: number): number[] {
   return Array.from(Array(n).keys())
@@ -8,16 +9,6 @@ function range (n: number): number[] {
 
 function MapError ({ children }: { children?: ReactNode }): JSX.Element {
   return <div className='w-full h-full flexc text-red-500'>{children}</div>
-}
-function MapTile ({ tile, select, selected = false }: { tile: Tile, select: (newx: number, newy: number)=>any, selected?: boolean }): JSX.Element {
-  return (
-    <div
-      className={clsx('flexc text-[0.4rem] bg-gray-500', selected && 'border-black border-2')}
-      onClick={() => select(tile.x, tile.y)}
-    >
-      {tile?.entity?.id ?? ''}
-    </div>
-  )
 }
 
 export function Map ({ tiles, select, selected }: { tiles: Tile[], select: (newx: number, newy: number)=>any, selected: [number, number] }): JSX.Element {
