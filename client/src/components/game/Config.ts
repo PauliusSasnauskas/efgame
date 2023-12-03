@@ -1,6 +1,7 @@
 import { Bush1Decoration, Mountain1Decoration, Rock1Decoration, Tree1Decoration, Tree2Decoration, Tree3Decoration } from "./vanilla/Decorations";
 import { GoldResource } from "./vanilla/GoldResource";
-import { BarracksBuilding, CapitolBuilding, MineBuilding, StoneWall, TowerBuilding, WoodWall } from "./vanilla/VanillaBuilding";
+import { BarracksBuilding, CapitolBuilding, MineBuilding, StoneWall, TowerBuilding, WoodWall } from "./vanilla/Building";
+import { ActionStat } from "./vanilla/Stats";
 
 const config = {
   actions: [
@@ -24,17 +25,17 @@ const config = {
     'v:tower': TowerBuilding,
     'v:woodwall': WoodWall,
     'v:stonewall': StoneWall,
-  } as {[k: string]: any},
+  } as { [k: string]: any },
   resources: {
     'v:gold': GoldResource,
-  } as {[k: string]: any},
-  stats: [
-    // ActionStat,
-    // ArmyStat,
-    // GoldStat,
-    // TerritoryStat,
-    // XpStat,
-  ],
+  } as { [k: string]: any },
+  stats: {
+    'v:action': ActionStat,
+    // 'v:army': ArmyStat,
+    // 'v:gold': GoldStat,
+    // 'v:territory': TerritoryStat,
+    // 'v:xp': XpStat,
+  },
 }
 
 export default config

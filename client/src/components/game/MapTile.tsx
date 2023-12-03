@@ -1,8 +1,6 @@
 import { ReactNode } from 'react'
 import gameConfig from '../game/Config'
-import { Resource } from './Resource'
-import { Tile } from './Tile'
-import { Entity } from './Entity'
+import { Entity, Resource, Tile } from './Tile'
 
 export type ResourceTile = (
   selected: boolean,

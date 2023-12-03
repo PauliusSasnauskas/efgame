@@ -68,6 +68,9 @@
   .m-playerbox {
     background: url('./img/menus/player/player.svg') no-repeat;
   }
+  .m-spectatorbox {
+    background: url('./img/menus/player/spectator.svg') no-repeat;
+  }
   .m-map {
     @apply border-2 border-black bg-neutral-800 w-full h-full grid;
     grid-template-columns: repeat(20, 24px);

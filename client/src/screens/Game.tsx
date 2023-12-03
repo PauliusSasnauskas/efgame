@@ -6,6 +6,8 @@ import { Panel } from '../components/Panel'
 import { ChatPanel } from '../components/ChatPanel'
 import { Map } from '../components/game/Map'
 import { Tile } from '../components/game/Tile'
+import { Player } from '../components/game/Player'
+import { PlayerBox } from '../components/PlayerBox'
 
 const mockSize = 4
 const mockTiles: Tile[] = [
@@ -27,14 +29,18 @@ const mockTiles: Tile[] = [
   { x: 3, y: 3, entity: { id: 'v:mountain1' } }
 ]
 
-const mockUsers = [
-  
+const mockPlayers: Player[] = [
+  { name: 'paul', color: '255,127,0', eliminated: false, team: 'greencross', controllable: true, stats: {} },
+  { name: 'richard', color: '0,127,255', eliminated: false, controllable: false },
+  { name: 'bot2', color: '127,127,127', eliminated: false, controllable: true, stats: {} },
+  { name: 'bot3', color: '255,100,100', eliminated: true, team: 'bluetriangle', controllable: false },
+  { name: 'bot4', color: '255,100,255', team: 'spectator', controllable: false }
 ]
 
 export function Game (): JSX.Element {
   const gameContext = useContext(MenuContext)
 
-  const gameState = { size: mockSize, tiles: mockTiles, users: mockUsers }
+  const gameState = { size: mockSize, tiles: mockTiles, players: mockPlayers, turn: 'paul', turnNumber: 7 }
   
   const [menuVisible, setMenuVisible] = useState(false)
   const [chatActive, setChatActive] = useState(false)
@@ -92,17 +98,19 @@ export function Game (): JSX.Element {
       )}
       <div>
         <Bar>Players</Bar>
-        Player panel
+        {gameState.players.map((player) => (
+          <PlayerBox player={player} myTurn={player.name === gameState.turn} />
+        ))}
       </div>
       <div className='flex flex-col gap-2'>
         <Bar className='flex justify-between'>
-          <span>Whose turn</span>
+          <span>{gameState.turn}'s turn</span>
           <span>{selected[0]+1}x{selected[1]+1}</span>
         </Bar>
         <Map tiles={gameState.tiles} select={trySelect as any} selected={selected} />
       </div>
       <div className='row-span-2'>
-        <Bar>Turn: number</Bar>
+        <Bar>Turn: {gameState.turnNumber}</Bar>
         stats panel
         <br />
         actions panel
