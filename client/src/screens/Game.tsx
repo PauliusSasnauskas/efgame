@@ -9,6 +9,9 @@ import { Tile } from '../components/game/Tile'
 import { Player } from '../components/game/Player'
 import { PlayerBox } from '../components/PlayerBox'
 import config from '../components/game/Config'
+import StatBox from '../components/game/StatBox'
+import SimpleAction from '../components/game/SimpleAction'
+import leaveActionIcon from '../img/end-turn.svg'
 
 const mockSize = 4
 const mockTiles: Tile[] = [
@@ -92,7 +95,7 @@ export function Game (): JSX.Element {
   return (
     <div className='s-game bg1 w-full'>
       {menuVisible && (
-        <div className='absolute top-0 left-0 right-0 bottom-0 flexc bg-black bg-opacity-50'>
+        <div className='absolute top-0 left-0 right-0 bottom-0 flexc bg-black bg-opacity-50 z-10'>
           <Panel className='p-4 absolute z-10'>
             <Button onClick={() => setMenuVisible(false)}>Resume Game</Button>
             <br />
@@ -103,7 +106,7 @@ export function Game (): JSX.Element {
       <div>
         <Bar>Players</Bar>
         {gameState.players.map((player) => (
-          <PlayerBox player={player} myTurn={player.name === gameState.turn} />
+          <PlayerBox player={player} myTurn={player.name === gameState.turn} key={player.name} />
         ))}
       </div>
       <div className='flex flex-col gap-2'>
@@ -116,11 +119,20 @@ export function Game (): JSX.Element {
       <div className='row-span-2'>
         <Bar>Turn: {gameState.turnNumber}</Bar>
         {stats !== undefined && Object.entries(stats).map(([statName, stat]) => (
-          config.stats[statName](stat)
+          <StatBox src={config.stats[statName].img} stat={stat} key={statName} />
         ))}
-
-        <br />
-        actions panel
+        <div className='h-3'></div>
+        {Object.entries(config.actions).map(([action, actionElement]) => {
+          if (actionElement === null){
+            return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={() => { console.log('endturn') }} className='mb-4' key={action} />
+          }
+          if (typeof actionElement === 'function'){
+            const ActionElement = actionElement
+            return <ActionElement onClick={() => { console.log(action, selected) }} key={action} />
+          }
+          return <SimpleAction img={actionElement.img} name={actionElement.name} onClick={() => { console.log(action, selected) }} key={action} />
+        })}
+        {!('endturn' in config.actions) && <SimpleAction img={leaveActionIcon} name='End Turn' onClick={() => { console.log('endturn') }} />} {/* TODO: networking */}
       </div>
       <ChatPanel active={chatActive} className='col-span-2' />
     </div>

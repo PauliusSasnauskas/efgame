@@ -8,6 +8,6 @@ export interface Player {
 }
 
 export interface Stat { 
-  val: number,
+  val: number | string,
   max?: number
 }

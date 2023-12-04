@@ -1,5 +1,4 @@
 import { ReactNode } from "react"
-import { EntityTile } from "../MapTile"
 import { Entity, Resource } from "../Tile"
 import fire1 from '../../../img/vanilla/entities/fire1a.svg'
 import fire2 from '../../../img/vanilla/entities/fire2a.svg'
@@ -14,6 +13,7 @@ import woodwall from '../../../img/vanilla/entities/wood-wall.svg'
 import stonewall from '../../../img/vanilla/entities/stone-wall.svg'
 import mine from '../../../img/vanilla/entities/mine.svg'
 import mineoff from '../../../img/vanilla/entities/mine-off.svg'
+import { EntityTile } from "../ConfigSpec"
 
 const getFireImg = (healthScaled: number): string => {
   if (healthScaled >= 0.8) return fire1

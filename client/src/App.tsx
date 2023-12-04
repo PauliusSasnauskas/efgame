@@ -31,7 +31,7 @@ function App (): JSX.Element {
   const ScreenElement = screens[gameScreen]
 
   return (
-    <div className='app mt-8 mx-auto text-white bg-gray-500 flex items-stretch justify-items-stretch overflow-hidden w-240 h-180 font-nokiafc22 border-box-all cursor-default relative'>
+    <div className='app mt-8 mx-auto text-white bg-gray-500 flex items-stretch justify-items-stretch overflow-hidden w-240 min-h-180 font-nokiafc22 border-box-all cursor-default relative'>
       <MenuContext.Provider value={{ setGameScreen, settings, setSettings }}>
         <ScreenElement />
       </MenuContext.Provider>

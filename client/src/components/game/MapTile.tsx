@@ -1,30 +1,36 @@
-import { ReactNode } from 'react'
 import gameConfig from '../game/Config'
-import { Entity, Resource, Tile } from './Tile'
+import { Tile } from './Tile'
+import { ConfigStaticEntity, EntityTile, ResourceTile } from './ConfigSpec'
+import StaticEntity from './StaticEntity'
 
-export type ResourceTile = (
-  selected: boolean,
-  resourceState?: Resource['state']
-) => ReactNode
+function getResourceElement(resourceSpec: ResourceTile | ConfigStaticEntity | null, selected: boolean, tile: Tile) {
+  if (resourceSpec === null) return null
+  if (typeof resourceSpec === 'object') return <StaticEntity img={resourceSpec?.img} />
+  if (typeof resourceSpec === 'function') return resourceSpec?.(selected, tile.resource?.state)
+  return null
+}
 
-export type EntityTile = (
-  selected: boolean,
-  health?: number,
-  state?: Entity['state'],
-  resource?: Resource
-) => ReactNode
+function getEntityElement(entitySpec: EntityTile | ConfigStaticEntity | null, selected: boolean, tile: Tile) {
+  if (entitySpec === null) return null
+  if (typeof entitySpec === 'object') return <StaticEntity img={entitySpec?.img} />
+  if (typeof entitySpec === 'function') return entitySpec(selected, tile.entity?.health, tile.entity?.state, tile.resource)
+  return null
+}
 
 export default function MapTile ({ tile, select, selected = false }: { tile: Tile, select: (newx: number, newy: number)=>any, selected?: boolean }): JSX.Element {
-  const resource: ResourceTile = (tile.resource !== undefined && tile.resource.id in gameConfig.resources) ? gameConfig.resources[tile.resource.id] : () => null
-  const entity: EntityTile = (tile.entity !== undefined && tile.entity.id in gameConfig.entities) ? gameConfig.entities[tile.entity.id] : () => null
+  const resourceSpec: ResourceTile | ConfigStaticEntity | null = tile?.resource?.id !== undefined ? gameConfig.resources?.[tile?.resource?.id] : null
+  const resource = getResourceElement(resourceSpec, selected, tile)
+
+  const entitySpec: EntityTile | ConfigStaticEntity | null = tile.entity?.id !== undefined ? gameConfig.entities[tile.entity.id] : null
+  const entity = getEntityElement(entitySpec, selected, tile)
 
   return (
     <div
       className='tile text-[0.4rem] bg-gray-500'
       onClick={() => select(tile.x, tile.y)}
     >
-      {resource(selected, tile.resource?.state)}
-      {entity(selected, tile.entity?.health, tile.entity?.state, tile.resource)}
+      {resource}
+      {entity}
       {selected && <div className="tile-selected"></div>}
     </div>
   )
