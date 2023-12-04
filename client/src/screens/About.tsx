@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { MenuContext, GameScreen } from '../App'
-import { Button } from '../components/Button'
-import { Bar } from '../components/Bar'
+import { Button } from '../menu/Button'
+import { Bar } from '../menu/Bar'
 
 export function About (): JSX.Element {
   const gameContext = useContext(MenuContext)

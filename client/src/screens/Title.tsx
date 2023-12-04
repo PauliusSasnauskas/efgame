@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import useSound from 'use-sound';
 import { MenuContext, GameScreen } from '../App'
-import { Button } from '../components/Button'
+import { Button } from '../menu/Button'
 import banner from '../img/menus/banner.svg'
 import findIcon from '../img/menus/find.svg'
 import mapEditorIcon from '../img/menus/map-editor.svg'

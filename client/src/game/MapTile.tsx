@@ -1,6 +1,6 @@
-import gameConfig from '../game/Config'
+import gameConfig from '../Config'
 import { Tile } from './Tile'
-import { ConfigStaticEntity, EntityTile, ResourceTile } from './ConfigSpec'
+import { ConfigStaticEntity, EntityTile, ResourceTile } from '../ConfigSpec'
 import StaticEntity from './StaticEntity'
 
 function getResourceElement(resourceSpec: ResourceTile | ConfigStaticEntity | null, selected: boolean, tile: Tile) {

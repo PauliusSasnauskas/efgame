@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { MouseEventHandler, useContext } from 'react'
 import { MenuContext, GameScreen } from '../App'
-import { Button } from '../components/Button'
-import { Bar } from '../components/Bar'
+import { Button } from '../menu/Button'
+import { Bar } from '../menu/Bar'
 import useSound from 'use-sound'
 
 const userColors = ['255,255,255', '255,110,0', '255,0,0', '187,0,0', '187,255,0', '0,255,0', '0,192,0', '0,255,141', '0,255,255', '0,148,255', '0,38,255', '0,18,127', '255,250,0', '255,0,151', '255,0,255', '187,0,255']

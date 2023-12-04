@@ -1,5 +1,5 @@
 import clsx from "clsx"
-import { Button } from "../Button"
+import { Button } from "../menu/Button"
 
 const SimpleAction = ({img, name, onClick, className}: {img: string, name: string, onClick: () => void, className?: string}): JSX.Element => {
   return (

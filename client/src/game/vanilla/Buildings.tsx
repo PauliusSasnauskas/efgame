@@ -1,19 +1,19 @@
 import { ReactNode } from "react"
 import { Entity, Resource } from "../Tile"
-import fire1 from '../../../img/vanilla/entities/fire1a.svg'
-import fire2 from '../../../img/vanilla/entities/fire2a.svg'
-import fire3 from '../../../img/vanilla/entities/fire3a.svg'
-import fire4 from '../../../img/vanilla/entities/fire4a.svg'
-import fire5 from '../../../img/vanilla/entities/fire5a.svg'
-import fire6 from '../../../img/vanilla/entities/fire6a.svg'
-import barracks from '../../../img/vanilla/entities/barracks.svg'
-import capitol from '../../../img/vanilla/entities/capitol.svg'
-import tower from '../../../img/vanilla/entities/tower.svg'
-import woodwall from '../../../img/vanilla/entities/wood-wall.svg'
-import stonewall from '../../../img/vanilla/entities/stone-wall.svg'
-import mine from '../../../img/vanilla/entities/mine.svg'
-import mineoff from '../../../img/vanilla/entities/mine-off.svg'
-import { EntityTile } from "../ConfigSpec"
+import fire1 from '../../img/vanilla/entities/fire1a.svg'
+import fire2 from '../../img/vanilla/entities/fire2a.svg'
+import fire3 from '../../img/vanilla/entities/fire3a.svg'
+import fire4 from '../../img/vanilla/entities/fire4a.svg'
+import fire5 from '../../img/vanilla/entities/fire5a.svg'
+import fire6 from '../../img/vanilla/entities/fire6a.svg'
+import barracks from '../../img/vanilla/entities/barracks.svg'
+import capitol from '../../img/vanilla/entities/capitol.svg'
+import tower from '../../img/vanilla/entities/tower.svg'
+import woodwall from '../../img/vanilla/entities/wood-wall.svg'
+import stonewall from '../../img/vanilla/entities/stone-wall.svg'
+import mine from '../../img/vanilla/entities/mine.svg'
+import mineoff from '../../img/vanilla/entities/mine-off.svg'
+import { EntityTile } from "../../ConfigSpec"
 
 const getFireImg = (healthScaled: number): string => {
   if (healthScaled >= 0.8) return fire1

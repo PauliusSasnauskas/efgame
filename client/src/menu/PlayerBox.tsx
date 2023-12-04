@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Player } from './game/Player'
+import { Player } from '../game/Player'
 import eliminated from '../img/menus/player/eliminated.svg'
 import turn from '../img/menus/player/turn.svg'
 import teamneutral from '../img/menus/player/neutral.svg'

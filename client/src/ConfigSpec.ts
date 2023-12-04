@@ -1,5 +1,5 @@
 import { ReactNode } from "react"
-import { Entity, Resource } from "./Tile"
+import { Entity, Resource } from "./game/Tile"
 
 export default interface ConfigSpec {
   actions: {[k: string]: Function | null | ConfigSimpleAction }
