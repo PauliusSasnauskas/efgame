@@ -12,26 +12,10 @@ import config from '../Config'
 import StatBox from '../game/StatBox'
 import SimpleAction from '../game/SimpleAction'
 import leaveActionIcon from '../img/end-turn.svg'
+import generateMockMap from '../game/MockMapGenerator'
 
-const mockSize = 4
-const mockTiles: Tile[] = [
-  { x: 0, y: 0 },
-  { x: 1, y: 0 },
-  { x: 2, y: 0, entity: { id: 'v:tree1' } },
-  { x: 3, y: 0 },
-  { x: 0, y: 1 },
-  { x: 1, y: 1, entity: { id: 'v:tree2' } },
-  { x: 2, y: 1 },
-  { x: 3, y: 1, resource: { id: 'v:gold' } },
-  { x: 0, y: 2 },
-  { x: 1, y: 2, resource: { id: 'v:gold' } },
-  { x: 2, y: 2, entity: { id: 'v:mine', health: 2 } },
-  { x: 3, y: 2, entity: { id: 'v:tower', health: 1 } },
-  { x: 0, y: 3 },
-  { x: 1, y: 3 },
-  { x: 2, y: 3 },
-  { x: 3, y: 3, entity: { id: 'v:mountain1' } }
-]
+const mockSize = 20
+const mockTiles: Tile[] = generateMockMap(mockSize)
 
 const mockPlayers: Player[] = [
   { name: 'paul', color: '255,127,0', eliminated: false, team: 'greencross', controllable: true, stats: { 'v:action': { val: 8, max: 12 }, 'v:gold': { val: 174 }, 'v:army': { val: 43 }, 'v:territory': { val: 12 }, 'v:xp': { val: 4 } } },
