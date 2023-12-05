@@ -28,7 +28,7 @@ export function Settings (): JSX.Element {
 
         <div className='w-64'>
           <Bar>Music Volume</Bar>
-          <Slider value={gameContext.settings.musicVolume} setValue={(musicVolume) => gameContext.setSettings({ ...gameContext.settings, musicVolume })} />
+          <Slider value={gameContext.settings.musicVolume} setValue={(musicVolume) => gameContext.setSettings({ ...gameContext.settings, musicVolume })} muted />
 
           <Bar>Sound Volume</Bar>
           <Slider value={gameContext.settings.soundVolume} setValue={(soundVolume) => gameContext.setSettings({ ...gameContext.settings, soundVolume })} />

@@ -17,7 +17,7 @@ export function Button ({ children, onClick, icon, className, sound = 'sound/men
   }
   
   return (
-    <div className={clsx('m-item m-button w-56 cursor-pointer hover:text-gray-300', icon !== undefined && 'justify-start', className)} onClick={onClickFull} onMouseEnter={() => hoverAudio.play()}>
+    <div className={clsx('m-item m-button w-56 cursor-pointer hover:text-gray-300 pl-2', icon !== undefined && 'justify-start', className)} onClick={onClickFull} onMouseEnter={() => hoverAudio.play()}>
       {icon !== undefined && <img src={icon} alt='' className='w-6.5 h-6.5 -mt-1' />}
       {children}
     </div>

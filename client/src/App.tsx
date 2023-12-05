@@ -29,11 +29,25 @@ export interface SettingsSpec {
   soundVolume: number
 }
 
-export const MenuContext = createContext<{ setGameScreen: Function, settings: SettingsSpec, setSettings: Function }>({ setGameScreen: () => {}, settings: { color: '127,127,127', name: 'player', musicVolume: 80, soundVolume: 0.8 }, setSettings: () => {} })
+export const MenuContext = createContext<{ setGameScreen: Function, settings: SettingsSpec, setSettings: Function }>({ setGameScreen: () => {}, settings: { color: '', name: '', musicVolume: 0, soundVolume: 0 }, setSettings: () => {} })
 
 function App (): JSX.Element {
   const [gameScreen, setGameScreen] = useState(GameScreen.TITLE)
-  const [settings, setSettings] = useState<any>({ color: '127,127,127', name: 'player', musicVolume: 0.8, soundVolume: 0.8 })
+
+  const [settings, updateSettings] = useState<any>({
+    color: localStorage.getItem('settings.color') || '127,127,127',
+    name: localStorage.getItem('settings.name') || 'player',
+    musicVolume: Number.parseInt(localStorage.getItem('settings.musicVolume') || '80'),
+    soundVolume: Number.parseInt(localStorage.getItem('settings.soundVolume') || '80'),
+  })
+
+  const setSettings = (newSettings: SettingsSpec) => {
+    updateSettings(newSettings)
+    localStorage.setItem('settings.color', newSettings.color)
+    localStorage.setItem('settings.name', newSettings.name)
+    localStorage.setItem('settings.musicVolume', newSettings.musicVolume.toString())
+    localStorage.setItem('settings.soundVolume', newSettings.soundVolume.toString())
+  }
 
   const ScreenElement = screens[gameScreen]
 
