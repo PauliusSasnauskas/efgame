@@ -3,7 +3,7 @@ import { MenuContext, GameScreen } from '../App'
 import { Button } from '../menu/Button'
 import { Bar } from '../menu/Bar'
 import { Panel } from '../menu/Panel'
-import { ChatPanel } from '../menu/ChatPanel'
+import { ChatPanel, Message } from '../menu/ChatPanel'
 import { Map } from '../game/Map'
 import { Tile } from '../game/Tile'
 import { Player } from '../game/Player'
@@ -13,16 +13,30 @@ import StatBox from '../game/StatBox'
 import SimpleAction from '../game/SimpleAction'
 import leaveActionIcon from '../img/end-turn.svg'
 import { generateMockMap, generateMockPlayers } from '../game/MockDataGenerator'
+import { Socket, io } from 'socket.io-client'
+import { ClientEvents, ServerEvents } from '../SocketSpec'
 
 const mockSize = 20
 const mockPlayers: Player[] = generateMockPlayers()
 const mockTiles: Tile[] = generateMockMap(mockSize, mockPlayers)
 
-export function Game (): JSX.Element {
+const reconnectionAttempts = 5
+
+const dcReasons: {[k: string]: string} = {
+  "io server disconnect": "Server removed connection",
+  "io client disconnect": "Client disconnected",
+  "ping timeout": "Timed out",
+  "transport close": "Connection closed (lost connection)",
+  "transport error": "Connection error",
+}
+
+export function Game ({ ip }: { ip: string }): JSX.Element {
   const gameContext = useContext(MenuContext)
   
+  const [socket, setSocket] = useState<Socket<ServerEvents, ClientEvents> | undefined>(undefined)
   const [menuVisible, setMenuVisible] = useState(false)
   const [chatActive, setChatActive] = useState(false)
+  const [messages, setMessages] = useState<Message[]>([])
   const [selected, select] = useState<[number, number]>([0, 0])
   
   const gameState = { size: mockSize, tiles: mockTiles, players: mockPlayers, turn: 'paul', turnNumber: 7 }
@@ -37,7 +51,7 @@ export function Game (): JSX.Element {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent): void => {
-      switch (e.key) {
+      switch (e.code) {
         case 'Escape':
           if (chatActive) {
             setChatActive(false)
@@ -69,6 +83,58 @@ export function Game (): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatActive, selected])
 
+  useEffect(() => {
+    const s = io(ip, { reconnectionAttempts })
+
+    const onConnect = () => {
+      setSocket(s)
+    }
+    const handleError = (err: Error) => gameContext.setConnectError(`${err.message}. Caused by: ${err.cause ?? 'unknown'}`)
+    const handleReconnectAttempt = (attempt: number) => setMessages((m) => [...m, { text: `Reconnecting... (attempt ${attempt+1} out of ${reconnectionAttempts})...` }])
+    const handleReconnectFailed = () => {
+      gameContext.setConnectError('Connection failed.')
+      gameContext.setGameScreen(GameScreen.FINDGAME)
+    }
+    const handleReconnect = (attempt: number) => setMessages((m) => [...m, { text: `Reconnected after ${attempt} attempts.` }])
+    const handleClose = (reason: string) => {
+      setMessages((m) => [...m, { text: `Connection closed. ${dcReasons[reason]}` }])
+      if (reason === Object.keys(dcReasons)[0] || reason === Object.keys(dcReasons)[1]){
+        s.removeAllListeners()
+        s.io.removeAllListeners()
+        s.close()
+      }
+    }
+
+    s.on('chat', (message: Message) => {
+      setMessages((m) => [...m, message])
+    })
+
+    // s.on('connect_error', handleError)
+    s.io.on('error', handleError)
+    s.io.on('reconnect_attempt', handleReconnectAttempt)
+    s.io.on('reconnect_failed', handleReconnectFailed)
+    s.io.on('reconnect', handleReconnect)
+    s.io.on('close', handleClose)
+    s.on('connect', onConnect)
+
+    return () => {
+      s.io.removeListener('error', handleError)
+      s.io.removeListener('reconnect_attempt', handleReconnectAttempt)
+      s.io.removeListener('reconnect_failed', handleReconnectFailed)
+      s.io.removeListener('close', handleClose)
+      s.io.removeListener('reconnect', handleReconnect)
+      s.removeListener('connect', onConnect)
+      s.disconnect()
+    }
+
+  }, [])
+
+  const sendMessage = (message: string) => {
+    socket?.emit('chat', message)
+  }
+
+  const quitGame = () => gameContext.setGameScreen(GameScreen.TITLE)
+
   return (
     <div className='s-game bg1 w-full'>
       {menuVisible && (
@@ -76,7 +142,7 @@ export function Game (): JSX.Element {
           <Panel className='p-4 absolute z-10'>
             <Button onClick={() => setMenuVisible(false)}>Resume Game</Button>
             <br />
-            <Button onClick={() => gameContext.setGameScreen(GameScreen.TITLE)}>Quit to Title Screen</Button>
+            <Button onClick={quitGame}>Quit to Title Screen</Button>
           </Panel>
         </div>
       )}
@@ -117,7 +183,7 @@ export function Game (): JSX.Element {
         })}
         {!('endturn' in config.actions) && <SimpleAction img={leaveActionIcon} name='End Turn' onClick={() => { console.log('endturn') }} />} {/* TODO: networking */}
       </div>
-      <ChatPanel active={chatActive} className='col-span-2' />
+      <ChatPanel active={chatActive} messages={messages} sendMessage={sendMessage} className='col-span-2' />
     </div>
   )
 }

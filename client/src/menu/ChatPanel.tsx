@@ -2,17 +2,13 @@ import clsx from "clsx"
 import { KeyboardEvent, useEffect, useRef, useState } from "react"
 import { Box } from "./Box"
 
-export function ChatPanel ({ active, className }: { active: boolean, className?: string }): JSX.Element {
+export function ChatPanel ({ active, className, messages, sendMessage }: { active: boolean, className?: string, messages: Message[], sendMessage: (message: string) => void }): JSX.Element {
   const [chatMessage, setChatMessage] = useState('')
 
-  const sendChatMessage = () => {
-    console.log('send', chatMessage)
-    setChatMessage('')
-  }
-
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== 'Enter') return
-    sendChatMessage()
+    if (e.code !== 'Enter') return
+    sendMessage(chatMessage)
+    setChatMessage('')
   }
 
   const input = useRef<HTMLInputElement>(null)
@@ -24,7 +20,12 @@ export function ChatPanel ({ active, className }: { active: boolean, className?:
   
   return (
     <Box className={clsx('flex flex-col overflow-y-auto', className)}>
-      Log panel
+      {messages.map((message, idx) => (
+        <p key={idx}>
+          {message.from !== undefined && <>{`<`}<span style={{ color: message.fromColor }}>{message.from}</span>{`> `}</>}
+          {message.text}
+        </p>
+      ))}
       {active && (
         <div className='flex items-center gap-2 w-full'>
           <span className='text-gray-400'>{'> '}</span>
@@ -41,4 +42,10 @@ export function ChatPanel ({ active, className }: { active: boolean, className?:
       )}
     </Box>
   )
+}
+
+export interface Message {
+  text: string
+  from?: string
+  fromColor?: string
 }

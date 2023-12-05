@@ -6,7 +6,7 @@ import { FindGame } from './screens/FindGame'
 import { Settings } from './screens/Settings'
 import { Title } from './screens/Title'
 
-import { io } from 'socket.io-client'
+import { Socket } from 'socket.io-client'
 
 export enum GameScreen {
   TITLE = 'title',
@@ -21,7 +21,6 @@ const screens: { [k: string | GameScreen]: FunctionComponent } = {
   [GameScreen.SETTINGS]: Settings,
   [GameScreen.ABOUT]: About,
   [GameScreen.FINDGAME]: FindGame,
-  [GameScreen.GAME]: Game
 }
 
 export interface SettingsSpec {
@@ -36,12 +35,17 @@ export const MenuContext = createContext<{
   setGameScreen: Function,
   settings: SettingsSpec,
   setSettings: Function,
-  tryConnect: Function
-}>({ setGameScreen: () => {}, settings: { color: '', name: '', musicVolume: 0, soundVolume: 0, lastIp: '' }, setSettings: () => {}, tryConnect: () => {} })
+  connect: Function,
+  cancelConnect: Function,
+  setConnectError: Function,
+  connectError: string,
+  socket?: Socket
+}>({ setGameScreen: () => {}, settings: { color: '', name: '', musicVolume: 0, soundVolume: 0, lastIp: '' }, setSettings: () => {}, connect: () => {}, cancelConnect: () => {}, connectError: '', setConnectError: () => {} })
 
 function App (): JSX.Element {
   const [gameScreen, setGameScreen] = useState(GameScreen.TITLE)
-
+  const [ip, setIp] = useState('')
+  const [connectError, setConnectError] = useState('')
   const [settings, updateSettings] = useState<SettingsSpec>({
     color: localStorage.getItem('settings.color') || '127,127,127',
     name: localStorage.getItem('settings.name') || 'player',
@@ -58,20 +62,25 @@ function App (): JSX.Element {
     localStorage.setItem('settings.soundVolume', newSettings.soundVolume.toString())
   }
 
-  const tryConnect = (ip: string) => {
-    const socket = io(ip)
-    socket.on('welcome', (args) => {
-      setGameScreen(GameScreen.GAME)
-      console.log('socket:', args)
-    })
+  const connect = (ip: string) => {
+    setIp(ip)
+    setGameScreen(GameScreen.GAME)
+  }
+
+  const cancelConnect = () => {
+    setConnectError('Connection cancelled.')
+    setGameScreen(GameScreen.FINDGAME)
   }
 
   const ScreenElement = screens[gameScreen]
 
   return (
     <div className='app mt-8 mx-auto text-white bg-gray-500 flex items-stretch justify-items-stretch overflow-hidden w-240 min-h-180 font-nokiafc22 border-box-all cursor-default relative'>
-      <MenuContext.Provider value={{ setGameScreen, settings, setSettings, tryConnect }}>
-        <ScreenElement />
+      <MenuContext.Provider value={{ setGameScreen, settings, setSettings, connect, cancelConnect, connectError, setConnectError }}>
+        {gameScreen === GameScreen.GAME
+          ? <Game ip={ip} />
+          : <ScreenElement />
+        }
       </MenuContext.Provider>
     </div>
   )
