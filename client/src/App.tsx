@@ -1,5 +1,5 @@
 import { createContext, FunctionComponent, useState } from 'react'
-import './index.css'
+import './style.css'
 import { About } from './screens/About'
 import { Game } from './screens/Game'
 import { Lobby } from './screens/Lobby'
@@ -22,11 +22,18 @@ const screens: { [k: string | GameScreen]: FunctionComponent } = {
   [GameScreen.GAME]: Game
 }
 
-export const MenuContext = createContext<{ setGameScreen: Function, settings: { color: string, name: string }, setSettings: Function }>({ setGameScreen: () => {}, settings: { color: '127,127,127', name: 'player' }, setSettings: () => {} })
+export interface SettingsSpec {
+  color: string
+  name: string
+  musicVolume: number
+  soundVolume: number
+}
+
+export const MenuContext = createContext<{ setGameScreen: Function, settings: SettingsSpec, setSettings: Function }>({ setGameScreen: () => {}, settings: { color: '127,127,127', name: 'player', musicVolume: 80, soundVolume: 0.8 }, setSettings: () => {} })
 
 function App (): JSX.Element {
   const [gameScreen, setGameScreen] = useState(GameScreen.TITLE)
-  const [settings, setSettings] = useState<any>({ color: '127,127,127', name: 'player' })
+  const [settings, setSettings] = useState<any>({ color: '127,127,127', name: 'player', musicVolume: 0.8, soundVolume: 0.8 })
 
   const ScreenElement = screens[gameScreen]
 

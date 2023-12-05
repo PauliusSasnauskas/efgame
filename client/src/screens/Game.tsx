@@ -66,6 +66,7 @@ export function Game (): JSX.Element {
     }
     document.addEventListener('keydown', handleKey)
     return () => document.removeEventListener('keydown', handleKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatActive, selected])
 
   return (

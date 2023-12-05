@@ -31,7 +31,7 @@ export function PlayerBox ({ player, className, myTurn, selected = false }: { pl
         {player.eliminated && <img src={eliminated} alt='' />}
       </span>
       {player.name}
-      {myTurn && <img src={turn} className='absolute h-6 -left-0.5 top-1.5'/>}
+      {myTurn && <img src={turn} className='absolute h-6 -left-0.5 top-1.5' alt=''/>}
       <img src={player.team !== undefined ? getTeamIcon[player.team] : teamneutral} className='absolute h-5 right-2.5 top-2' alt=''/>
       {selected && <img src={selectedImg} className='absolute h-5 right-0 top-2' alt='' />}
     </div>

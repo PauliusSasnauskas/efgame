@@ -1,20 +1,23 @@
 import clsx from 'clsx'
-import { MouseEvent, MouseEventHandler, ReactNode } from 'react'
-import useSound from 'use-sound';
+import { MouseEvent, MouseEventHandler, ReactNode, useContext } from 'react'
+import { MenuContext } from '../App';
+
+const hoverAudio = new Audio('sound/menu-hover.wav');
 
 export function Button ({ children, onClick, icon, className, sound = 'sound/menu-click.wav' }: { children?: ReactNode, onClick?: MouseEventHandler<HTMLDivElement>, icon?: string, className?: string, sound?: string | null }): JSX.Element {
-  const [playHover] = useSound('sound/menu-hover2.wav') as any;
-  let [playClick] = useSound(sound || '') as any;
-
-  if (sound === null) playClick = null
+  const gameContext = useContext(MenuContext)
+  hoverAudio.volume = gameContext.settings.soundVolume / 100
+  
+  let clickSound = new Audio()
+  if (sound != null) clickSound.src = sound
 
   const onClickFull = (e: MouseEvent<any>) => {
-    playClick?.()
+    clickSound.play()
     onClick?.(e)
   }
   
   return (
-    <div className={clsx('m-item m-button w-56 cursor-pointer hover:text-gray-300', icon !== undefined && 'justify-start', className)} onClick={onClickFull} onMouseEnter={playHover}>
+    <div className={clsx('m-item m-button w-56 cursor-pointer hover:text-gray-300', icon !== undefined && 'justify-start', className)} onClick={onClickFull} onMouseEnter={() => hoverAudio.play()}>
       {icon !== undefined && <img src={icon} alt='' className='w-6.5 h-6.5 -mt-1' />}
       {children}
     </div>

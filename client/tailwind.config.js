@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const plugin = require('tailwindcss/plugin')
+
 module.exports = {
   mode: 'jit',
   content: [
@@ -6,6 +8,15 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        grey: {
+          light: '#404040',
+          medium: '#404040',
+          dark: '#3e3c32',
+          darker: '#1e1e1e',
+          darkest: '#151619'
+        }
+      },
       spacing: {
         0.25: '0.0625rem',
         5.5: '1.375rem',
@@ -30,5 +41,9 @@ module.exports = {
       }
     }
   },
-  plugins: []
+  plugins: [
+    plugin(function({ addVariant }) {
+      addVariant('slider-thumb', ['&::-webkit-slider-thumb', '&::slider-thumb', '&::-moz-range-thumb'])
+    })
+  ]
 }

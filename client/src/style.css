@@ -28,6 +28,14 @@
     grid-row: 1 / 2;
     grid-column: 1 / 2;
   }
+
+  .border-r-none {
+    border-right: none;
+  }
+  
+  .border-l-none {
+    border-left: none
+  }
   
   /* m - menu components */
 
@@ -66,6 +74,9 @@
   }
   .m-colorbox {
     border-image: url('./img/menus/frame.svg') 8;
+  }
+  .m-colorbox:hover {
+    border-image: url('./img/menus/frame-hover.svg') 8;
   }
   .m-playerbox {
     @apply w-56 h-9;
