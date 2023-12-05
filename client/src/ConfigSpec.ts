@@ -2,6 +2,8 @@ import { ReactNode } from "react"
 import { Entity, Resource } from "./game/Tile"
 
 export default interface ConfigSpec {
+  name: string,
+  version: string
   actions: {[k: string]: Function | null | ConfigSimpleAction }
   entities: {[k: string]: EntityTile | ConfigStaticEntity}
   resources: {[k: string]: ResourceTile | ConfigStaticEntity }

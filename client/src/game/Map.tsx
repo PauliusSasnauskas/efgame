@@ -1,6 +1,6 @@
-import { ReactNode, useState } from "react";
-import { Tile } from "./Tile";
-import MapTile from "./MapTile";
+import { ReactNode, useState } from "react"
+import { Tile } from "./Tile"
+import MapTile from "./MapTile"
 
 
 function range (n: number): number[] {
@@ -14,10 +14,10 @@ function MapError ({ children }: { children?: ReactNode }): JSX.Element {
 function checkTileBorders(tiles: Tile[], row: number, col: number, size: number): string | undefined {
   const tileOwner = tiles[row*size + col].owner?.name
   if (tileOwner === undefined) return undefined
-  const borderTop = row === 0 || tiles[(row-1)*size + col].owner?.name !== tileOwner ? '1' : '0';
-  const borderRight = col === size-1 || tiles[row*size + col + 1].owner?.name !== tileOwner ? '1' : '0';
-  const borderBottom = row === size-1 || tiles[(row+1)*size + col].owner?.name !== tileOwner ? '1' : '0';
-  const borderLeft = col === 0 || tiles[row*size + col - 1].owner?.name !== tileOwner ? '1' : '0';
+  const borderTop = row === 0 || tiles[(row-1)*size + col].owner?.name !== tileOwner ? '1' : '0'
+  const borderRight = col === size-1 || tiles[row*size + col + 1].owner?.name !== tileOwner ? '1' : '0'
+  const borderBottom = row === size-1 || tiles[(row+1)*size + col].owner?.name !== tileOwner ? '1' : '0'
+  const borderLeft = col === 0 || tiles[row*size + col - 1].owner?.name !== tileOwner ? '1' : '0'
   return borderTop + borderRight + borderBottom + borderLeft
 }
 
@@ -48,7 +48,7 @@ export function Map ({ tiles, select, selected }: { tiles: Tile[], select: (newx
         if (row < 0 || row >= size || col < 0 || col >= size) return <div key={index} />
         const tile = tiles[row*size + col]
         const borders = checkTileBorders(tiles, row, col, size)
-        return <MapTile tile={tile} key={index} select={select} selected={col === selected[0] && row === selected[1]} borders={borders} />;
+        return <MapTile tile={tile} key={index} select={select} selected={col === selected[0] && row === selected[1]} borders={borders} />
       })}
     </div>
   )

@@ -32,8 +32,8 @@ const VanillaBuilding = (src: string, maxHealth: number) => (selected: boolean =
       {healthScaled !== 1 && <img src={getFireImg(healthScaled)} alt='' className='tileimg' />}
       {selected && health !== undefined &&
         (
-          <div className='healthbar'>
-            <div className='health' style={{ width: `${healthScaled * 100}%` }}></div>
+          <div className='absolute w-6 h-1.5 border-2 border-black bg-red-500 mt-5.5 pointer-events-none'>
+            <div className='h-full bg-green-500' style={{ width: `${healthScaled * 100}%` }}></div>
           </div>
         )
       }

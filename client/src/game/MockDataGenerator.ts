@@ -1,6 +1,6 @@
-import config from "../Config";
-import { Player } from "./Player";
-import { Tile } from "./Tile";
+import config from "../Config"
+import { Player } from "./Player"
+import { Tile } from "./Tile"
 
 const decorations = Object.entries(config.entities)
   .filter(([_, val]) => typeof val === 'object')
@@ -15,8 +15,8 @@ const buildings = [
 ]
 
 function getRandomInt(max: number) {
-  max = Math.floor(max);
-  return Math.floor(Math.random() * max); // The maximum is exclusive and the minimum is inclusive
+  max = Math.floor(max)
+  return Math.floor(Math.random() * max) // The maximum is exclusive and the minimum is inclusive
 }
 
 function randomlyExpand(posx: number, posy: number, map: Tile[], size: number, player: Player) {

@@ -4,13 +4,13 @@ import { Button } from '../menu/Button'
 import banner from '../img/menus/banner.svg'
 // import findIcon from '../img/menus/find.svg'
 // import mapEditorIcon from '../img/menus/map-editor.svg'
-import attackIcon from '../img/vanilla/actions/attack.svg'
+import playIcon from '../img/menus/play.svg'
 import settingsIcon from '../img/menus/settings.svg'
 import aboutIcon from '../img/menus/about.svg'
 import exitIcon from '../img/menus/exit.svg'
 import noteGlyph from '../img/menus/note.svg'
 
-const bgmAudio = new Audio('sound/bgm01.wav');
+const bgmAudio = new Audio('sound/bgm01.wav')
 
 export function Title (): JSX.Element {
   const gameContext = useContext(MenuContext)
@@ -24,7 +24,7 @@ export function Title (): JSX.Element {
   return (
     <div className='bg6 w-full pt-36 pl-16 flex flex-col gap'>
       <img src={banner} alt='banner' className='w-60 -translate-x-1' />
-      <Button onClick={changeScreen(GameScreen.LOBBY)} icon={attackIcon}>Play</Button>
+      <Button onClick={changeScreen(GameScreen.FINDGAME)} icon={playIcon}>Play</Button>
       {/* <Button onClick={() => console.log('Not Implemented!')} icon={mapEditorIcon}>Map Editor</Button> */}
       <Button onClick={changeScreen(GameScreen.SETTINGS)} icon={settingsIcon}>Settings</Button>
       <Button onClick={changeScreen(GameScreen.ABOUT)} icon={aboutIcon}>About</Button>

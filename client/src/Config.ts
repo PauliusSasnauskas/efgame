@@ -1,5 +1,5 @@
-import { BarracksBuilding, CapitolBuilding, MineBuilding, StoneWall, TowerBuilding, WoodWall } from "./game/vanilla/Buildings";
-import { AttackAction, BuildBarracksAction, BuildCapitolAction, BuildMineAction, BuildStoneWallAction, BuildTowerAction, BuildWoodWallAction, RepairAction } from "./game/vanilla/Actions";
+import { BarracksBuilding, CapitolBuilding, MineBuilding, StoneWall, TowerBuilding, WoodWall } from "./game/vanilla/Buildings"
+import { AttackAction, BuildBarracksAction, BuildCapitolAction, BuildMineAction, BuildStoneWallAction, BuildTowerAction, BuildWoodWallAction, RepairAction } from "./game/vanilla/Actions"
 
 import demolishActionIcon from './img/vanilla/actions/demolish.svg'
 import leaveActionIcon from './img/vanilla/actions/leave.svg'
@@ -19,9 +19,11 @@ import goldStatIcon from './img/vanilla/stats/gold.svg'
 import armyStatIcon from './img/vanilla/stats/army.svg'
 import territoryStatIcon from './img/vanilla/stats/territory.svg'
 import xpStatIcon from './img/vanilla/stats/xp.svg'
-import ConfigSpec from "./ConfigSpec";
+import ConfigSpec from "./ConfigSpec"
 
 const config: ConfigSpec = {
+  name: 'Vanilla',
+  version: '1',
   actions: {
     'v:attack': AttackAction,
     'endturn': null,

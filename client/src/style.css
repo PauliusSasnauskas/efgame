@@ -93,13 +93,6 @@
     grid-template-rows: repeat(20, 24px);
     user-select: none;
   }
-
-  .healthbar {
-    @apply absolute w-6 h-1.5 border-2 border-black bg-red-500 mt-5.5 pointer-events-none;
-  }
-  .health {
-    @apply h-full bg-green-500;
-  }
 }
 
 /* Images converted with Pixels to SVG https://codepen.io/shshaw/pen/XbxvNj */
@@ -116,18 +109,10 @@ body {
   @apply bg-transparent border-none outline-none;
 }
 
-.bg6 {
-  background: url('./img/menus/bg6.png') 0 / cover no-repeat;
-}
-.bg1 {
-  background: url('./img/menus/bg1.svg') 0 / 90px repeat;
-}
-.bg7 {
-  background: url('./img/menus/bg7.png') 0 / cover no-repeat;
-}
-.bg8 {
-  background: url('./img/menus/bg8.png') 0 / cover no-repeat;
-}
+.bg6 { background: url('./img/menus/bg6.png') 0 / cover no-repeat; }
+.bg1 { background: url('./img/menus/bg1.svg') 0 / 90px repeat; }
+.bg7 { background: url('./img/menus/bg7.png') 0 / cover no-repeat; }
+.bg8 { background: url('./img/menus/bg8.png') 0 / cover no-repeat; }
 
 /* s - screens */
 
