@@ -12,22 +12,14 @@ import config from '../Config'
 import StatBox from '../game/StatBox'
 import SimpleAction from '../game/SimpleAction'
 import leaveActionIcon from '../img/end-turn.svg'
-import generateMockMap from '../game/MockMapGenerator'
+import { generateMockMap, generateMockPlayers } from '../game/MockDataGenerator'
 
 const mockSize = 20
-const mockTiles: Tile[] = generateMockMap(mockSize)
-
-const mockPlayers: Player[] = [
-  { name: 'paul', color: '255,127,0', eliminated: false, team: 'greencross', controllable: true, stats: { 'v:action': { val: 8, max: 12 }, 'v:gold': { val: 174 }, 'v:army': { val: 43 }, 'v:territory': { val: 12 }, 'v:xp': { val: 4 } } },
-  { name: 'richard', color: '0,127,255', eliminated: false, controllable: false },
-  { name: 'bot2', color: '127,127,127', eliminated: false, controllable: true, stats: {} },
-  { name: 'bot3', color: '255,100,100', eliminated: true, team: 'bluetriangle', controllable: false },
-  { name: 'bot4', color: '255,100,255', team: 'spectator', controllable: false }
-]
+const mockPlayers: Player[] = generateMockPlayers()
+const mockTiles: Tile[] = generateMockMap(mockSize, mockPlayers)
 
 export function Game (): JSX.Element {
   const gameContext = useContext(MenuContext)
-
   
   const [menuVisible, setMenuVisible] = useState(false)
   const [chatActive, setChatActive] = useState(false)
@@ -90,7 +82,7 @@ export function Game (): JSX.Element {
       <div>
         <Bar>Players</Bar>
         {gameState.players.map((player) => (
-          <PlayerBox player={player} myTurn={player.name === gameState.turn} key={player.name} />
+          <PlayerBox player={player} myTurn={player.name === gameState.turn} key={player.name} selected={gameState.tiles[selected[1]*gameState.size + selected[0]].owner?.name === player.name} />
         ))}
       </div>
       <div className='flex flex-col gap-2'>
@@ -98,6 +90,12 @@ export function Game (): JSX.Element {
           <span>{gameState.turn}'s turn</span>
           <span>{selected[0]+1}x{selected[1]+1}</span>
         </Bar>
+        <style>
+          {'.m-map {'}
+            {gameState.players.map((player) => `--p-${player.name}-bg: rgb(${player.color},0.5); --p-${player.name}: rgb(${player.color},1);`)}
+          {'}'}
+          {gameState.players.map((player) => `.m-map .p-${player.name} {--owner-bg: var(--p-${player.name}-bg); --owner: var(--p-${player.name});}`)}
+        </style>
         <Map tiles={gameState.tiles} select={trySelect as any} selected={selected} />
       </div>
       <div className='row-span-2'>

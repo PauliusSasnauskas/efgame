@@ -76,26 +76,13 @@
     background: url('./img/menus/darkbox.svg') no-repeat;
   }
   .m-map {
-    @apply border-2 border-black bg-neutral-800 w-full h-full grid;
+    @apply border-2 border-black w-full h-full grid;
+    background: url('./img/bg01.png') 0 0 / 480px 480px no-repeat;
     grid-template-columns: repeat(20, 24px);
     grid-template-rows: repeat(20, 24px);
     user-select: none;
   }
 
-  .tile {
-    @apply tilesize grid grid-cols-1 grid-rows-1;
-  }
-  .tileimg {
-    @apply tilesize pointer-events-none grid-pos-11;
-  }
-  .tile-selected {
-    @apply grid-pos-11 pointer-events-none;
-    box-shadow: inset 0px 0px 0px 2px black;
-  }
-  .tile:hover::after {
-    @apply tile-selected opacity-10;
-    content: '';
-  }
   .healthbar {
     @apply absolute w-6 h-1.5 border-2 border-black bg-red-500 mt-5.5 pointer-events-none;
   }
@@ -138,3 +125,43 @@ body {
   grid-template-columns: 224px 484px 224px;
   grid-template-rows: 530px auto;
 }
+
+/* map */
+.tile {
+  @apply tilesize grid grid-cols-1 grid-rows-1;
+}
+.tile::after {
+  @apply tile-selected opacity-0;
+  content: '';
+}
+.tile:hover::after {
+  @apply opacity-10;
+}
+.tileimg {
+  @apply tilesize pointer-events-none grid-pos-11;
+}
+.tile-selected {
+  @apply tilesize grid-pos-11 pointer-events-none;
+  box-shadow: inset 0px 0px 0px 2px black;
+}
+
+.tile-owned {
+  background-color: var(--owner-bg);
+}
+
+/* Top Right Bottom Left */
+.tile-border-0001 { box-shadow: inset  2px  0px 0px 0px var(--owner) }
+.tile-border-0010 { box-shadow: inset  0px -2px 0px 0px var(--owner) }
+.tile-border-0011 { box-shadow: inset  2px -2px 0px 0px var(--owner) }
+.tile-border-0100 { box-shadow: inset -2px  0px 0px 0px var(--owner) }
+.tile-border-0101 { box-shadow: inset -2px  0px 0px 0px var(--owner), inset  2px  0px 0px 0px var(--owner) }
+.tile-border-0110 { box-shadow: inset -2px -2px 0px 0px var(--owner) }
+.tile-border-0111 { box-shadow: inset  2px -2px 0px 0px var(--owner), inset -2px  0px 0px 0px var(--owner) }
+.tile-border-1000 { box-shadow: inset  0px  2px 0px 0px var(--owner) }
+.tile-border-1001 { box-shadow: inset  2px  2px 0px 0px var(--owner) }
+.tile-border-1010 { box-shadow: inset  0px  2px 0px 0px var(--owner), inset  0px -2px 0px 0px var(--owner) }
+.tile-border-1011 { box-shadow: inset  0px  2px 0px 0px var(--owner), inset  2px -2px 0px 0px var(--owner) }
+.tile-border-1100 { box-shadow: inset -2px  2px 0px 0px var(--owner) }
+.tile-border-1101 { box-shadow: inset -2px  2px 0px 0px var(--owner), inset  2px  0px 0px 0px var(--owner) }
+.tile-border-1110 { box-shadow: inset -2px  2px 0px 0px var(--owner), inset  0px -2px 0px 0px var(--owner) }
+.tile-border-1111 { box-shadow: inset  0px  0px 0px 2px var(--owner) }

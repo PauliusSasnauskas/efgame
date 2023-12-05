@@ -8,8 +8,8 @@ export interface Tile {
 }
 
 export interface Owner {
-  readonly isPlayer: boolean
-  readonly id: number
+  readonly isPlayer: boolean // TODO: do I need this?
+  readonly name: string
 }
 
 export interface Entity {

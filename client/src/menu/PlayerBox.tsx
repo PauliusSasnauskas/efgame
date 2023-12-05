@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { Player } from '../game/Player'
 import eliminated from '../img/menus/player/eliminated.svg'
 import turn from '../img/menus/player/turn.svg'
+import selectedImg from '../img/menus/player/selected.svg'
 import teamneutral from '../img/menus/player/neutral.svg'
 import teambt from '../img/menus/player/teambt.svg'
 import teamgc from '../img/menus/player/teamgc.svg'
@@ -15,7 +16,7 @@ const getTeamIcon: { [k: string]: string } = {
   'redrectangle': teamrr,
 }
 
-export function PlayerBox ({ player, className, myTurn }: { player: Player, className?: string, myTurn: boolean }): JSX.Element {
+export function PlayerBox ({ player, className, myTurn, selected = false }: { player: Player, className?: string, myTurn: boolean, selected?: boolean }): JSX.Element {
   if (player.team === 'spectator') {
     return (
       <div className={clsx('m-item m-darkbox pb-0.25 justify-start pl-10 relative', className, 'text-gray-500')}>
@@ -31,7 +32,8 @@ export function PlayerBox ({ player, className, myTurn }: { player: Player, clas
       </span>
       {player.name}
       {myTurn && <img src={turn} className='absolute h-6 -left-0.5 top-1.5'/>}
-      <img src={player.team !== undefined ? getTeamIcon[player.team] : teamneutral} className='absolute h-5 right-2.5 top-2'/>
+      <img src={player.team !== undefined ? getTeamIcon[player.team] : teamneutral} className='absolute h-5 right-2.5 top-2' alt=''/>
+      {selected && <img src={selectedImg} className='absolute h-5 right-0 top-2' alt='' />}
     </div>
   )
 }

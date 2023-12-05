@@ -2,6 +2,7 @@ import gameConfig from '../Config'
 import { Tile } from './Tile'
 import { ConfigStaticEntity, EntityTile, ResourceTile } from '../ConfigSpec'
 import StaticEntity from './StaticEntity'
+import clsx from 'clsx'
 
 function getResourceElement(resourceSpec: ResourceTile | ConfigStaticEntity | null, selected: boolean, tile: Tile) {
   if (resourceSpec === null) return null
@@ -17,7 +18,9 @@ function getEntityElement(entitySpec: EntityTile | ConfigStaticEntity | null, se
   return null
 }
 
-export default function MapTile ({ tile, select, selected = false }: { tile: Tile, select: (newx: number, newy: number)=>any, selected?: boolean }): JSX.Element {
+export default function MapTile ({ tile, select, selected = false, borders }: { tile: Tile, select: (newx: number, newy: number)=>any, selected?: boolean, borders?: string }): JSX.Element {
+  const ownership = tile.owner?.isPlayer ? <div className={clsx('tilesize pointer-events-none tile-owned', `p-${tile.owner.name}`, `tile-border-${borders}`)}></div> : null
+
   const resourceSpec: ResourceTile | ConfigStaticEntity | null = tile?.resource?.id !== undefined ? gameConfig.resources?.[tile?.resource?.id] : null
   const resource = getResourceElement(resourceSpec, selected, tile)
 
@@ -26,9 +29,10 @@ export default function MapTile ({ tile, select, selected = false }: { tile: Til
 
   return (
     <div
-      className='tile text-[0.4rem] bg-gray-500'
+      className='tile'
       onClick={() => select(tile.x, tile.y)}
     >
+      {ownership}
       {resource}
       {entity}
       {selected && <div className="tile-selected"></div>}
