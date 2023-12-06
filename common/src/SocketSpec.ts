@@ -1,5 +1,7 @@
+import { PlayerDTO } from './Player'
+
 export interface ServerEvents {
-  welcome: (message: string) => void
+  welcome: (message: ServerGreeting) => void
   chat: (message: Message) => void
 }
 
@@ -14,4 +16,23 @@ export interface Message {
   from?: string
   fromColor?: string
   private?: boolean
+}
+
+export interface ServerGreeting {
+  name: string
+  version: string
+  gamemode: string
+  gamemodeVersion: string
+  motd: string
+}
+
+export interface GameInfo {
+  gameState: GameState
+  players: PlayerDTO[]
+}
+
+export enum GameState {
+  LOBBY = 0,
+  PLAYING = 1,
+  POSTGAME = 2
 }

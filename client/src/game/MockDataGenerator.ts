@@ -80,13 +80,3 @@ export function generateMockMap(size: number, players?: Player[]): Tile[] {
 
   return map
 }
-
-export function generateMockPlayers(): Player[] {
-  return [
-    { id: 0, name: 'paul', color: '255,127,0', eliminated: false, team: 'greencross', controllable: true, stats: { 'v:action': { val: 8, max: 12 }, 'v:gold': { val: 174 }, 'v:army': { val: 43 }, 'v:territory': { val: 12 }, 'v:xp': { val: 4 } } },
-    { id: 1, name: 'richard', color: '0,127,255', eliminated: false, controllable: false },
-    { id: 2, name: 'bot2', color: '127,127,127', eliminated: false, controllable: true, stats: {} },
-    { id: 3, name: 'bot3', color: '255,100,100', eliminated: true, team: 'bluetriangle', controllable: false },
-    { id: 4, name: 'bot4', color: '255,100,255', team: 'spectator', controllable: false }
-  ]
-}

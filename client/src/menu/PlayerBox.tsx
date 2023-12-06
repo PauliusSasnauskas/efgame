@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Player } from 'common/src/Player'
+import { PlayerDTO } from 'common/src/Player'
 import eliminated from '../img/menus/player/eliminated.svg'
 import turn from '../img/menus/player/turn.svg'
 import selectedImg from '../img/menus/player/selected.svg'
@@ -16,7 +16,7 @@ const getTeamIcon: { [k: string]: string } = {
   'redrectangle': teamrr,
 }
 
-export function PlayerBox ({ player, className, myTurn, selected = false }: { player: Player, className?: string, myTurn: boolean, selected?: boolean }): JSX.Element {
+export function PlayerBox ({ player, className, myTurn, selected = false }: { player: PlayerDTO, className?: string, myTurn: boolean, selected?: boolean }): JSX.Element {
   if (player.team === 'spectator') {
     return (
       <div className={clsx('m-item m-darkbox pb-0.25 justify-start pl-10 relative', className, 'text-gray-500')}>

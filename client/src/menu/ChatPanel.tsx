@@ -27,7 +27,7 @@ export function ChatPanel ({ active, className, messages, sendMessage }: { activ
   return (
     <Box className={clsx('flex flex-col overflow-y-auto', className)} reff={messageRef}>
       {messages.map((message, idx) => (
-        <p key={idx}>
+        <p className={clsx(message.private && message.from === undefined && 'text-grey-lighter')} key={idx}>
           {message.from !== undefined && <>{`<`}<span style={{ color: `rgb(${message.fromColor})` }}>{message.from}</span>{`> `}</>}
           {message.text}
         </p>

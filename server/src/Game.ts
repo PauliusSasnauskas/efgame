@@ -1,29 +1,34 @@
-import { Player } from "common/src/Player"
-
-export enum GameState {
-  LOBBY = 0,
-  PLAYING = 1,
-  POSTGAME = 2
-}
+import { Player, PlayerDTO } from "common/src/Player"
+import { GameState } from "common/src/SocketSpec"
 
 export default class Game {
   state: GameState
-  players: Player[] = []
+  players: {[k: number]: Player} = {}
 
   constructor () {
     this.state = GameState.LOBBY
   }
 
   addPlayer (id: number, name: string, color: string) {
-    this.players.push({
+    this.players[id] = new Player(
       id,
       name,
       color,
-      team: this.state === GameState.PLAYING ? 'spectator' : undefined
-    })
+      this.state === GameState.PLAYING ? 'spectator' : undefined
+    )
   }
 
   getPlayer(id: number) {
-    return this.players.find((player) => player.id === id)
+    return this.players[id]
+  }
+
+  removePlayer (id: number): Player {
+    const player = this.players[id]
+    delete this.players[id]
+    return player
+  }
+
+  listPlayers (): PlayerDTO[] {
+    return Object.values(this.players).map((player) => player.serialize())
   }
 }
