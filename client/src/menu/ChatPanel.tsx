@@ -9,7 +9,7 @@ export function ChatPanel ({ active, className, messages, sendMessage }: { activ
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.code !== 'Enter') return
-    sendMessage(chatMessage)
+    if (chatMessage !== '') sendMessage(chatMessage.trim())
     setChatMessage('')
   }
 
@@ -21,7 +21,7 @@ export function ChatPanel ({ active, className, messages, sendMessage }: { activ
   }, [active])
 
   useEffect(() => {
-    messageRef?.current?.scrollIntoView({ block: "end", inline: "nearest" })
+    messageRef?.current?.scrollIntoView({ block: "end", inline: "end" })
   }, [messages])
   
   return (

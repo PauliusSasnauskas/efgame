@@ -1,14 +1,12 @@
 export class Player {
-  id: number
   name: string
   color: string
   eliminated?: boolean
   team?: 'spectator' | string
-  controllable?: boolean
+  controlledBy?: string
   stats?: {[k: string]: Stat}
 
-  constructor (id: number, name: string, color: string, team?: string) {
-    this.id = id
+  constructor (name: string, color: string, team?: string) {
     this.name = name
     this.color = color
     this.team = team
@@ -16,21 +14,21 @@ export class Player {
 
   serialize(): PlayerDTO {
     return {
-      id: this.id,
       name: this.name,
       color: this.color,
       eliminated: this.eliminated,
-      team: this.team
+      team: this.team,
+      controlledBy: this.controlledBy
     }
   }
 }
 
 export interface PlayerDTO {
-  id: number
   name: string
   color: string
   eliminated?: boolean
   team?: string
+  controlledBy?: string
 }
 
 export interface Stat { 

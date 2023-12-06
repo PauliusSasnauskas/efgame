@@ -12,6 +12,9 @@ import leaveActionIcon from '../img/end-turn.svg'
 import { Socket, io } from 'socket.io-client'
 import { ClientEvents, GameInfoLobby, GameInfoPlaying, Message, ServerEvents, ServerGreeting } from 'common/src/SocketSpec'
 import { GameState } from '../game/GameState'
+import { Tile } from 'common/src/Tile'
+import { Stat } from 'common/src/Player'
+import StatBox from '../game/StatBox'
 
 const reconnectionAttempts = 5
 
@@ -34,6 +37,8 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
 
   const [serverInfo, setServerInfo] = useState<ServerGreeting | undefined>()
   const [gameInfo, setGameInfo] = useState<GameInfoLobby | GameInfoPlaying | undefined>()
+  const [map, setMap] = useState<Tile[] | undefined>()
+  const [stats, setStats] = useState<{[k: string]: Stat} | undefined>()
 
   const trySelect = (newx: number, newy: number) => {
     if (gameInfo === undefined) return
@@ -113,7 +118,9 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
       setMessages((m) => [...m, { text: message.motd }])
     })
     s.on('chat', (message) => setMessages((m) => [...m, message]))
-    s.on('gameInfo', (info) => setGameInfo(info))
+    s.on('gameInfo', setGameInfo)
+    s.on('mapInfo', setMap)
+    s.on('statsInfo', setStats)
 
     return () => {
       s.io.removeListener('error', handleError)
@@ -137,6 +144,10 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     gameContext.setGameScreen(GameScreen.FINDGAME)
   }
 
+  const startGame = () => {
+    socket?.emit('startGame')
+  }
+
   return (
     <div className='s-game bg1 w-full'>
       {menuVisible && (
@@ -153,7 +164,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           <div>
             <Bar>Players</Bar>
             {gameInfo.players.map((player) => (
-              <PlayerBox player={player} myTurn={gameInfo.gameState === GameState.PLAYING ? player.name === gameInfo.turn : false} key={player.name} selected={gameInfo.gameState === GameState.PLAYING || gameInfo.gameState === GameState.POSTGAME ? gameInfo.map[selected[1]*gameInfo.mapSize + selected[0]].owner?.name === player.name : false} />
+              <PlayerBox player={player} myTurn={gameInfo.gameState === GameState.PLAYING ? player.name === gameInfo.turn : false} key={player.name} selected={map !== undefined ? map[selected[1]*gameInfo.mapSize + selected[0]].owner?.name === player.name : false} />
             ))}
           </div>
           <div className='flex flex-col'>
@@ -162,7 +173,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                 <Bar>Lobby</Bar>
                 <div className='p-2'>
                   {serverInfo.name} <span className='text-grey-lighter'>(v{serverInfo.version})</span>
-                  <div className='grid grid-cols-2 gap-4 text-center mt-4'>
+                  <div className='grid grid-cols-2 gap-4 text-center mt-4 mb-24'>
                     <div>
                       <Bar>Gamemode</Bar>
                       {serverInfo.gamemode} <span className='text-grey-lighter'>({serverInfo.gamemodeVersion})</span>
@@ -180,6 +191,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                       {gameInfo.mapSize}
                     </div>
                   </div>
+                  <Button onClick={startGame}>Start Game</Button>
                 </div>
               </>
             ) : (
@@ -194,7 +206,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                   {'}'}
                   {gameInfo.players.map((player) => `.m-map .p-${player.name} {--owner-bg: var(--p-${player.name}-bg); --owner: var(--p-${player.name});}`)}
                 </style>
-                <Map tiles={gameInfo.map} select={trySelect as any} selected={selected} />
+                <Map tiles={map} select={trySelect as any} selected={selected} />
               </>
             )}
           </div>
@@ -204,9 +216,9 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
             ) : (
               <>
                 <Bar>Turn: {gameInfo.turnNumber}</Bar>
-                {/* {stats !== undefined && Object.entries(stats).map(([statName, stat]) => (
+                {stats !== undefined && Object.entries(stats).map(([statName, stat]) => (
                   <StatBox src={config.stats[statName].img} stat={stat} key={statName} />
-                ))} */}
+                ))}
                 <div className='h-1'></div>
                 {Object.entries(config.actions).map(([action, actionElement]) => {
                   if (actionElement === null){

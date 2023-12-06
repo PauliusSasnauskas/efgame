@@ -1,6 +1,6 @@
 import { DisconnectReason, Server } from 'socket.io';
 import Game from './Game';
-import { ClientEvents, ServerEvents } from 'common/src/SocketSpec'
+import { ClientEvents, GameState, ServerEvents } from 'common/src/SocketSpec'
 import config from './Config'
 
 const dcReasons: {[k: DisconnectReason | string]: string} = {
@@ -22,11 +22,13 @@ const io = new Server<ClientEvents, ServerEvents>({ cors: { origin: '*' } });
 io.listen(port)
 console.log(`Started server on port ${port}`)
 
-const socketIdToPlayerId: {[k: string]: number} = {}
-let nextPlayerId = 0
+const socketIdToPlayerName: {[k: string]: string} = {}
 
 function sendGameInfo(io: Server<ClientEvents, ServerEvents>, game: Game) {
-  io.emit('gameInfo', { gameState: game.state, players: game.listPlayers() })
+  if (game.state === GameState.LOBBY)
+    io.emit('gameInfo', { gameState: game.state, players: game.listPlayers(), mapSize: game.mapSize, mapName: game.mapName, numTeams: game.teams.length })
+  else
+    io.emit('gameInfo', { gameState: game.state, players: game.listPlayers(), mapSize: game.mapSize, numTeams: game.teams.length, turnNumber: game.turnNumber, turn: game.turn })
 }
 
 io.on('connection', (socket) => {
@@ -36,29 +38,36 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', (reason) => {
     console.log(`[disconnect] ${socket.id} ${dcReasons[reason]}. ${socket.handshake.address}`)
-    const player = game.removePlayer(socketIdToPlayerId[socket.id])
+    const player = game.removePlayer(socketIdToPlayerName[socket.id])
     io.emit('chat', { text: `${player?.name} disconnected.` })
-    delete socketIdToPlayerId[socket.id]
+    delete socketIdToPlayerName[socket.id]
     sendGameInfo(io, game)
   })
 
   socket.on('welcome', ({ name, color }) => {
-    if (socket.id in socketIdToPlayerId) {
+    if (socket.id in socketIdToPlayerName) {
       console.log('Socket ID taken?')
       return
     }
-    const playerId = nextPlayerId
-    nextPlayerId += 1
+    if (Object.values(socketIdToPlayerName).includes(name)) {
+      socket.emit('chat', { text: 'Player name already taken' })
+      socket.disconnect()
+    }
 
-    socketIdToPlayerId[socket.id] = playerId
-    game.addPlayer(playerId, name, color)
+    socketIdToPlayerName[socket.id] = name
+    game.addPlayer(name, color)
     io.emit('chat', { text: `${name} connected.` })
     sendGameInfo(io, game)
   })
 
   socket.on('chat', (message) => {
     console.log(`<${socket.handshake.address}> ${message}`)
-    const player = game.getPlayer(socketIdToPlayerId[socket.id])
+    const player = game.getPlayer(socketIdToPlayerName[socket.id])
     io.emit('chat', { from: player?.name ?? 'unknown', fromColor: player?.color, text: message })
+  })
+
+  socket.on('startGame', () => {
+    game.start()
+    sendGameInfo(io, game)
   })
 });
