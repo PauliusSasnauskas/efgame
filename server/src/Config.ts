@@ -1,11 +1,12 @@
 import ConfigSpec from "./ConfigSpec"
+import generateMapRMG from "./vanilla/MapRMG"
+import { StatAction, StatArmy, StatGold, StatTerritory, StatXp } from "./vanilla/Stats"
 
 const config: ConfigSpec = {
   name: 'Vanilla',
   version: '1',
   actions: {
     // 'v:attack': AttackAction,
-    // 'endturn': null,
     // 'v:buildcapitol': BuildCapitolAction,
     // 'v:buildmine': BuildMineAction,
     // 'v:buildbarracks': BuildBarracksAction,
@@ -18,12 +19,12 @@ const config: ConfigSpec = {
     // 'v:demolish': { img: demolishActionIcon, name: 'Demolish', req: { 'v:action': 1, 'v:army': 1 } },
   },
   entities: {
-    // 'v:tree1': { img: tree1EntityIcon },
-    // 'v:tree2': { img: tree2EntityIcon },
-    // 'v:tree3': { img: tree3EntityIcon },
-    // 'v:bush1': { img: bush1EntityIcon },
-    // 'v:rock1': { img: rock1EntityIcon },
-    // 'v:mountain1': { img: mountain1EntityIcon },
+    'v:tree1': {},
+    'v:tree2': {},
+    'v:tree3': {},
+    'v:bush1': {},
+    'v:rock1': {},
+    'v:mountain1': {},
     // 'v:capitol': CapitolBuilding,
     // 'v:mine': MineBuilding,
     // 'v:barracks': BarracksBuilding,
@@ -32,15 +33,18 @@ const config: ConfigSpec = {
     // 'v:stonewall': StoneWall,
   },
   resources: {
-    // 'v:gold': { img: goldResourceIcon },
+    'v:gold': {},
   },
   stats: {
-    // 'v:action': { img: actionStatIcon },
-    // 'v:gold': { img: goldStatIcon },
-    // 'v:army': { img: armyStatIcon },
-    // 'v:territory': { img: territoryStatIcon },
-    // 'v:xp': { img: xpStatIcon },
+    'v:action': StatAction,
+    'v:gold': StatGold,
+    'v:army': StatArmy,
+    'v:territory': StatTerritory,
+    'v:xp': StatXp,
   },
+  mapNames: {
+    "RMG": generateMapRMG
+  }
 }
 
 export default config

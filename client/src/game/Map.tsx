@@ -23,16 +23,15 @@ function checkTileBorders(tiles: Tile[], row: number, col: number, size: number)
 
 export function Map ({ tiles = [], select, selected }: { tiles?: Tile[], select: (newx: number, newy: number)=>any, selected: [number, number] }): JSX.Element {
   const size = Math.sqrt(tiles.length)
+  const initialOffset = [Math.floor(size / 2) - 10, Math.floor(size / 2) - 10]
   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [offset, _] = useState<[number, number]>([Math.floor(size / 2) - 10, Math.floor(size / 2) - 10])
+  const [offset, setOffset] = useState<[number, number]>([0, 0])
 
   if (!Number.isInteger(size)) {
     return <MapError>Error retrieving tile data.</MapError>
   }
 
   if (size > 20) {
-    // TODO: setOffset
     return <MapError>Map size {'>'} 20 not yet implemented</MapError>
   }
 
@@ -40,10 +39,11 @@ export function Map ({ tiles = [], select, selected }: { tiles?: Tile[], select:
   return (
     <div className='m-map'>
       {range(20*20).map((index) => {
+        const [rowOffsetI, colOffsetI] = initialOffset
         const [rowOffset, colOffset] = offset
 
-        const row = rowOffset + Math.floor(index / 20)
-        const col = colOffset + index % 20
+        const row = rowOffsetI + rowOffset + Math.floor(index / 20)
+        const col = colOffsetI + colOffset + index % 20
 
         if (row < 0 || row >= size || col < 0 || col >= size) return <div key={index} />
         const tile = tiles[row*size + col]

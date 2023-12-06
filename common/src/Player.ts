@@ -21,6 +21,15 @@ export class Player {
       controlledBy: this.controlledBy
     }
   }
+  serializeStats(): {[k: string]: Stat} {
+    const serializedStats: {[k: string]: Stat} = {}
+
+    Object.entries(this.stats ?? {}).forEach(([statName, stat]) => {
+      serializedStats[statName] = { val: stat.val, max: stat.max }
+    })
+
+    return serializedStats
+  }
 }
 
 export interface PlayerDTO {

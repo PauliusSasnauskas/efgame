@@ -1,26 +1,29 @@
-import { Entity, Resource } from "common/src/Tile"
-
-// TODO: fix all this
+import { Player } from "common/src/Player"
+import { Tile } from "common/src/Tile"
+import ServerStat from "./ServerStat"
 
 export default interface ConfigSpec {
   name: string,
   version: string
-  actions: {[k: string]: Function | null | ConfigSimpleAction }
-  entities: {[k: string]: ConfigStaticEntity}
-  resources: {[k: string]: ConfigStaticEntity }
-  stats: {[k: string]: ConfigStat}
+  actions: { [k: string]: ConfigAction } // TODO
+  entities: { [k: string]: {} | ConfigEntity } // TODO
+  resources: { [k: string]: {} | ConfigResource } // TODO
+  stats: { [k: string]: typeof ServerStat }
+  mapNames: { [k: string]: (size: number, players: Player[]) => Tile[] }
 }
 
-export interface ConfigSimpleAction {
-  img: string
-  name: string
-  req: {[k: string]: number | string}
+export interface ConfigAction {
+  req: { [k: string]: number | string }
 }
 
-export interface ConfigStaticEntity {
-  img: string
+export interface ConfigEntity {
+  // TODO: fix
+}
+
+export interface ConfigResource {
+  // TODO: fix
 }
 
 export interface ConfigStat {
-  img: string
+  // TODO: fix
 }
