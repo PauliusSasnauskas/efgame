@@ -5,17 +5,13 @@ import { Bar } from '../menu/Bar'
 import { Panel } from '../menu/Panel'
 import { ChatPanel } from '../menu/ChatPanel'
 import { Map } from '../game/Map'
-import { Tile } from 'common/src/Tile'
 import { PlayerBox } from '../menu/PlayerBox'
 import config from '../Config'
 import SimpleAction from '../game/SimpleAction'
 import leaveActionIcon from '../img/end-turn.svg'
-import { generateMockMap } from '../game/MockDataGenerator'
 import { Socket, io } from 'socket.io-client'
-import { ClientEvents, GameInfo, GameState, Message, ServerEvents, ServerGreeting } from 'common/src/SocketSpec'
-
-const mockSize = 20
-const mockTiles: Tile[] = generateMockMap(mockSize)
+import { ClientEvents, GameInfoLobby, GameInfoPlaying, Message, ServerEvents, ServerGreeting } from 'common/src/SocketSpec'
+import { GameState } from '../game/GameState'
 
 const reconnectionAttempts = 5
 
@@ -37,12 +33,11 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   const [selected, select] = useState<[number, number]>([0, 0])
 
   const [serverInfo, setServerInfo] = useState<ServerGreeting | undefined>()
-  const [gameInfo, setGameInfo] = useState<GameInfo | undefined>()
-  
-  const game = { size: mockSize, tiles: mockTiles, turn: 'paul', turnNumber: 7 }
-  
+  const [gameInfo, setGameInfo] = useState<GameInfoLobby | GameInfoPlaying | undefined>()
+
   const trySelect = (newx: number, newy: number) => {
-    if (newx < 0 || newx >= game.size || newy < 0 || newy >= game.size) return
+    if (gameInfo === undefined) return
+    if (newx < 0 || newx >= gameInfo.mapSize || newy < 0 || newy >= gameInfo.mapSize) return
     select([newx, newy])
   }
 
@@ -87,7 +82,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     const handleError = (err: Error) => gameContext.setConnectError(`${err.message}. Caused by: ${err.cause ?? 'unknown'}`)
     const handleReconnectAttempt = (attempt: number) => setMessages((m) => [...m, { text: `Reconnecting... (attempt ${attempt+1} out of ${reconnectionAttempts})...`, private: true }])
     const handleReconnectFailed = () => {
-      gameContext.setConnectError('Reconnection failed.')
+      gameContext.setConnectError('Connection failed.')
       gameContext.setGameScreen(GameScreen.FINDGAME)
     }
     const handleReconnect = (attempt: number) => setMessages((m) => [...m, { text: `Reconnected after ${attempt} attempts.`, private: true }])
@@ -118,7 +113,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
       setMessages((m) => [...m, { text: message.motd }])
     })
     s.on('chat', (message) => setMessages((m) => [...m, message]))
-    // s.on('gameInfo', (info) => setGameInfo(info))
+    s.on('gameInfo', (info) => setGameInfo(info))
 
     return () => {
       s.io.removeListener('error', handleError)
@@ -139,7 +134,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
 
   const quitGame = () => {
     gameContext.setConnectError('')
-    gameContext.setGameScreen(GameScreen.TITLE)
+    gameContext.setGameScreen(GameScreen.FINDGAME)
   }
 
   return (
@@ -149,56 +144,92 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           <Panel className='p-4 absolute z-10'>
             <Button onClick={() => setMenuVisible(false)}>Resume Game</Button>
             <br />
-            <Button onClick={quitGame}>Quit to Title Screen</Button>
+            <Button onClick={quitGame}>Quit Game</Button>
           </Panel>
         </div>
       )}
-      <div>
-        <Bar>Players</Bar>
-        {gameInfo?.players.map((player) => (
-          <PlayerBox player={player} myTurn={player.name === game.turn} key={player.name} selected={game.tiles[selected[1]*game.size + selected[0]].owner?.name === player.name} />
-        ))}
-      </div>
-      <div className='flex flex-col'>
-        {gameInfo?.gameState === GameState.LOBBY ? (
-          <>
-            <Bar></Bar>
-          </>
-        ) : (
-          <>
-            <Bar className='flex justify-between'>
-              <span>{game.turn}'s turn</span>
-              <span>{selected[0]+1}x{selected[1]+1}</span>
-            </Bar>
-            <style>
-              {'.m-map {'}
-                {gameInfo?.players.map((player) => `--p-${player.name}-bg: rgb(${player.color},0.5); --p-${player.name}: rgb(${player.color},1);`)}
-              {'}'}
-              {gameInfo?.players.map((player) => `.m-map .p-${player.name} {--owner-bg: var(--p-${player.name}-bg); --owner: var(--p-${player.name});}`)}
-            </style>
-            <Map tiles={game.tiles} select={trySelect as any} selected={selected} />
-          </>
-        )}
-      </div>
-      <div className='row-span-2'>
-        <Bar>Turn: {game.turnNumber}</Bar>
-        {/* {stats !== undefined && Object.entries(stats).map(([statName, stat]) => (
-          <StatBox src={config.stats[statName].img} stat={stat} key={statName} />
-        ))} */}
-        <div className='h-1'></div>
-        {Object.entries(config.actions).map(([action, actionElement]) => {
-          if (actionElement === null){
-            return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={() => { console.log('endturn') }} className='mb-4' key={action} />
-          }
-          if (typeof actionElement === 'function'){
-            const ActionElement = actionElement
-            return <ActionElement onClick={() => { console.log(action, selected) }} key={action} />
-          }
-          return <SimpleAction img={actionElement.img} name={actionElement.name} onClick={() => { console.log(action, selected) }} key={action} />
-        })}
-        {!('endturn' in config.actions) && <SimpleAction img={leaveActionIcon} name='End Turn' onClick={() => { console.log('endturn') }} />} {/* TODO: networking */}
-      </div>
-      <ChatPanel active={chatActive} messages={messages} sendMessage={sendMessage} className='col-span-2 h-64' />
+      {serverInfo !== undefined && gameInfo !== undefined ? (
+        <>
+          <div>
+            <Bar>Players</Bar>
+            {gameInfo.players.map((player) => (
+              <PlayerBox player={player} myTurn={gameInfo.gameState === GameState.PLAYING ? player.name === gameInfo.turn : false} key={player.name} selected={gameInfo.gameState === GameState.PLAYING || gameInfo.gameState === GameState.POSTGAME ? gameInfo.map[selected[1]*gameInfo.mapSize + selected[0]].owner?.name === player.name : false} />
+            ))}
+          </div>
+          <div className='flex flex-col'>
+            {gameInfo !== undefined && gameInfo.gameState === GameState.LOBBY ? (
+              <>
+                <Bar>Lobby</Bar>
+                <div className='p-2'>
+                  {serverInfo.name} <span className='text-grey-lighter'>(v{serverInfo.version})</span>
+                  <div className='grid grid-cols-2 gap-4 text-center mt-4'>
+                    <div>
+                      <Bar>Gamemode</Bar>
+                      {serverInfo.gamemode} <span className='text-grey-lighter'>({serverInfo.gamemodeVersion})</span>
+                    </div>
+                    <div>
+                      <Bar>Map</Bar>
+                      {gameInfo.mapName}
+                    </div>
+                    <div>
+                      <Bar>Teams</Bar>
+                      {gameInfo.numTeams === 0 ? 'None' : gameInfo.numTeams}
+                    </div>
+                    <div>
+                      <Bar>Map Size</Bar>
+                      {gameInfo.mapSize}
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <Bar className='flex justify-between'>
+                  <span>{gameInfo.turn}'s turn</span>
+                  <span>{selected[0]+1}x{selected[1]+1}</span>
+                </Bar>
+                <style>
+                  {'.m-map {'}
+                    {gameInfo.players.map((player) => `--p-${player.name}-bg: rgb(${player.color},0.5); --p-${player.name}: rgb(${player.color},1);`)}
+                  {'}'}
+                  {gameInfo.players.map((player) => `.m-map .p-${player.name} {--owner-bg: var(--p-${player.name}-bg); --owner: var(--p-${player.name});}`)}
+                </style>
+                <Map tiles={gameInfo.map} select={trySelect as any} selected={selected} />
+              </>
+            )}
+          </div>
+          <div className='row-span-2'>
+            {gameInfo.gameState === GameState.LOBBY ? (
+              <></>
+            ) : (
+              <>
+                <Bar>Turn: {gameInfo.turnNumber}</Bar>
+                {/* {stats !== undefined && Object.entries(stats).map(([statName, stat]) => (
+                  <StatBox src={config.stats[statName].img} stat={stat} key={statName} />
+                ))} */}
+                <div className='h-1'></div>
+                {Object.entries(config.actions).map(([action, actionElement]) => {
+                  if (actionElement === null){
+                    return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={() => { console.log('endturn') }} className='mb-4' key={action} />
+                  }
+                  if (typeof actionElement === 'function'){
+                    const ActionElement = actionElement
+                    return <ActionElement onClick={() => { console.log(action, selected) }} key={action} />
+                  }
+                  return <SimpleAction img={actionElement.img} name={actionElement.name} onClick={() => { console.log(action, selected) }} key={action} />
+                })}
+                {!('endturn' in config.actions) && <SimpleAction img={leaveActionIcon} name='End Turn' onClick={() => { console.log('endturn') }} />} {/* TODO: networking */}
+              </>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className='col-span-3 flex gap-4 flex-col items-center pt-44'>
+          <span>Connecting to {ip}...</span>
+          <Button onClick={quitGame}>X Cancel</Button>
+        </div>
+      )}
+      <ChatPanel active={chatActive} messages={messages} sendMessage={sendMessage} className='col-span-2 row-start-2 h-64' />
     </div>
   )
 }

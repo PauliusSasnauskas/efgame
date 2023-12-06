@@ -21,7 +21,7 @@ function checkTileBorders(tiles: Tile[], row: number, col: number, size: number)
   return borderTop + borderRight + borderBottom + borderLeft
 }
 
-export function Map ({ tiles, select, selected }: { tiles: Tile[], select: (newx: number, newy: number)=>any, selected: [number, number] }): JSX.Element {
+export function Map ({ tiles = [], select, selected }: { tiles?: Tile[], select: (newx: number, newy: number)=>any, selected: [number, number] }): JSX.Element {
   const size = Math.sqrt(tiles.length)
   
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

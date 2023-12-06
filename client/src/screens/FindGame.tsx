@@ -16,7 +16,7 @@ export function FindGame (): JSX.Element {
 
   return (
     <div className='bg1 w-full p-16 flex flex-col'>
-      <Bar>Find a Game</Bar>
+      <Bar className='mb-8'>Find a Game</Bar>
       <div className='flex flex-col items-center gap-6'>
         <div>
           <div className='bg-[url("./img/menus/slider-base.svg")] h-10.5 w-56 px-3 py-2.5'>
