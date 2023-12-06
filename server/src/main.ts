@@ -1,7 +1,6 @@
 import { DisconnectReason, Server } from 'socket.io';
-
-const io = new Server({ cors: { origin: '*' } });
-io.listen(3001)
+import Game from './Game';
+import { ClientEvents, ServerEvents } from 'common/src/SocketSpec'
 
 const dcReasons: {[k: DisconnectReason | string]: string} = {
   "io server disconnect": "Server (io) removed connection",
@@ -14,17 +13,43 @@ const dcReasons: {[k: DisconnectReason | string]: string} = {
   "parse error": "Server received invalid data",
 }
 
+const port = 3001
+
+const game = new Game();
+
+const io = new Server<ClientEvents, ServerEvents>({ cors: { origin: '*' } });
+io.listen(port)
+console.log(`Started server on port ${port}`)
+
+const socketIdToPlayerId: {[k: string]: number} = {}
+let nextPlayerId = 0
+
 io.on('connection', (socket) => {
+  console.log(`[connect] ${socket.id} ${socket.handshake.address}`);
+  socket.emit("welcome", "Welcome to the server.")
+
   socket.on('disconnect', (reason) => {
     console.log(`[disconnect] ${socket.id} ${dcReasons[reason]}. ${socket.handshake.address}`)
+    const player = game.getPlayer(socketIdToPlayerId[socket.id])
+    io.emit('chat', { text: `${player?.name} disconnected.` })
   })
 
-  console.log(`[connect] ${socket.id} ${socket.handshake.address}`);
-  socket.emitWithAck("welcome", "welcome indeed")
+  socket.on('welcome', ({ name, color }) => {
+    if (socket.id in socketIdToPlayerId) {
+      console.log('Socket ID taken?')
+      return
+    }
+    const playerId = nextPlayerId
+    nextPlayerId += 1
+
+    socketIdToPlayerId[socket.id] = playerId
+    game.addPlayer(playerId, name, color)
+    io.emit('chat', { text: `${name} connected.` })
+  })
 
   socket.on('chat', (message) => {
     console.log(`<${socket.handshake.address}> ${message}`)
-    io.emit('chat', { from: socket.id, text: message })
+    const player = game.getPlayer(socketIdToPlayerId[socket.id])
+    io.emit('chat', { from: player?.name ?? 'unknown', fromColor: player?.color, text: message })
   })
-
 });

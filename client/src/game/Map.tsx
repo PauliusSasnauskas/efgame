@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react"
-import { Tile } from "./Tile"
+import { Tile } from "common/src/Tile"
 import MapTile from "./MapTile"
 
 

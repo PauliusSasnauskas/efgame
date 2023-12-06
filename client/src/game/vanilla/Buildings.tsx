@@ -1,5 +1,5 @@
 import { ReactNode } from "react"
-import { Entity, Resource } from "../Tile"
+import { Entity, Resource } from "common/src/Tile"
 import fire1 from '../../img/vanilla/entities/fire1a.svg'
 import fire2 from '../../img/vanilla/entities/fire2a.svg'
 import fire3 from '../../img/vanilla/entities/fire3a.svg'

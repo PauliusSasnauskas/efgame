@@ -1,12 +1,13 @@
-import { ReactNode } from "react"
 import { Entity, Resource } from "common/src/Tile"
+
+// TODO: fix all this
 
 export default interface ConfigSpec {
   name: string,
   version: string
   actions: {[k: string]: Function | null | ConfigSimpleAction }
-  entities: {[k: string]: EntityTile | ConfigStaticEntity}
-  resources: {[k: string]: ResourceTile | ConfigStaticEntity }
+  entities: {[k: string]: ConfigStaticEntity}
+  resources: {[k: string]: ConfigStaticEntity }
   stats: {[k: string]: ConfigStat}
 }
 
@@ -23,15 +24,3 @@ export interface ConfigStaticEntity {
 export interface ConfigStat {
   img: string
 }
-
-export type ResourceTile = (
-  selected: boolean,
-  resourceState?: Resource['state']
-) => ReactNode
-
-export type EntityTile = (
-  selected: boolean,
-  health?: number,
-  state?: Entity['state'],
-  resource?: Resource
-) => ReactNode

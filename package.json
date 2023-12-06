@@ -1,0 +1,5 @@
+{
+  "name": "efgame",
+  "private": true,
+  "workspaces": ["common"]
+}

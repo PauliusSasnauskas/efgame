@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Player } from '../game/Player'
+import { Player } from 'common/src/Player'
 import eliminated from '../img/menus/player/eliminated.svg'
 import turn from '../img/menus/player/turn.svg'
 import selectedImg from '../img/menus/player/selected.svg'

@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { MenuContext, GameScreen } from '../App'
 import { Button } from '../menu/Button'
 import banner from '../img/menus/banner.svg'
@@ -18,6 +18,11 @@ export function Title (): JSX.Element {
   const changeScreen = (screen: GameScreen) => () => {
     gameContext.setGameScreen(screen)
   }
+
+  useEffect(() => {
+    gameContext.setConnectError('')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   bgmAudio.volume = gameContext.settings.musicVolume / 100
 

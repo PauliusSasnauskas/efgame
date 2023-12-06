@@ -13,7 +13,7 @@ export default function Slider({ value, setValue, muted = false }: { value: numb
     audio.volume = muted ? 0 : gameContext.settings.soundVolume / 100
     audio.muted = muted
     setSlideAudio(audio)
-  }, [])
+  }, [gameContext.settings.soundVolume, muted])
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(Number.parseInt(e.target.value))

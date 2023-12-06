@@ -1,5 +1,5 @@
 import gameConfig from '../Config'
-import { Tile } from './Tile'
+import { Tile } from 'common/src/Tile'
 import { ConfigStaticEntity, EntityTile, ResourceTile } from '../ConfigSpec'
 import StaticEntity from './StaticEntity'
 import clsx from 'clsx'

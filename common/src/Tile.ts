@@ -15,10 +15,10 @@ export interface Owner {
 export interface Entity {
   readonly id: string
   health?: number // can have a numeric health value
-  state?: { [k: string]: string|number } // can have a key-value state
+  state?: { [k: string]: string | number } // can have a key-value state
 }
 
 export interface Resource {
   readonly id: string
-  state?: { [k: string]: string|number } // can have a key-value state
+  state?: { [k: string]: string | number } // can have a key-value state
 }

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { MenuContext, GameScreen } from '../App'
 import { Button } from '../menu/Button'
 import { Bar } from '../menu/Bar'

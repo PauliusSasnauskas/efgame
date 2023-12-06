@@ -1,9 +1,11 @@
 import clsx from "clsx"
 import { KeyboardEvent, useEffect, useRef, useState } from "react"
 import { Box } from "./Box"
+import { Message } from "common/src/SocketSpec";
 
 export function ChatPanel ({ active, className, messages, sendMessage }: { active: boolean, className?: string, messages: Message[], sendMessage: (message: string) => void }): JSX.Element {
   const [chatMessage, setChatMessage] = useState('')
+  const messageRef = useRef<HTMLElement>();
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.code !== 'Enter') return
@@ -17,12 +19,16 @@ export function ChatPanel ({ active, className, messages, sendMessage }: { activ
     if (!active) return
     input.current?.focus()
   }, [active])
+
+  useEffect(() => {
+    messageRef?.current?.scrollIntoView({ block: "end", inline: "nearest" })
+  }, [messages])
   
   return (
-    <Box className={clsx('flex flex-col overflow-y-auto', className)}>
+    <Box className={clsx('flex flex-col overflow-y-auto', className)} reff={messageRef}>
       {messages.map((message, idx) => (
         <p key={idx}>
-          {message.from !== undefined && <>{`<`}<span style={{ color: message.fromColor }}>{message.from}</span>{`> `}</>}
+          {message.from !== undefined && <>{`<`}<span style={{ color: `rgb(${message.fromColor})` }}>{message.from}</span>{`> `}</>}
           {message.text}
         </p>
       ))}
@@ -42,10 +48,4 @@ export function ChatPanel ({ active, className, messages, sendMessage }: { activ
       )}
     </Box>
   )
-}
-
-export interface Message {
-  text: string
-  from?: string
-  fromColor?: string
 }

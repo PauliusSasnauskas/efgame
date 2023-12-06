@@ -1,4 +1,4 @@
-import { Stat } from './Player'
+import { Stat } from 'common/src/Player'
 
 const StatBox = ({src, stat}: {src: string, stat: Stat}): JSX.Element => {
   return (
