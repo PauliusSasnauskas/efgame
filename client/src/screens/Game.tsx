@@ -52,28 +52,36 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
         case 'Escape':
           if (chatActive) {
             setChatActive(false)
-            break
+            return
           }
           setMenuVisible((oldval) => !oldval)
-          break
+          return
         case 'Enter':
           setChatActive((oldval) => !oldval)
-          break
+          return
         case 'ArrowUp':
           trySelect(selected[0], selected[1]-1)
-          break
+          return
         case 'ArrowRight':
           trySelect(selected[0]+1, selected[1])
-          break
+          return
         case 'ArrowDown':
           trySelect(selected[0], selected[1]+1)
-          break
+          return
         case 'ArrowLeft':
           trySelect(selected[0]-1, selected[1])
-          break
-        default:
-          // console.log(e.key)
+          return
+        case 'Space':
+          endTurn()
+          return
       }
+      Object.entries(config.actions).forEach(([action, actionSpec]) => {
+        if (typeof actionSpec?.key === 'string' && e.code === actionSpec.key) {
+          invokeAction(action, selected)
+          return
+        }
+        if (typeof actionSpec?.key === 'object' && actionSpec.key.includes(e.code)) invokeAction(action, selected)
+      })
     }
     document.addEventListener('keydown', handleKey)
     return () => document.removeEventListener('keydown', handleKey)
@@ -120,7 +128,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     s.on('chat', (message) => setMessages((m) => [...m, message]))
     s.on('gameInfo', setGameInfo)
     s.on('mapInfo', setMap)
-    s.on('statsInfo', setStats)
+    s.on('statsInfo', (stats) => setStats(stats))
 
     return () => {
       s.io.removeListener('error', handleError)
@@ -135,7 +143,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const sendMessage = (message: string) => {
+  const sendChat = (message: string) => {
     socket?.emit('chat', message)
   }
 
@@ -146,6 +154,18 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
 
   const startGame = () => {
     socket?.emit('startGame')
+  }
+
+  const endTurn = () => {
+    socket?.emit('endTurn')
+  }
+
+  const invokeAction = (action: string, tile: [number, number]) => {
+    socket?.emit('action', { action, x: tile[0], y: tile[1] })
+  }
+
+  function EndTurnButton(): JSX.Element {
+    return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={endTurn} />
   }
 
   return (
@@ -222,15 +242,15 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                 <div className='h-1'></div>
                 {Object.entries(config.actions).map(([action, actionElement]) => {
                   if (actionElement === null){
-                    return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={() => { console.log('endturn') }} className='mb-4' key={action} />
+                    return <EndTurnButton key={action} />
                   }
-                  if (typeof actionElement === 'function'){
-                    const ActionElement = actionElement
-                    return <ActionElement onClick={() => { console.log(action, selected) }} key={action} />
+                  if (typeof actionElement.impl === 'function'){
+                    const ActionElement = actionElement.impl
+                    return <ActionElement onClick={() => { invokeAction(action, selected) }} key={action} />
                   }
-                  return <SimpleAction img={actionElement.img} name={actionElement.name} onClick={() => { console.log(action, selected) }} key={action} />
+                  return <SimpleAction img={actionElement.impl.img} name={actionElement.impl.name} onClick={() => { invokeAction(action, selected) }} key={action} />
                 })}
-                {!('endturn' in config.actions) && <SimpleAction img={leaveActionIcon} name='End Turn' onClick={() => { console.log('endturn') }} />} {/* TODO: networking */}
+                {!('endturn' in config.actions) && <EndTurnButton />} {/* TODO: networking */}
               </>
             )}
           </div>
@@ -241,7 +261,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           <Button onClick={quitGame}>X Cancel</Button>
         </div>
       )}
-      <ChatPanel active={chatActive} messages={messages} sendMessage={sendMessage} className='col-span-2 row-start-2 h-64' />
+      <ChatPanel active={chatActive} messages={messages} sendMessage={sendChat} className='col-span-2 row-start-2 h-64' />
     </div>
   )
 }

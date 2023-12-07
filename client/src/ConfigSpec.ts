@@ -4,7 +4,7 @@ import { Entity, Resource } from "common/src/Tile"
 export default interface ConfigSpec {
   name: string,
   version: string
-  actions: {[k: string]: Function | null | ConfigSimpleAction }
+  actions: {[k: string]: null | { key: string | string[], impl: Function | ConfigSimpleAction } }
   entities: {[k: string]: EntityTile | ConfigStaticEntity}
   resources: {[k: string]: ResourceTile | ConfigStaticEntity }
   stats: {[k: string]: ConfigStat}

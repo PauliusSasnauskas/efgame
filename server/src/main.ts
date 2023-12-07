@@ -76,6 +76,13 @@ io.on('connection', (socket) => {
   socket.on('startGame', () => {
     game.start()
     sendGameInfo(io, game)
-    
+  })
+
+  socket.on('endTurn', () => {
+    game.playerEndTurn(socketIdToPlayerName[socket.id])
+  })
+
+  socket.on('action', ({ action, x, y }) => {
+    game.playerAction(socketIdToPlayerName[socket.id], action, x, y)
   })
 });

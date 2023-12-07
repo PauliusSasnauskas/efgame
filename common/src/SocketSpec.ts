@@ -14,6 +14,8 @@ export interface ClientEvents {
   chat: (message: string) => void
   chatPrivate: (message: string, to: number) => void
   startGame: () => void
+  endTurn: () => void
+  action: (data: { action: string, x: number, y: number }) => void
 }
 
 export interface Message {
