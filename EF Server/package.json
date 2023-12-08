@@ -1,7 +1,0 @@
-{
-  "name": "efgame-server",
-  "version": "0.1.0",
-  "author": "Paulius Sasnauskas",
-  "license": "MIT",
-  "main": "main.js"
-}
