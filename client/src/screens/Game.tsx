@@ -13,7 +13,7 @@ import { Socket, io } from 'socket.io-client'
 import { ClientEvents, GameInfoLobby, GameInfoPlaying, Message, ServerEvents, ServerGreeting } from 'common/src/SocketSpec'
 import { GameState } from '../game/GameState'
 import { Tile } from 'common/src/Tile'
-import { Stat } from 'common/src/Player'
+import { Player, Stat } from 'common/src/Player'
 import StatBox from '../game/StatBox'
 
 const reconnectionAttempts = 5
@@ -35,9 +35,10 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   const [messages, setMessages] = useState<Message[]>([])
   const [selected, select] = useState<[number, number]>([0, 0])
 
+  const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>()
   const [serverInfo, setServerInfo] = useState<ServerGreeting | undefined>()
   const [gameInfo, setGameInfo] = useState<GameInfoLobby | GameInfoPlaying | undefined>()
-  const [map, setMap] = useState<Tile[] | undefined>()
+  const [map, setMap] = useState<Tile[][] | undefined>()
   const [stats, setStats] = useState<{[k: string]: Stat} | undefined>()
 
   const trySelect = (newx: number, newy: number) => {
@@ -93,7 +94,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     setMessages((m) => [...m, { text: `Connecting to ${ip}...`, private: true }])
 
     const handleError = (err: Error) => gameContext.setConnectError(`${err.message}. Caused by: ${err.cause ?? 'unknown'}`)
-    const handleReconnectAttempt = (attempt: number) => setMessages((m) => [...m, { text: `Reconnecting... (attempt ${attempt+1} out of ${reconnectionAttempts})...`, private: true }])
+    const handleReconnectAttempt = (attempt: number) => setMessages((m) => [...m, { text: `Reconnecting... (attempt ${attempt} out of ${reconnectionAttempts})...`, private: true }])
     const handleReconnectFailed = () => {
       gameContext.setConnectError('Connection failed.')
       gameContext.setGameScreen(GameScreen.FINDGAME)
@@ -111,7 +112,9 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     const onConnect = () => { 
       setMessages((m) => [...m, { text: `Connected to ${ip}.`, private: true }])
       setSocket(s)
-      s.emit("welcome", { name: gameContext.settings.name, color: gameContext.settings.color })
+      const player = { name: gameContext.settings.name, color: gameContext.settings.color } as Player
+      setCurrentPlayer(player)
+      s.emit("welcome", player)
     }
 
     // s.on('connect_error', handleError)
@@ -164,8 +167,14 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     socket?.emit('action', { action, x: tile[0], y: tile[1] })
   }
 
-  function EndTurnButton(): JSX.Element {
-    return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={endTurn} />
+  function EndTurnButton({ disabled }: { disabled?: boolean }): JSX.Element {
+    return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={endTurn} disabled={disabled} />
+  }
+
+  function getSelectedTile(): Tile {
+    const tile = map?.[selected[1]]?.[selected[0]]
+    if (tile === undefined) throw new Error('Tile undefined')
+    return tile
   }
 
   return (
@@ -184,7 +193,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           <div>
             <Bar>Players</Bar>
             {gameInfo.players.map((player) => (
-              <PlayerBox player={player} myTurn={gameInfo.gameState === GameState.PLAYING ? player.name === gameInfo.turn : false} key={player.name} selected={map !== undefined ? map[selected[1]*gameInfo.mapSize + selected[0]].owner?.name === player.name : false} />
+              <PlayerBox player={player} myTurn={gameInfo.gameState === GameState.PLAYING ? player.name === gameInfo.turn : false} key={player.name} selected={map !== undefined ? map[selected[1]][selected[0]].owner?.name === player.name : false} />
             ))}
           </div>
           <div className='flex flex-col'>
@@ -231,26 +240,28 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
             )}
           </div>
           <div className='row-span-2'>
-            {gameInfo.gameState === GameState.LOBBY ? (
-              <></>
-            ) : (
+            {gameInfo.gameState === GameState.LOBBY && (
+              <>
+                {/* TODO: join team buttons */}
+              </>
+            )}
+            {gameInfo.gameState === GameState.PLAYING && map !== undefined && (
               <>
                 <Bar>Turn: {gameInfo.turnNumber}</Bar>
                 {stats !== undefined && Object.entries(stats).map(([statName, stat]) => (
                   <StatBox src={config.stats[statName].img} stat={stat} key={statName} />
                 ))}
-                <div className='h-1'></div>
-                {Object.entries(config.actions).map(([action, actionElement]) => {
-                  if (actionElement === null){
-                    return <EndTurnButton key={action} />
+                {Object.entries(config.actions).map(([actionName, action]) => {
+                  if (action === null){
+                    return <EndTurnButton key={actionName} disabled={gameInfo.turn !== currentPlayer?.name} />
                   }
-                  if (typeof actionElement.impl === 'function'){
-                    const ActionElement = actionElement.impl
-                    return <ActionElement onClick={() => { invokeAction(action, selected) }} key={action} />
+                  if (typeof action.button === 'function'){
+                    const ActionElement = action.button
+                    return <ActionElement onClick={() => { invokeAction(actionName, selected) }} disabled={gameInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getSelectedTile(), currentPlayer) ?? false)} key={actionName} />
                   }
-                  return <SimpleAction img={actionElement.impl.img} name={actionElement.impl.name} onClick={() => { invokeAction(action, selected) }} key={action} />
+                  return <SimpleAction img={action.button.img} name={action.button.name} onClick={() => { invokeAction(actionName, selected) }} disabled={gameInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getSelectedTile(), currentPlayer) ?? false)} key={actionName} />
                 })}
-                {!('endturn' in config.actions) && <EndTurnButton />} {/* TODO: networking */}
+                {!('endturn' in config.actions) && <EndTurnButton disabled={gameInfo.turn !== currentPlayer?.name} />}
               </>
             )}
           </div>

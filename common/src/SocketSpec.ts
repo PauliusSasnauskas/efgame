@@ -5,7 +5,7 @@ export interface ServerEvents {
   welcome: (message: ServerGreeting) => void
   chat: (message: Message) => void
   gameInfo: (info: GameInfoLobby | GameInfoPlaying) => void
-  mapInfo: (map: Tile[]) => void
+  mapInfo: (map: Tile[][]) => void
   statsInfo: (stats: {[k: string]: Stat}) => void
 }
 

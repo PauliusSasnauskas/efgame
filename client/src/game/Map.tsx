@@ -11,23 +11,24 @@ function MapError ({ children }: { children?: ReactNode }): JSX.Element {
   return <div className='w-full h-full flexc text-red-500'>{children}</div>
 }
 
-function checkTileBorders(tiles: Tile[], row: number, col: number, size: number): string | undefined {
-  const tileOwner = tiles[row*size + col].owner?.name
+function checkTileBorders(tiles: Tile[][], row: number, col: number, size: number): string | undefined {
+  const tileOwner = tiles[row][col].owner?.name
   if (tileOwner === undefined) return undefined
-  const borderTop = row === 0 || tiles[(row-1)*size + col].owner?.name !== tileOwner ? '1' : '0'
-  const borderRight = col === size-1 || tiles[row*size + col + 1].owner?.name !== tileOwner ? '1' : '0'
-  const borderBottom = row === size-1 || tiles[(row+1)*size + col].owner?.name !== tileOwner ? '1' : '0'
-  const borderLeft = col === 0 || tiles[row*size + col - 1].owner?.name !== tileOwner ? '1' : '0'
+  const borderTop = row === 0 || tiles[(row-1)][col].owner?.name !== tileOwner ? '1' : '0'
+  const borderRight = col === size-1 || tiles[row][col + 1].owner?.name !== tileOwner ? '1' : '0'
+  const borderBottom = row === size-1 || tiles[(row+1)][col].owner?.name !== tileOwner ? '1' : '0'
+  const borderLeft = col === 0 || tiles[row][col - 1].owner?.name !== tileOwner ? '1' : '0'
   return borderTop + borderRight + borderBottom + borderLeft
 }
 
-export function Map ({ tiles = [], select, selected }: { tiles?: Tile[], select: (newx: number, newy: number)=>any, selected: [number, number] }): JSX.Element {
-  const size = Math.sqrt(tiles.length)
+export function Map ({ tiles = [], select, selected }: { tiles?: Tile[][], select: (newx: number, newy: number)=>any, selected: [number, number] }): JSX.Element {
+  const size = tiles.length
   const initialOffset = [Math.floor(size / 2) - 10, Math.floor(size / 2) - 10]
   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [offset, setOffset] = useState<[number, number]>([0, 0])
 
-  if (!Number.isInteger(size)) {
+  if (size === 0) {
     return <MapError>Error retrieving tile data.</MapError>
   }
 
@@ -46,7 +47,7 @@ export function Map ({ tiles = [], select, selected }: { tiles?: Tile[], select:
         const col = colOffsetI + colOffset + index % 20
 
         if (row < 0 || row >= size || col < 0 || col >= size) return <div key={index} />
-        const tile = tiles[row*size + col]
+        const tile = tiles[row][col]
         const borders = checkTileBorders(tiles, row, col, size)
         return <MapTile tile={tile} key={index} select={select} selected={col === selected[0] && row === selected[1]} borders={borders} />
       })}

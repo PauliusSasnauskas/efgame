@@ -1,9 +1,5 @@
 import { BarracksBuilding, CapitolBuilding, MineBuilding, StoneWall, TowerBuilding, WoodWall } from "./game/vanilla/Buildings"
-import { AttackAction, BuildBarracksAction, BuildCapitolAction, BuildMineAction, BuildStoneWallAction, BuildTowerAction, BuildWoodWallAction, RepairAction } from "./game/vanilla/Actions"
-
-import demolishActionIcon from './img/vanilla/actions/demolish.svg'
-import leaveActionIcon from './img/vanilla/actions/leave.svg'
-import transferActionIcon from './img/vanilla/actions/transfer.svg'
+import { AttackAction, BuildBarracksAction, BuildCapitolAction, BuildMineAction, BuildStoneWallAction, BuildTowerAction, BuildWoodWallAction, DemolishAction, LeaveAction, RepairAction, TransferAction } from "./game/vanilla/Actions"
 
 import tree1EntityIcon from './img/vanilla/entities/tree1.svg'
 import tree2EntityIcon from './img/vanilla/entities/tree2.svg'
@@ -25,18 +21,18 @@ const config: ConfigSpec = {
   name: 'Vanilla',
   version: '1',
   actions: {
-    'v:attack': { key: 'KeyA', impl: AttackAction },
+    'v:attack': AttackAction,
     'endturn': null,
-    'v:buildcapitol': { key: ['Numpad1', 'Digit1'], impl: BuildCapitolAction },
-    'v:buildmine': { key: ['Numpad2', 'Digit2'], impl: BuildMineAction },
-    'v:buildbarracks': { key: ['Numpad3', 'Digit3'], impl: BuildBarracksAction },
-    'v:buildtower': { key: ['Numpad4', 'Digit4'], impl: BuildTowerAction },
-    'v:buildwoodwall': { key: ['Numpad5', 'Digit5'], impl: BuildWoodWallAction },
-    'v:buildstonewall': { key: ['Numpad6', 'Digit6'], impl: BuildStoneWallAction },
-    'v:transfer': { key: 'KeyT', impl: { img: transferActionIcon, name: 'Transfer 50 Gold', req: { 'v:action': 1, 'v:gold': 50 } } },
-    'v:repair': { key: 'KeyR', impl: RepairAction },
-    'v:leave': { key: 'KeyL', impl: { img: leaveActionIcon, name: "Leave", req: { 'v:action': 1 } } },
-    'v:demolish': { key: 'KeyD', impl: { img: demolishActionIcon, name: 'Demolish', req: { 'v:action': 1, 'v:army': 1 } } },
+    'v:buildcapitol': BuildCapitolAction,
+    'v:buildmine': BuildMineAction,
+    'v:buildbarracks': BuildBarracksAction,
+    'v:buildtower': BuildTowerAction,
+    'v:buildwoodwall': BuildWoodWallAction,
+    'v:buildstonewall': BuildStoneWallAction,
+    'v:transfer': TransferAction,
+    'v:repair': RepairAction,
+    'v:leave': LeaveAction,
+    'v:demolish': DemolishAction,
   },
   entities: {
     'v:tree1': { img: tree1EntityIcon },

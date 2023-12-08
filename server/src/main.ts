@@ -84,5 +84,6 @@ io.on('connection', (socket) => {
 
   socket.on('action', ({ action, x, y }) => {
     game.playerAction(socketIdToPlayerName[socket.id], action, x, y)
+    sendGameInfo(io, game)
   })
 });

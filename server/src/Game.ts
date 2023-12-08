@@ -3,20 +3,35 @@ import { GameState } from "common/src/SocketSpec"
 import { Tile } from "common/src/Tile"
 import config from "./Config"
 import { groupBy } from "common/src/util/array"
+import { ConfigAction } from "./ConfigSpec"
+
+function log(...params: any[]) {
+  console.log('[game]', ...params)
+}
 
 export default class Game {
   state: GameState = GameState.LOBBY
   players: {[k: string]: Player} = {}
   mapSize: number = 20
   mapName: string = 'RMG'
-  map: Tile[] = []
+  map: Tile[][] = []
   teams: string[] = []
 
   turnQueue: string[] = []
   turnNumber: number = 1
   turn: string = ''
 
+  private isValidTile (x: number, y: number): boolean {
+    if (x < 0 || y < 0 || x >= this.mapSize || y >= this.mapSize) return false
+    return true
+  }
+
+  private getTile (x: number, y: number): Tile {
+    return this.map[y][x]
+  }
+
   addPlayer (name: string, color: string) {
+    if (name in this.players) return
     this.players[name] = new Player(
       name,
       color,
@@ -31,8 +46,10 @@ export default class Game {
   removePlayer (name: string): Player {
     const player = this.players[name]
     if (this.state === GameState.PLAYING){
-      player.eliminated = true
-      // TODO: Remove from turn queue
+      if (player.team !== 'spectator') {
+        player.eliminated = true
+        this.turnQueue.splice(this.turnQueue.indexOf(player.name), 1)
+      }
     } else {
       delete this.players[name]
     }
@@ -43,7 +60,7 @@ export default class Game {
     return Object.values(this.players).map((player) => player.serialize())
   }
 
-  getMapForPlayer (playerName: string): Tile[] {
+  getMapForPlayer (playerName: string): Tile[][] {
     // TODO: calculate user seeable map
     // TODO: if spectator show all
     return this.map
@@ -92,16 +109,16 @@ export default class Game {
 
   start () {
     if (this.state !== GameState.LOBBY) return
-    console.log('[game] (1/3) Generating map...')
+    log('(1/3) Generating map...')
     this.generateMap()
 
-    console.log('[game] (2/3) Setting stats...')
+    log('(2/3) Setting stats...')
     this.setStats()
     
-    console.log('[game] (3/3) Setting up turn queue...')
+    log('(3/3) Setting up turn queue...')
     this.setTurnQueue()
 
-    console.log('[game] Started.')
+    log('Started.')
     this.state = GameState.PLAYING
   }
 
@@ -111,9 +128,63 @@ export default class Game {
     // TODO: end turn
   }
 
+  private doesMeetReq (action: ConfigAction, tile: Tile, player: Player, players: Player[]) {
+    if (action.statsCost === undefined) return true
+    
+    let req = action.statsCost
+    if (typeof req === 'function') {
+      req = req({ tile, player, map: this.map, mapSize: this.mapSize, players })
+    }
+
+    for (const [statName, reqStat] of Object.entries(action.statsCost)) {
+      const playerStat = (player.stats!)[statName]
+      if (playerStat === undefined) return false
+      if (typeof playerStat.val === 'string' && playerStat.val !== reqStat) {
+        return false // Question: is string equality a good rule?
+      } else if (typeof playerStat.val === 'number' && playerStat.val < reqStat){
+        return false
+      }
+    }
+
+    return true 
+  }
+
+  private subtractReq (action: ConfigAction, tile: Tile, player: Player, players: Player[]) {
+    if (action.statsCost === undefined) return
+
+    let req = action.statsCost
+    if (typeof req === 'function') {
+      req = req({ tile, player, map: this.map, mapSize: this.mapSize, players })
+    }
+
+    for (const [statName, reqStat] of Object.entries(action.statsCost)) {
+      const playerStat = (player.stats!)[statName]
+      if (typeof playerStat.val === 'number'){
+        playerStat.val -= reqStat
+      }
+    }
+  }
+
   playerAction (playerName: string, actionName: string, x: number, y: number) {
     if (this.state !== GameState.PLAYING) return
+    if (this.turn !== playerName) return
 
-    // TODO: end turn
+    const action = config.actions[actionName]
+
+    if (action === undefined) return
+    if (!this.isValidTile(x, y)) return
+
+    const player = this.players[playerName]
+    if (player.stats === undefined) return
+    
+    const players = Object.values(this.players)
+    const tile = this.getTile(x, y)
+
+    const meetsReq = this.doesMeetReq(action, tile, player, players)
+    
+    if (!meetsReq) return
+    if (!action.canInvoke({ tile, player, map: this.map, mapSize: this.mapSize, players })) return
+    action.invoke({ tile, player, map: this.map, mapSize: this.mapSize, players })
+    this.subtractReq(action, tile, player, players)
   }
 }

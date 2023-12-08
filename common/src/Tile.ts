@@ -10,6 +10,7 @@ export interface Tile {
 export interface Owner {
   readonly isPlayer: boolean // TODO: do I need this?
   readonly name: string
+  readonly team?: string
 }
 
 export interface Entity {
