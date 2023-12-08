@@ -3,5 +3,11 @@
   "version": "0.1.0",
   "author": "Paulius Sasnauskas",
   "license": "MIT",
-  "main": "main.js"
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "socket.io": "^2.3.0"
+  }
 }

@@ -3,3 +3,5 @@ build
 dist
 releases
 .vscode
+
+user.json
