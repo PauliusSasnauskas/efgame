@@ -1,19 +1,31 @@
 # EFGAME
 This is a turn-based multiplater strategy game written in javascript.
 Wrote this in the summer of 2018.
-Might get updated soon.
+Attempted to update in 2020-2021.
+Succeeded fully rewriting in Dec 2023.
 Consists of: Client and Server
 
-Entire functionallity cloned and idea copied from http://www.enemyflag.net/ (which is a lovely game, message me if you'd like to play a match).
-Functionallity added: customizable play area (not locked to 20x20)
+Idea taken from http://www.enemyflag.net/ (which is a lovely game, message me if you'd like to play a match).
 
-### Client
-Current state: compiles to an Electron installer, which can be installed on a Windows machine.
-Produces a runnable executable
+## Client
+Built with react, runs in your browser.
+```bash
+cd client
+yarn install
+yarn start
+```
 
-### Server
-Current state: runnable javascript with node.js.
+## Server
+Built with `ts-node`, runs on a computer.
+```bash
+cd server
+yarn install
+yarn start
+```
 
-## Future plans
-* Migrate client to web-only (platform independent)
-* Maybe optimize server to run on the cloud (like GCP or Firebase?)
+## Gallery
+
+![](./preview/game.png)
+![](./preview/lobby.png)
+![](./preview/title.png)
+![](./preview/settings.png)
