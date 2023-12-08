@@ -3,7 +3,7 @@ import generateMapRMG from "./vanilla/MapRMG"
 import { StatAction, StatArmy, StatGold, StatTerritory, StatXp } from "./vanilla/Stats"
 import { AttackAction, BuildBarracksAction, BuildCapitolAction, BuildMineAction, BuildStoneWallAction, BuildTowerAction, BuildWoodWallAction, DemolishAction, LeaveAction, RepairAction, TransferAction } from "./vanilla/Actions"
 import { Barracks, Capitol, Mine, StoneWall, Tower, WoodWall } from "./vanilla/Building"
-import { getMapForPlayer } from "./vanilla/GameLogic"
+import { checkWinner, getMapForPlayer, processEndTurnForPlayer } from "./vanilla/GameLogic"
 
 const config: ConfigSpec = {
   name: 'Vanilla',
@@ -48,7 +48,9 @@ const config: ConfigSpec = {
   mapNames: {
     "RMG": generateMapRMG
   },
-  getMapForPlayer: getMapForPlayer
+  getMapForPlayer: getMapForPlayer,
+  processEndTurnForPlayer: processEndTurnForPlayer,
+  checkWinner: checkWinner
 }
 
 export default config

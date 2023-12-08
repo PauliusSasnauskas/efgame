@@ -1,32 +1,79 @@
-import { Entity } from "common/src/Tile";
-import { StatReq } from "../ConfigSpec";
+import { Player } from "common/src/Player"
+import { ServerEntity, ServerTile } from "../ConfigSpec"
+import { getRandomInt } from "../util"
 
-export class Capitol implements Entity {
+function isTileOwnerEndingTurn (tile: ServerTile, lastTurnPlayer: Player): boolean {
+  return (tile.owner?.name === lastTurnPlayer.name)
+}
+
+export class Capitol implements ServerEntity {
   id = 'v:capitol'
   health = 3
+  readonly turnBuilt: number
+
+  constructor (turn: number) {
+    this.turnBuilt = turn
+  }
+
+  onTurnChange (lastTurnPlayer: Player, tile: ServerTile) {
+    if (!(isTileOwnerEndingTurn(tile, lastTurnPlayer))) return
+    const playerStats = lastTurnPlayer.stats!
+    ;(playerStats['v:action'].val as number) += 1
+  }
 }
 
-export class Mine implements Entity {
+export class Mine implements ServerEntity {
   id = 'v:mine'
   health = 2
+  readonly turnBuilt: number
+
+  constructor (turn: number) {
+    this.turnBuilt = turn
+  }
+
+  onTurnChange (lastTurnPlayer: Player, tile: ServerTile) {
+    if (!(isTileOwnerEndingTurn(tile, lastTurnPlayer))) return
+    const playerStats = lastTurnPlayer.stats!
+    ;(playerStats['v:gold'].val as number) += (tile.resource?.id === 'v:gold' ? 16 : 4) + getRandomInt(5)
+  }
 }
 
-export class Barracks implements Entity {
+export class Barracks implements ServerEntity {
   id = 'v:barracks'
   health = 2
+  readonly turnBuilt: number
+
+  constructor (turn: number) {
+    this.turnBuilt = turn
+  }
 }
 
-export class Tower implements Entity {
+export class Tower implements ServerEntity {
   id = 'v:tower'
   health = 2
+  readonly turnBuilt: number
+
+  constructor (turn: number) {
+    this.turnBuilt = turn
+  }
 }
 
-export class WoodWall implements Entity {
+export class WoodWall implements ServerEntity {
   id = 'v:woodwall'
   health = 4
+  readonly turnBuilt: number
+
+  constructor (turn: number) {
+    this.turnBuilt = turn
+  }
 }
 
-export class StoneWall implements Entity {
+export class StoneWall implements ServerEntity {
   id = 'v:stonewall'
   health = 7
+  readonly turnBuilt: number
+
+  constructor (turn: number) {
+    this.turnBuilt = turn
+  }
 }

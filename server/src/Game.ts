@@ -2,8 +2,8 @@ import { Player, PlayerDTO, Stat } from "common/src/Player"
 import { GameState } from "common/src/SocketSpec"
 import config from "./Config"
 import { groupBy } from "common/src/util/array"
-import { ServerAction, ServerTile } from "./ConfigSpec"
-import { Tile } from "common/src/Tile"
+import { ServerAction, ServerEntity, ServerTile } from "./ConfigSpec"
+import { Owner, Tile } from "common/src/Tile"
 
 function log(...params: any[]) {
   console.log('[game]', ...params)
@@ -21,6 +21,8 @@ export default class Game {
   turnNumber: number = 1
   turn: string = ''
 
+  private addMessageCallbacks: Array<(message: string) => void> = []
+
   private isValidTile (x: number, y: number): boolean {
     if (x < 0 || y < 0 || x >= this.mapSize || y >= this.mapSize) return false
     return true
@@ -28,6 +30,14 @@ export default class Game {
 
   private getTile (x: number, y: number): ServerTile {
     return this.map[y][x]
+  }
+
+  addMessageListener(callback: (message: string) => void) {
+    this.addMessageCallbacks.push(callback)
+  }
+
+  private sendMessage(message: string) {
+    this.addMessageCallbacks.forEach((callback) => callback(message))
   }
 
   addPlayer (name: string, color: string) {
@@ -63,7 +73,7 @@ export default class Game {
   getMapForPlayer (playerName: string): Tile[] {
     const player = this.players[playerName]
 
-    return config.getMapForPlayer(this.map, this.mapSize, player)
+    return config.getMapForPlayer(this.map, this.mapSize, player, this.state)
   }
 
   getStatsForPlayer (playerName: string): {[k: string]: Stat} {
@@ -130,8 +140,30 @@ export default class Game {
     let nextTurnQueueIndex = this.turnQueue.indexOf(playerName) + 1
     if (nextTurnQueueIndex >= this.turnQueue.length) nextTurnQueueIndex %= this.turnQueue.length
 
-    // TODO: do turn events
-    // TODO: check win condition
+    const player = this.players[playerName]
+    const players = Object.values(this.players)
+
+    const turnChangeEvents: Array<[number, ServerTile, NonNullable<ServerEntity['onTurnChange']>]> = []
+    for (let i = 0; i < this.mapSize; i++) {
+      for (let j = 0; j < this.mapSize; j++) {
+        const tile = this.map[i][j]
+        if (tile.entity !== undefined && tile.entity.onTurnChange !== undefined){
+          turnChangeEvents.push([tile.entity.turnBuilt, tile, tile.entity.onTurnChange])
+        }
+      }
+    }
+    turnChangeEvents.sort((a, b) => a[0] - b[0])
+    turnChangeEvents.forEach(([_, tile, turnChangeEvent]) => {
+      turnChangeEvent(player, tile, this.map, this.mapSize, players)
+    })
+
+    config.processEndTurnForPlayer(player, this.map, this.mapSize, players)
+    
+    const winner = config.checkWinner(this.map, this.mapSize, players)
+    if (winner !== undefined) {
+      this.sendMessage(`${winner.name} won the game by eliminating all players!`)
+      this.state = GameState.POSTGAME
+    }
   }
 
   private doesMeetReq (action: ServerAction, tile: ServerTile, player: Player, players: Player[]) {
@@ -139,7 +171,7 @@ export default class Game {
 
     let req = action.statsCost
     if (typeof req === 'function') {
-      req = req({ tile, player, map: this.map, mapSize: this.mapSize, players })
+      req = req({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber })
     }
 
     for (const [statName, reqStat] of Object.entries(action.statsCost)) {
@@ -160,7 +192,7 @@ export default class Game {
 
     let req = action.statsCost
     if (typeof req === 'function') {
-      req = req({ tile, player, map: this.map, mapSize: this.mapSize, players })
+      req = req({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber })
     }
 
     for (const [statName, reqStat] of Object.entries(action.statsCost)) {
@@ -189,8 +221,8 @@ export default class Game {
     const meetsReq = this.doesMeetReq(action, tile, player, players)
 
     if (!meetsReq) return
-    if (!action.canInvoke({ tile, player, map: this.map, mapSize: this.mapSize, players })) return
-    action.invoke({ tile, player, map: this.map, mapSize: this.mapSize, players })
+    if (!action.canInvoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber })) return
+    action.invoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber })
     this.subtractReq(action, tile, player, players)
   }
 }

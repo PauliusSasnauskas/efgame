@@ -1,28 +1,25 @@
 import { Player } from "common/src/Player"
-import { Tile } from "common/src/Tile"
 import config from "../Config"
-
-function getRandomInt(max: number) {
-  max = Math.floor(max)
-  return Math.floor(Math.random() * max) // The maximum is exclusive
-}
+import { getRandomInt } from "../util"
+import { Capitol } from "./Building"
+import { ServerTile } from "../ConfigSpec"
 
 const maxDistTo1stGold = 3
 
-export default function generateMapRMG(size: number, players: Player[]): Tile[][] {
+export default function generateMapRMG(size: number, players: Player[]): ServerTile[][] {
   const decorations = Object.entries(config.entities)
     .filter(([_, val]) => val === null)
     .map(([key, _]) => key)
 
-  const map: Tile[][] = []
+  const map: ServerTile[][] = []
 
   for (let i = 0; i < size; i++){
-    const newRow: Tile[] = []
+    const newRow: ServerTile[] = []
     for (let j = 0; j < size; j++){
-      let newTile: Tile = { x: j, y: i }
+      let newTile: ServerTile = new ServerTile(j, i)
       
       if (Math.random() > 0.88)
-        newTile.entity = { id: decorations[getRandomInt(decorations.length)] }
+        newTile.entity = { id: decorations[getRandomInt(decorations.length)], turnBuilt: 0 }
 
       if (Math.random() > 0.97)
         newTile.resource = { id: 'v:gold' }
@@ -38,7 +35,7 @@ export default function generateMapRMG(size: number, players: Player[]): Tile[][
     let posy = getRandomInt(size)
     while (map[posy][posx].entity !== undefined) [posx, posy] = [getRandomInt(size), getRandomInt(size)]
 
-    map[posy][posx].entity = { id: 'v:capitol', health: 3 }
+    map[posy][posx].entity = new Capitol(0)
     map[posy][posx].owner = { name: player.name, isPlayer: true, team: player.team }
 
     while (map[posy][posx].entity !== undefined) [posx, posy] = [getRandomInt(maxDistTo1stGold), getRandomInt(maxDistTo1stGold)]

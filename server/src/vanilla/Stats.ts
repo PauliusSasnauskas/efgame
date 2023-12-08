@@ -1,23 +1,25 @@
 import { ServerStat } from "../ConfigSpec"
 
 export class StatAction implements ServerStat {
-  val: number = 8
-  max: number = 12
+  val = 8
+  max = 12
+  hiddenMax = 200
 }
 
 export class StatArmy implements ServerStat {
-  val: number = 20
+  val = 20
+  hiddenMax = 200
 }
 
 export class StatGold implements ServerStat {
-  val: number = 350
-  hiddenMax: number = 20000
+  val = 350
+  hiddenMax = 20000
 }
 
 export class StatXp implements ServerStat {
-  val: number = 0
+  val = 0
 }
 
 export class StatTerritory implements ServerStat {
-  val: number = 1
+  val = 1
 }

@@ -26,6 +26,8 @@ const dcReasons: {[k: string]: string} = {
   "transport error": "Error in network transport",
 }
 
+const eliminatedColor = '127,127,127'
+
 export function Game ({ ip }: { ip: string }): JSX.Element {
   const gameContext = useContext(MenuContext)
 
@@ -229,7 +231,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                 </Bar>
                 <style>
                   {'.m-map {'}
-                    {gameInfo.players.map((player) => `--p-${player.name}-bg: rgb(${player.color},0.5); --p-${player.name}: rgb(${player.color},1);`)}
+                    {gameInfo.players.map((player) => `--p-${player.name}-bg: rgb(${player.eliminated ? eliminatedColor : player.color},0.5); --p-${player.name}: rgb(${player.eliminated ? eliminatedColor : player.color},1);`)}
                   {'}'}
                   {gameInfo.players.map((player) => `.m-map .p-${player.name} {--owner-bg: var(--p-${player.name}-bg); --owner: var(--p-${player.name});}`)}
                 </style>
