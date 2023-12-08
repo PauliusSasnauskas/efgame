@@ -18,7 +18,7 @@ function isAttackable (tile: ServerTile, player: Player) {
 }
 
 function getTile (map: ServerTile[][], mapSize: number, x: number, y: number): ServerTile | undefined {
-  if (x < 0 || y < 0 || x > mapSize || y > mapSize) return undefined
+  if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) return undefined
   return map[y][x]
 }
 
@@ -44,6 +44,10 @@ function isConnected (tile: ServerTile, player: Player, map: ServerTile[][], map
   return false
 }
 
+function findPlayer (playerName: string, players: Player[]): Player | undefined {
+  return players.find((player) => player.name === playerName)
+}
+
 function deductStat (statName: string, player: Player, amount: number): void {
   if (player.eliminated) return
   const playerStats = player.stats!
@@ -59,7 +63,7 @@ function addStat (statName: string, player: Player, amount: number): void {
 
 function isNeutralTile (tile: ServerTile, player: Player, players: Player[]): boolean {
   if (tile.owner === undefined) return true
-  const tilePlayer = players.find((player) => player.name === tile.owner!.name)
+  const tilePlayer = findPlayer(tile.owner.name, players)
   if (tilePlayer === undefined) return true
   if (tilePlayer.eliminated) return true
   return false
@@ -79,9 +83,14 @@ function tryTileSurroundCapture (x: number, y: number, player: Player, map: Serv
   if (tile.owner?.name === player.name) return
   if (player.team !== undefined && tile.owner?.team === player.team) return
 
-  const tileIsNeutral = isNeutralTile(tile, player, players)
-
+  if (tile.owner !== undefined) {
+    const defender = findPlayer(tile.owner.name, players)
+    if (defender !== undefined) deductStat('v:territory', defender, 1)
+  }
+  
   tile.owner = { name: player.name, isPlayer: true, team: player.team }
+
+  const tileIsNeutral = isNeutralTile(tile, player, players)
   addStat('v:xp', player, tileIsNeutral ? 0.375 : 1.5)
   addStat('v:territory', player, 1)
 }
@@ -103,9 +112,6 @@ const buildingXpReward: {[k:string]: number} = {
 }
 
 export const AttackAction: ServerAction = {
-  // +1 - attempt attack sector (25% if neutral)
-  // +1.5 - capture sector (25% if neutral)
-
   canInvoke: ({ tile, player, map, mapSize }) => {
     if (!isAttackable(tile, player)) return false
     if (!isConnected(tile, player, map, mapSize)) return false
@@ -114,21 +120,15 @@ export const AttackAction: ServerAction = {
   statsCost: { "v:action": 2, "v:army": 1 },
   invoke: ({ tile, player, map, mapSize, players, sendMessage }) => {
     const tileIsNeutral = isNeutralTile(tile, player, players)
-    addStat('v:xp', player, tileIsNeutral ? 0.25 : 1)
 
     if (tile.entity !== undefined && tile.entity.health !== undefined && tile.entity.health > 1) {
       tile.entity.health -= 1
       return
     } 
     if (tile.entity !== undefined && tile.entity.health === 1) {
-      if (tile.owner !== undefined) {
-        const defendingPlayer = players.find((player) => player.name === tile.owner!.name)!
-        deductStat('v:territory', defendingPlayer, 1)
-      }
-
       addStat('v:xp', player, buildingXpReward[tile.entity.id] * (tileIsNeutral ? 0.25 : 1))
       if (tile.entity.id === 'v:capitol') {
-        const defendingPlayer = players.find((player) => player.name === tile.owner!.name)
+        const defendingPlayer = findPlayer(tile.owner!.name, players)
         if (defendingPlayer !== undefined && hasOnlyOneCapitol(map, mapSize, defendingPlayer.name)){
           defendingPlayer.eliminated = true
           addStat('v:xp', player, 20)
@@ -136,10 +136,13 @@ export const AttackAction: ServerAction = {
         }
       }
     }
+    if (tile.owner !== undefined) {
+      const defendingPlayer = findPlayer(tile.owner!.name, players)!
+      deductStat('v:territory', defendingPlayer, 1)
+    }
     tile.entity = undefined
     tile.owner = { name: player.name, isPlayer: true, team: player.team }
     tryClaimSurrounded(tile.x, tile.y, player, map, mapSize, players)
-    addStat('v:xp', player, tileIsNeutral ? 0.375 : 1.5)
     addStat('v:territory', player, 1)
   }
 }
@@ -157,6 +160,7 @@ export const LeaveAction: ServerAction = {
 
 export const TransferAction: ServerAction = {
   canInvoke: ({tile, player}) => {
+    if (tile.owner?.name === undefined) return false
     const isOwn = tile.owner?.name === player.name
     if (isOwn) return false
     const isTeammate = player.team !== undefined && tile.owner?.team === player.team
@@ -165,8 +169,7 @@ export const TransferAction: ServerAction = {
   },
   statsCost: { "v:action": 1, "v:gold": 50 },
   invoke: ({ tile, players }) => {
-    const receiverName = tile.owner?.name
-    const receiver = players.find((player) => player.name === receiverName)
+    const receiver = findPlayer(tile.owner!.name, players)
     if (receiver?.stats !== undefined) {
       (receiver.stats['v:gold'].val as number) += 50
     }
