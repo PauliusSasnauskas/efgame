@@ -37,6 +37,7 @@ export default class Game {
   }
 
   private sendMessage(message: string) {
+    log(message)
     this.addMessageCallbacks.forEach((callback) => callback(message))
   }
 
@@ -77,7 +78,11 @@ export default class Game {
   }
 
   getStatsForPlayer (playerName: string): {[k: string]: Stat} {
-    return this.players[playerName].serializeStats()
+    if (!this.players[playerName].eliminated) {
+      return this.players[playerName].serializeStats()
+    } else {
+      return {}
+    }
   }
 
   private generateMap() {
@@ -139,6 +144,7 @@ export default class Game {
     this.turnNumber += 1
     let nextTurnQueueIndex = this.turnQueue.indexOf(playerName) + 1
     if (nextTurnQueueIndex >= this.turnQueue.length) nextTurnQueueIndex %= this.turnQueue.length
+    this.turn = this.turnQueue[nextTurnQueueIndex]
 
     const player = this.players[playerName]
     const players = Object.values(this.players)
@@ -171,7 +177,7 @@ export default class Game {
 
     let req = action.statsCost
     if (typeof req === 'function') {
-      req = req({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber })
+      req = req({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })
     }
 
     for (const [statName, reqStat] of Object.entries(action.statsCost)) {
@@ -192,7 +198,7 @@ export default class Game {
 
     let req = action.statsCost
     if (typeof req === 'function') {
-      req = req({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber })
+      req = req({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })
     }
 
     for (const [statName, reqStat] of Object.entries(action.statsCost)) {
@@ -221,8 +227,8 @@ export default class Game {
     const meetsReq = this.doesMeetReq(action, tile, player, players)
 
     if (!meetsReq) return
-    if (!action.canInvoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber })) return
-    action.invoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber })
+    if (!action.canInvoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })) return
+    action.invoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })
     this.subtractReq(action, tile, player, players)
   }
 }

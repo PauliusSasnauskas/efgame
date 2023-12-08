@@ -38,6 +38,10 @@ function sendGameInfo(io: Server<ClientEvents, ServerEvents>, game: Game) {
   }
 }
 
+game.addMessageListener((message) => {
+  io.emit('chat', { text: message })
+})
+
 io.on('connection', (socket) => {
   console.log(`[connect] ${socket.id} ${socket.handshake.address}`);
   socket.emit("welcome", { name: 'efgame server', version: '2.0.0', gamemode: config.name, gamemodeVersion: config.version, motd: 'Welcome to the server!' })

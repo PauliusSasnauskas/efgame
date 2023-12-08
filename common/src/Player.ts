@@ -1,7 +1,7 @@
 export class Player {
   name: string
   color: string
-  eliminated?: boolean
+  eliminated: boolean
   team?: 'spectator' | string
   controlledBy?: string
   stats?: {[k: string]: Stat}
@@ -10,6 +10,7 @@ export class Player {
     this.name = name
     this.color = color
     this.team = team
+    this.eliminated = false
   }
 
   serialize(): PlayerDTO {

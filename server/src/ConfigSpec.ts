@@ -18,9 +18,19 @@ export default interface ConfigSpec {
 export type StatReq = { [k: string]: number | string }
 
 export interface ServerAction {
-  canInvoke: (data: {tile: ServerTile, player: Player, map: ServerTile[][], mapSize: number, players: Player[], turnNumber: number}) => boolean
-  statsCost?: StatReq | ((data: {tile: ServerTile, player: Player, map: ServerTile[][], mapSize: number, players: Player[], turnNumber: number}) => StatReq)
-  invoke: (data: {tile: ServerTile, player: Player, map: ServerTile[][], mapSize: number, players: Player[], turnNumber: number}) => void
+  canInvoke: (data: ActionData) => boolean
+  statsCost?: StatReq | ((data: ActionData) => StatReq)
+  invoke: (data: ActionData) => void
+}
+
+interface ActionData {
+  tile: ServerTile
+  player: Player
+  map: ServerTile[][]
+  mapSize: number
+  players: Player[]
+  turnNumber: number
+  sendMessage: (message: string) => void
 }
 
 export interface ServerEntity extends Entity {

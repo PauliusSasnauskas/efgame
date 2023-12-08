@@ -2,7 +2,7 @@ import { Tile } from "common/src/Tile"
 import { ServerStat, ServerTile } from "../ConfigSpec"
 import { Player } from "common/src/Player"
 import { GameState } from "common/src/SocketSpec"
-import { getTilesWhere } from "../util"
+import { getTilesWhere, isTileSurrounded } from "../util"
 
 function seeDiamond (seeMap: boolean[][], mapSize: number, x: number, y: number, dist: number, manhattan: boolean = true) {
   for (let i = -dist; i <= dist; i++){
@@ -41,15 +41,6 @@ export function getMapForPlayer (map: ServerTile[][], mapSize: number, player: P
   return tiles
 }
 
-function checkInner(map: ServerTile[][], mapSize: number, x: number, y: number, playerName: string): boolean {
-  let [dir1, dir2, dir3, dir4] = [false, false, false, false]
-  if (y > 0 && map[y-1][x].owner?.name === playerName) dir1 = true
-  if (x < mapSize-1 && map[y][x+1].owner?.name === playerName) dir2 = true
-  if (y < mapSize-1 && map[y+1][x].owner?.name === playerName) dir3 = true
-  if (x > 0 && map[y][x-1].owner?.name === playerName) dir4 = true
-  return dir1 && dir2 && dir3 && dir4
-}
-
 export function processEndTurnForPlayer (player: Player, map: ServerTile[][], mapSize: number, players: Player[]) {
   const playerStats = player.stats!
   ;(playerStats['v:gold'].val as number) += 2
@@ -59,7 +50,7 @@ export function processEndTurnForPlayer (player: Player, map: ServerTile[][], ma
   for (let i = 0; i < mapSize; i++) {
     for (let j = 0; j < mapSize; j++) {
       if (map[i][j].owner?.name === player.name){
-        const isInner = checkInner(map, mapSize, j, i, player.name)
+        const isInner = isTileSurrounded(map, mapSize, j, i, player.name)
         if (isInner) ownedInner += 1
         else ownedOuter += 1
       }

@@ -1,7 +1,7 @@
 import { Player } from "common/src/Player"
 import { ServerAction, ServerTile, StatReq } from "../ConfigSpec"
 import { Barracks, Mine, Tower, WoodWall, StoneWall, Capitol } from "./Building"
-import { countTilesWhere, hasStat, isOwned, isOwnedEntity, isOwnedNoEntity } from "../util"
+import { countTilesWhere, hasStat, isOwned, isOwnedEntity, isOwnedNoEntity, isTileSurrounded } from "../util"
 
 function isAttackable (tile: ServerTile, player: Player) {
   if (tile.owner === undefined && tile.entity === undefined){
@@ -45,31 +45,102 @@ function isConnected (tile: ServerTile, player: Player, map: ServerTile[][], map
 }
 
 function deductStat (statName: string, player: Player, amount: number): void {
+  if (player.eliminated) return
   const playerStats = player.stats!
   const stat = playerStats[statName]
   ;(stat.val as number) -= amount
 }
 
+function addStat (statName: string, player: Player, amount: number): void {
+  const playerStats = player.stats!
+  const stat = playerStats[statName]
+  ;(stat.val as number) += amount
+}
+
+function isNeutralTile (tile: ServerTile, player: Player, players: Player[]): boolean {
+  if (tile.owner === undefined) return true
+  const tilePlayer = players.find((player) => player.name === tile.owner!.name)
+  if (tilePlayer === undefined) return true
+  if (tilePlayer.eliminated) return true
+  return false
+}
+
+function hasOnlyOneCapitol (map: ServerTile[][], mapSize: number, playerName: string): boolean {
+  const numOwnedCapitols = countTilesWhere(map, mapSize, (tile) => tile.owner?.name === playerName && tile.entity?.id === 'v:capitol')
+
+  return numOwnedCapitols === 1
+}
+
+function tryTileSurroundCapture (x: number, y: number, player: Player, map: ServerTile[][], mapSize: number, players: Player[]) {
+  if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) return
+  if (!isTileSurrounded(map, mapSize, x, y, player.name)) return
+  const tile = map[y][x]
+  if (tile.entity !== undefined) return
+  if (tile.owner?.name === player.name) return
+  if (player.team !== undefined && tile.owner?.team === player.team) return
+
+  const tileIsNeutral = isNeutralTile(tile, player, players)
+
+  tile.owner = { name: player.name, isPlayer: true, team: player.team }
+  addStat('v:xp', player, tileIsNeutral ? 0.375 : 1.5)
+  addStat('v:territory', player, 1)
+}
+
+function tryClaimSurrounded (x: number, y: number, player: Player, map: ServerTile[][], mapSize: number, players: Player[]) {
+  tryTileSurroundCapture(x-1, y, player, map, mapSize, players)
+  tryTileSurroundCapture(x+1, y, player, map, mapSize, players)
+  tryTileSurroundCapture(x, y-1, player, map, mapSize, players)
+  tryTileSurroundCapture(x, y+1, player, map, mapSize, players)
+}
+
+const buildingXpReward: {[k:string]: number} = {
+  'v:capitol': 15,
+  'v:mine': 10,
+  'v:barracks': 10,
+  'v:tower': 5,
+  'v:woodwall': 8,
+  'v:stonewall': 15,
+}
+
 export const AttackAction: ServerAction = {
+  // +1 - attempt attack sector (25% if neutral)
+  // +1.5 - capture sector (25% if neutral)
+
   canInvoke: ({ tile, player, map, mapSize }) => {
     if (!isAttackable(tile, player)) return false
     if (!isConnected(tile, player, map, mapSize)) return false
     return true
   },
   statsCost: { "v:action": 2, "v:army": 1 },
-  invoke: ({ tile, player }) => {
-    if (tile.entity === undefined || tile.entity.health === 1) {
-      tile.entity = undefined
-      tile.owner = { name: player.name, isPlayer: true, team: player.team }
-      // if (Math.random() > 0.8) {
-      //   tile.entity = { id: 'v:tower', health: 2 }
-      // }
-      return
-    }
+  invoke: ({ tile, player, map, mapSize, players, sendMessage }) => {
+    const tileIsNeutral = isNeutralTile(tile, player, players)
+    addStat('v:xp', player, tileIsNeutral ? 0.25 : 1)
+
     if (tile.entity !== undefined && tile.entity.health !== undefined && tile.entity.health > 1) {
       tile.entity.health -= 1
       return
+    } 
+    if (tile.entity !== undefined && tile.entity.health === 1) {
+      if (tile.owner !== undefined) {
+        const defendingPlayer = players.find((player) => player.name === tile.owner!.name)!
+        deductStat('v:territory', defendingPlayer, 1)
+      }
+
+      addStat('v:xp', player, buildingXpReward[tile.entity.id] * (tileIsNeutral ? 0.25 : 1))
+      if (tile.entity.id === 'v:capitol') {
+        const defendingPlayer = players.find((player) => player.name === tile.owner!.name)
+        if (defendingPlayer !== undefined && hasOnlyOneCapitol(map, mapSize, defendingPlayer.name)){
+          defendingPlayer.eliminated = true
+          addStat('v:xp', player, 20)
+          sendMessage(`${defendingPlayer.name} has been eliminated by ${player.name}!`)
+        }
+      }
     }
+    tile.entity = undefined
+    tile.owner = { name: player.name, isPlayer: true, team: player.team }
+    tryClaimSurrounded(tile.x, tile.y, player, map, mapSize, players)
+    addStat('v:xp', player, tileIsNeutral ? 0.375 : 1.5)
+    addStat('v:territory', player, 1)
   }
 }
 
@@ -79,8 +150,7 @@ export const LeaveAction: ServerAction = {
   },
   statsCost: { "v:action": 1 },
   invoke: ({ tile, player }) => {
-    const playerStats = player.stats!
-    ;(playerStats['v:territory'].val as number) -= 1
+    deductStat('v:territory', player, 1)
     tile.owner = undefined
   }
 }
@@ -168,6 +238,7 @@ export const BuildCapitolAction: ServerAction = {
     const reqGold = 475 + capitols * 25
 
     deductStat('v:gold', player, reqGold)
+    addStat('v:xp', player, 0.5)
 
     tile.entity = new Capitol(turnNumber)
   }
@@ -176,7 +247,8 @@ export const BuildCapitolAction: ServerAction = {
 export const BuildMineAction: ServerAction = {
   canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player),
   statsCost: { 'v:action': 6, 'v:gold': 125 },
-  invoke: ({ tile, turnNumber }) => {
+  invoke: ({ tile, player, turnNumber }) => {
+    addStat('v:xp', player, 0.5)
     tile.entity = new Mine(turnNumber)
   }
 }
@@ -188,9 +260,8 @@ export const BuildBarracksAction: ServerAction = {
     const barracksHealthy = countTilesWhere(map, mapSize, (tile) => isOwned(tile, player) && tile.entity?.id === 'v:barracks' && tile.entity.health === 2)
     const barracksDamaged = countTilesWhere(map, mapSize, (tile) => isOwned(tile, player) && tile.entity?.id === 'v:barracks' && tile.entity.health === 1)
 
-    const playerStats = player.stats!
-    ;(playerStats['v:army'].val as number) += 20 + 2 * barracksHealthy + barracksDamaged
-
+    addStat('v:army', player, 20 + 2 * barracksHealthy + barracksDamaged)
+    addStat('v:xp', player, 0.5)
     tile.entity = new Barracks(turnNumber)
   }
 }
@@ -198,7 +269,8 @@ export const BuildBarracksAction: ServerAction = {
 export const BuildTowerAction: ServerAction = {
   canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, 25),
   statsCost: { 'v:action': 4, 'v:gold': 90, 'v:army': 1 },
-  invoke: ({ tile, turnNumber }) => {
+  invoke: ({ tile, player, turnNumber }) => {
+    addStat('v:xp', player, 0.5)
     tile.entity = new Tower(turnNumber)
   }
 }
@@ -206,7 +278,8 @@ export const BuildTowerAction: ServerAction = {
 export const BuildWoodWallAction: ServerAction = {
   canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, 50),
   statsCost: { 'v:action': 4, 'v:gold': 115, 'v:army': 3 },
-  invoke: ({ tile, turnNumber }) => {
+  invoke: ({ tile, player, turnNumber }) => {
+    addStat('v:xp', player, 0.5)
     tile.entity = new WoodWall(turnNumber)
   }
 }
@@ -214,21 +287,8 @@ export const BuildWoodWallAction: ServerAction = {
 export const BuildStoneWallAction: ServerAction = {
   canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, 135),
   statsCost: { 'v:action': 7, 'v:gold': 180, 'v:army': 5 },
-  invoke: ({ tile, turnNumber }) => {
+  invoke: ({ tile, player, turnNumber }) => {
+    addStat('v:xp', player, 0.5)
     tile.entity = new StoneWall(turnNumber)
   }
 }
-
-
-// TODO: add XP:
-// 1 / attack sector
-// 1.5 / capture sector
-// 0.5 / build a building
-// 15 / destroy the town hall
-// 10 / destroy the barracks
-// 10 / destroy the mine
-// 5 / destroy the observation tower
-// 8 / destroy the wooden wall
-// 15 / destroy the stone wall
-// 20 / eliminate the player
-// All numbers refer to sectors/ enemy buildings. Only 25% of the given experience is awarded for the corresponding neutral sector/building.
