@@ -126,6 +126,9 @@ body {
 .tile {
   @apply tilesize grid grid-cols-1 grid-rows-1;
 }
+.tile.fog {
+  @apply bg-black bg-opacity-50;
+}
 .tile::after {
   @apply tile-selected opacity-0;
   content: '';

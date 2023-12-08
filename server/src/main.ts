@@ -42,7 +42,6 @@ io.on('connection', (socket) => {
   console.log(`[connect] ${socket.id} ${socket.handshake.address}`);
   socket.emit("welcome", { name: 'efgame server', version: '2.0.0', gamemode: config.name, gamemodeVersion: config.version, motd: 'Welcome to the server!' })
 
-
   socket.on('disconnect', (reason) => {
     console.log(`[disconnect] ${socket.id} ${dcReasons[reason]}. ${socket.handshake.address}`)
     const player = game.removePlayer(socketIdToPlayerName[socket.id])
@@ -80,6 +79,7 @@ io.on('connection', (socket) => {
 
   socket.on('endTurn', () => {
     game.playerEndTurn(socketIdToPlayerName[socket.id])
+    sendGameInfo(io, game)
   })
 
   socket.on('action', ({ action, x, y }) => {

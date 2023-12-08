@@ -1,9 +1,9 @@
 import { Player, PlayerDTO, Stat } from "common/src/Player"
 import { GameState } from "common/src/SocketSpec"
-import { Tile } from "common/src/Tile"
 import config from "./Config"
 import { groupBy } from "common/src/util/array"
-import { ConfigAction } from "./ConfigSpec"
+import { ServerAction, ServerTile } from "./ConfigSpec"
+import { Tile } from "common/src/Tile"
 
 function log(...params: any[]) {
   console.log('[game]', ...params)
@@ -12,9 +12,9 @@ function log(...params: any[]) {
 export default class Game {
   state: GameState = GameState.LOBBY
   players: {[k: string]: Player} = {}
-  mapSize: number = 20
+  mapSize: number = 14
   mapName: string = 'RMG'
-  map: Tile[][] = []
+  map: ServerTile[][] = []
   teams: string[] = []
 
   turnQueue: string[] = []
@@ -26,7 +26,7 @@ export default class Game {
     return true
   }
 
-  private getTile (x: number, y: number): Tile {
+  private getTile (x: number, y: number): ServerTile {
     return this.map[y][x]
   }
 
@@ -60,10 +60,10 @@ export default class Game {
     return Object.values(this.players).map((player) => player.serialize())
   }
 
-  getMapForPlayer (playerName: string): Tile[][] {
-    // TODO: calculate user seeable map
-    // TODO: if spectator show all
-    return this.map
+  getMapForPlayer (playerName: string): Tile[] {
+    const player = this.players[playerName]
+
+    return config.getMapForPlayer(this.map, this.mapSize, player)
   }
 
   getStatsForPlayer (playerName: string): {[k: string]: Stat} {
@@ -85,10 +85,10 @@ export default class Game {
 
   private setTurnQueue() {
     this.turnQueue = []
-    
+
     const teams = groupBy(Object.values(this.players), (player) => player.team ?? '')
     let teamsSortedByNumPlayers = Object.values(teams).sort((a, b) => a.length - b.length)
-    
+
     while (teamsSortedByNumPlayers.length > 0) {
       for (let i = 0, n = teamsSortedByNumPlayers.length; i < n; i++){
         const team = teamsSortedByNumPlayers[i]
@@ -114,7 +114,7 @@ export default class Game {
 
     log('(2/3) Setting stats...')
     this.setStats()
-    
+
     log('(3/3) Setting up turn queue...')
     this.setTurnQueue()
 
@@ -124,13 +124,19 @@ export default class Game {
 
   playerEndTurn (playerName: string) {
     if (this.state !== GameState.PLAYING) return
+    if (this.turn !== playerName) return
 
-    // TODO: end turn
+    this.turnNumber += 1
+    let nextTurnQueueIndex = this.turnQueue.indexOf(playerName) + 1
+    if (nextTurnQueueIndex >= this.turnQueue.length) nextTurnQueueIndex %= this.turnQueue.length
+
+    // TODO: do turn events
+    // TODO: check win condition
   }
 
-  private doesMeetReq (action: ConfigAction, tile: Tile, player: Player, players: Player[]) {
+  private doesMeetReq (action: ServerAction, tile: ServerTile, player: Player, players: Player[]) {
     if (action.statsCost === undefined) return true
-    
+
     let req = action.statsCost
     if (typeof req === 'function') {
       req = req({ tile, player, map: this.map, mapSize: this.mapSize, players })
@@ -149,7 +155,7 @@ export default class Game {
     return true 
   }
 
-  private subtractReq (action: ConfigAction, tile: Tile, player: Player, players: Player[]) {
+  private subtractReq (action: ServerAction, tile: ServerTile, player: Player, players: Player[]) {
     if (action.statsCost === undefined) return
 
     let req = action.statsCost
@@ -170,18 +176,18 @@ export default class Game {
     if (this.turn !== playerName) return
 
     const action = config.actions[actionName]
-
     if (action === undefined) return
+
     if (!this.isValidTile(x, y)) return
+    const tile = this.getTile(x, y)
 
     const player = this.players[playerName]
     if (player.stats === undefined) return
-    
+
     const players = Object.values(this.players)
-    const tile = this.getTile(x, y)
 
     const meetsReq = this.doesMeetReq(action, tile, player, players)
-    
+
     if (!meetsReq) return
     if (!action.canInvoke({ tile, player, map: this.map, mapSize: this.mapSize, players })) return
     action.invoke({ tile, player, map: this.map, mapSize: this.mapSize, players })

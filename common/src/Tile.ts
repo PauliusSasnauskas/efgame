@@ -2,13 +2,13 @@ export interface Tile {
   readonly x: number
   readonly y: number
 
-  owner?: Owner // can be occupied by a player
-  entity?: Entity // can host up to a single entity
+  owner?: Owner // can be occupied by someone
+  entity?: Entity // can have a single entity
   resource?: Resource // can have a special resource
 }
 
 export interface Owner {
-  readonly isPlayer: boolean // TODO: do I need this?
+  readonly isPlayer: boolean // Question: is this necessary?
   readonly name: string
   readonly team?: string
 }

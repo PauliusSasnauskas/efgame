@@ -28,7 +28,7 @@ const dcReasons: {[k: string]: string} = {
 
 export function Game ({ ip }: { ip: string }): JSX.Element {
   const gameContext = useContext(MenuContext)
-  
+
   const [socket, setSocket] = useState<Socket<ServerEvents, ClientEvents> | undefined>(undefined)
   const [menuVisible, setMenuVisible] = useState(false)
   const [chatActive, setChatActive] = useState(false)
@@ -38,7 +38,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>()
   const [serverInfo, setServerInfo] = useState<ServerGreeting | undefined>()
   const [gameInfo, setGameInfo] = useState<GameInfoLobby | GameInfoPlaying | undefined>()
-  const [map, setMap] = useState<Tile[][] | undefined>()
+  const [map, setMap] = useState<Tile[] | undefined>()
   const [stats, setStats] = useState<{[k: string]: Stat} | undefined>()
 
   const trySelect = (newx: number, newy: number) => {
@@ -171,10 +171,8 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={endTurn} disabled={disabled} />
   }
 
-  function getSelectedTile(): Tile {
-    const tile = map?.[selected[1]]?.[selected[0]]
-    if (tile === undefined) throw new Error('Tile undefined')
-    return tile
+  function getTile(x: number, y: number): Tile | undefined {
+    return map?.find((tile: Tile) => tile.x === x && tile.y === y)
   }
 
   return (
@@ -193,7 +191,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           <div>
             <Bar>Players</Bar>
             {gameInfo.players.map((player) => (
-              <PlayerBox player={player} myTurn={gameInfo.gameState === GameState.PLAYING ? player.name === gameInfo.turn : false} key={player.name} selected={map !== undefined ? map[selected[1]][selected[0]].owner?.name === player.name : false} />
+              <PlayerBox player={player} myTurn={gameInfo.gameState === GameState.PLAYING ? player.name === gameInfo.turn : false} key={player.name} selected={map !== undefined ? getTile(selected[0], selected[1])?.owner?.name === player.name : false} />
             ))}
           </div>
           <div className='flex flex-col'>
@@ -235,7 +233,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                   {'}'}
                   {gameInfo.players.map((player) => `.m-map .p-${player.name} {--owner-bg: var(--p-${player.name}-bg); --owner: var(--p-${player.name});}`)}
                 </style>
-                <Map tiles={map} select={trySelect as any} selected={selected} />
+                <Map tiles={map} mapSize={gameInfo.mapSize} select={trySelect as any} selected={selected} />
               </>
             )}
           </div>
@@ -257,9 +255,9 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                   }
                   if (typeof action.button === 'function'){
                     const ActionElement = action.button
-                    return <ActionElement onClick={() => { invokeAction(actionName, selected) }} disabled={gameInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getSelectedTile(), currentPlayer) ?? false)} key={actionName} />
+                    return <ActionElement onClick={() => { invokeAction(actionName, selected) }} disabled={gameInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} />
                   }
-                  return <SimpleAction img={action.button.img} name={action.button.name} onClick={() => { invokeAction(actionName, selected) }} disabled={gameInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getSelectedTile(), currentPlayer) ?? false)} key={actionName} />
+                  return <SimpleAction img={action.button.img} name={action.button.name} onClick={() => { invokeAction(actionName, selected) }} disabled={gameInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} />
                 })}
                 {!('endturn' in config.actions) && <EndTurnButton disabled={gameInfo.turn !== currentPlayer?.name} />}
               </>

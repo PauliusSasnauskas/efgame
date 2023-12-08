@@ -1,8 +1,7 @@
-import { Player } from "common/src/Player";
-import { ConfigAction, StatReq } from "../ConfigSpec";
-import { Tile } from "common/src/Tile";
-import { Barracks, Mine, Tower, WoodWall, StoneWall, Capitol } from "./Building";
-import ServerStat from "../ServerStat";
+import { Player } from "common/src/Player"
+import { ServerAction, StatReq } from "../ConfigSpec"
+import { Tile } from "common/src/Tile"
+import { Barracks, Mine, Tower, WoodWall, StoneWall, Capitol } from "./Building"
 
 function isAttackable (tile: Tile, player: Player) {
   if (tile.owner === undefined && tile.entity === undefined){
@@ -37,7 +36,7 @@ function isConnected (tile: Tile, player: Player, map: Tile[][], mapSize: number
   const capitolNear = near.map((tile) => tile?.owner?.name === player.name && tile?.entity?.id === 'v:capitol')
   const isCapitolNear = capitolNear.reduce((prev, cur) => prev || cur, false)
   if (isCapitolNear) return true
-  
+
   const ownAround = [...near, ...far].map((tile) => tile?.owner?.name === player.name)
   const isAtLeastTwoConnected = ownAround.reduce((accum, cur) => accum += cur ? 1 : 0, 0) >= 2
   if (isAtLeastTwoConnected) return true
@@ -79,7 +78,7 @@ function countTilesWhere (map: Tile[][], mapSize: number, where: (t: Tile) => bo
   return count
 }
 
-export const AttackAction: ConfigAction = {
+export const AttackAction: ServerAction = {
   canInvoke: ({ tile, player, map, mapSize }) => {
     if (!isAttackable(tile, player)) return false
     if (!isConnected(tile, player, map, mapSize)) return false
@@ -90,6 +89,9 @@ export const AttackAction: ConfigAction = {
     if (tile.entity === undefined || tile.entity.health === 1) {
       tile.entity = undefined
       tile.owner = { name: player.name, isPlayer: true, team: player.team }
+      if (Math.random() > 0.8) {
+        tile.entity = { id: 'v:tower', health: 2 }
+      }
       return
     }
     if (tile.entity !== undefined && tile.entity.health !== undefined && tile.entity.health > 1) {
@@ -99,7 +101,7 @@ export const AttackAction: ConfigAction = {
   }
 }
 
-export const LeaveAction: ConfigAction = {
+export const LeaveAction: ServerAction = {
   canInvoke: ({ tile, player }) => {
     return (tile.owner?.name === player.name && tile.entity === undefined)
   },
@@ -109,7 +111,7 @@ export const LeaveAction: ConfigAction = {
   }
 }
 
-export const TransferAction: ConfigAction = {
+export const TransferAction: ServerAction = {
   canInvoke: ({tile, player}) => {
     const isOwn = tile.owner?.name === player.name
     if (isOwn) return false
@@ -127,7 +129,7 @@ export const TransferAction: ConfigAction = {
   }
 }
 
-export const DemolishAction: ConfigAction = {
+export const DemolishAction: ServerAction = {
   canInvoke: ({ tile, player }) => {
     return isOwnedBuilding(tile, player)
   },
@@ -155,7 +157,7 @@ const maxHealthForBuilding: { [k: string]: number } = {
   'v:stonewall': 7
 }
 
-export const RepairAction: ConfigAction = {
+export const RepairAction: ServerAction = {
   canInvoke: ({ tile, player }) => {
     if (!isOwnedBuilding(tile, player)) return false
 
@@ -164,14 +166,14 @@ export const RepairAction: ConfigAction = {
     const hasStats = Object.entries(repairReq).map(([statName, statReq]) => hasStat(statName, player, statReq as number))
     const hasStatsAll = hasStats.reduce((prev, cur) => prev && cur, true)
     if (!hasStatsAll) return false
-    
+
     if (building.health! < maxHealthForBuilding[building.id]) return true
 
     return false
   },
   invoke: ({ tile, player }) => {
     const building = tile.entity!
-    
+
     building.health! += 1
 
     const repairReq = repairReqForBuilding[building.id]
@@ -179,7 +181,7 @@ export const RepairAction: ConfigAction = {
   }
 }
 
-export const BuildCapitolAction: ConfigAction = {
+export const BuildCapitolAction: ServerAction = {
   canInvoke: ({ tile, player, map, mapSize }) => {
     const capitols = countTilesWhere(map, mapSize, (tile) => isOwned(tile, player) && tile.entity?.id === 'v:capitol')
     const reqGold = 475 + capitols * 25
@@ -197,7 +199,7 @@ export const BuildCapitolAction: ConfigAction = {
   }
 }
 
-export const BuildMineAction: ConfigAction = {
+export const BuildMineAction: ServerAction = {
   canInvoke: ({ tile, player }) => isOwnedNoBuilding(tile, player),
   statsCost: { 'v:action': 6, 'v:gold': 125 },
   invoke: ({ tile }) => {
@@ -205,7 +207,7 @@ export const BuildMineAction: ConfigAction = {
   }
 }
 
-export const BuildBarracksAction: ConfigAction = {
+export const BuildBarracksAction: ServerAction = {
   canInvoke: ({ tile, player }) => isOwnedNoBuilding(tile, player),
   statsCost: { 'v:action': 6, 'v:gold': 100 },
   invoke: ({ tile, player, map, mapSize }) => {
@@ -220,7 +222,7 @@ export const BuildBarracksAction: ConfigAction = {
   }
 }
 
-export const BuildTowerAction: ConfigAction = {
+export const BuildTowerAction: ServerAction = {
   canInvoke: ({ tile, player }) => isOwnedNoBuilding(tile, player) && hasStat('v:xp', player, 25),
   statsCost: { 'v:action': 4, 'v:gold': 90, 'v:army': 1 },
   invoke: ({ tile }) => {
@@ -228,7 +230,7 @@ export const BuildTowerAction: ConfigAction = {
   }
 }
 
-export const BuildWoodWallAction: ConfigAction = {
+export const BuildWoodWallAction: ServerAction = {
   canInvoke: ({ tile, player }) => isOwnedNoBuilding(tile, player) && hasStat('v:xp', player, 50),
   statsCost: { 'v:action': 4, 'v:gold': 115, 'v:army': 3 },
   invoke: ({ tile }) => {
@@ -236,7 +238,7 @@ export const BuildWoodWallAction: ConfigAction = {
   }
 }
 
-export const BuildStoneWallAction: ConfigAction = {
+export const BuildStoneWallAction: ServerAction = {
   canInvoke: ({ tile, player }) => isOwnedNoBuilding(tile, player) && hasStat('v:xp', player, 135),
   statsCost: { 'v:action': 7, 'v:gold': 180, 'v:army': 5 },
   invoke: ({ tile }) => {

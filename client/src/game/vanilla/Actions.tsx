@@ -22,11 +22,11 @@ const VanillaAction = (src: string, actionName: string, className?: string) => (
   )
 }
 
-const tileOwned = (tile: Tile, currentPlayer: Player): boolean => tile.owner?.name === currentPlayer.name
-const tileOwnedEmpty = (tile: Tile, currentPlayer: Player): boolean => tileOwned(tile, currentPlayer) && tile.entity === undefined
-const tileOwnedNotEmpty = (tile: Tile, currentPlayer: Player): boolean => tileOwned(tile, currentPlayer) && tile.entity !== undefined
-const tileNotOwned = (tile: Tile, currentPlayer: Player): boolean => tile.owner?.name !== currentPlayer.name
-const tileFromTeammate = (tile: Tile, currentPlayer: Player): boolean => tile.owner?.team === currentPlayer.team && tile.owner?.name !== currentPlayer.name
+const tileOwned = (tile: Tile | undefined, currentPlayer: Player): boolean => tile?.owner?.name === currentPlayer.name
+const tileOwnedEmpty = (tile: Tile | undefined, currentPlayer: Player): boolean => tileOwned(tile, currentPlayer) && tile?.entity === undefined
+const tileOwnedNotEmpty = (tile: Tile | undefined, currentPlayer: Player): boolean => tileOwned(tile, currentPlayer) && tile?.entity !== undefined
+const tileNotOwned = (tile: Tile | undefined, currentPlayer: Player): boolean => tile?.owner?.name !== currentPlayer.name
+const tileFromTeammate = (tile: Tile | undefined, currentPlayer: Player): boolean => tile?.owner?.team === currentPlayer.team && tile?.owner?.name !== currentPlayer.name
 
 export const AttackAction = { key: 'KeyA', button: VanillaAction(attack, "Attack", 'mb-4'), allowOnTile: tileNotOwned } as ConfigAction
 export const RepairAction = { key: 'KeyR', button: VanillaAction(repair, "Repair", 'mb-4'), allowOnTile: tileOwned } as ConfigAction

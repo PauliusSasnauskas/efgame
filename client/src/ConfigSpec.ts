@@ -15,8 +15,8 @@ export interface ConfigAction {
   key: string | string[] // keyboard shortcut
   button: Function | ConfigSimpleAction // button implementation
   req?: {[k: string]: number | string} // stat requirements to show on stat panel
-  showOnTile?: (tile: Tile, currentPlayer: Player) => boolean // should this button be shown on a tile
-  allowOnTile?: (tile: Tile, currentPlayer: Player) => boolean // should this button be enabled on a tile
+  showOnTile?: (tile: Tile | undefined, currentPlayer: Player) => boolean // should this button be shown on a tile
+  allowOnTile?: (tile: Tile | undefined, currentPlayer: Player) => boolean // should this button be enabled on a tile
 }
 
 export interface ConfigSimpleAction {

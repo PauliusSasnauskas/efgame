@@ -18,7 +18,18 @@ function getEntityElement(entitySpec: EntityTile | ConfigStaticEntity | null, se
   return null
 }
 
-export default function MapTile ({ tile, select, selected = false, borders }: { tile: Tile, select: (newx: number, newy: number)=>any, selected?: boolean, borders?: string }): JSX.Element {
+export default function MapTile ({ tile, x, y, select, selected = false, borders }: { tile: Tile | undefined, x: number, y: number, select: (newx: number, newy: number) => any, selected?: boolean, borders?: string }): JSX.Element {
+  if (tile === undefined) {
+    return (
+      <div
+        className='tile fog'
+        onClick={() => select(x, y)}
+      >
+      {selected && <div className="tile-selected"></div>}
+      </div>
+    )
+  }
+
   const ownership = tile.owner?.isPlayer ? <div className={clsx('tilesize pointer-events-none tile-owned', `p-${tile.owner.name}`, `tile-border-${borders}`)}></div> : null
 
   const resourceSpec: ResourceTile | ConfigStaticEntity | null = tile?.resource?.id !== undefined ? gameConfig.resources?.[tile?.resource?.id] : null
