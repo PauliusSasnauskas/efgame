@@ -92,7 +92,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   }, [chatActive, selected])
 
   useEffect(() => {
-    const s: Socket<ServerEvents, ClientEvents> = io(ip, { reconnectionAttempts })
+    const s: Socket<ServerEvents, ClientEvents> = io(ip, { reconnectionAttempts, transports: ['websocket'] })
     setMessages((m) => [...m, { text: `Connecting to ${ip}...`, private: true }])
 
     const handleError = (err: Error) => gameContext.setConnectError(`${err.message}. Caused by: ${err.cause ?? 'unknown'}`)
