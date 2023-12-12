@@ -41,7 +41,7 @@
 
   .m-bar {
     @apply border-6;
-    background: url('./img/menus/bar-bg.svg') 0 / 168px repeat padding-box;
+    background: url('./img/menus/bar-bg.svg') 0 / 166px repeat padding-box;
     border-image: url('./img/menus/bar-border.svg') 25% / 8px round;
   }
   .m-box {

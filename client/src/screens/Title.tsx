@@ -37,7 +37,7 @@ export function Title (): JSX.Element {
       <br/>
       <p className='ml-1'>
         <img src={noteGlyph} alt='' className='w-[10px] inline mr-4 align-baseline cursor-pointer' onClick={() => bgmAudio.play()}/>
-        v2.0.0a1
+        v2.0.0a2
       </p>
     </div>
   )

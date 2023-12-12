@@ -24,6 +24,7 @@ export function getMapForPlayer (map: ServerTile[][], mapSize: number, player: S
   for (let i = 0; i < mapSize; i++) {
     for (let j = 0; j < mapSize; j++) {
       const tile = map[i][j]
+      // TODO: see map if in same team
       if (tile.owner?.name === player.name) {
         const hasFullTower = tile.entity?.id === 'v:tower' && tile.entity?.health === 2
         seeDiamond(seeMap, mapSize, j, i, hasFullTower ? 30 : 2, hasFullTower ? false : true)
