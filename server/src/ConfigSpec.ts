@@ -52,7 +52,7 @@ export class ServerPlayer extends Player {
 }
 
 export class ServerStat implements Stat {
-  val: string | number
+  val: string | number = 0
   max?: number
   hiddenMax?: number
 

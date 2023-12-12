@@ -4,9 +4,8 @@ import { Tile } from "./Tile"
 export interface ServerEvents {
   welcome: (message: ServerGreeting) => void
   chat: (message: Message) => void
-  gameInfo: (info: GameInfoLobby | GameInfoPlaying) => void
-  mapInfo: (map: Tile[]) => void
-  statsInfo: (stats: {[k: string]: Stat}) => void
+  metaInfo: (info: GameInfoLobby | GameInfoPlaying) => void
+  gameInfo: (info: { stats: {[k: string]: Stat}, map: Tile[] }) => void
 }
 
 export interface ClientEvents {

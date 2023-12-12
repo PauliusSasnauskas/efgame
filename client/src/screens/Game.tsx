@@ -39,13 +39,12 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
 
   const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>()
   const [serverInfo, setServerInfo] = useState<ServerGreeting | undefined>()
-  const [gameInfo, setGameInfo] = useState<GameInfoLobby | GameInfoPlaying | undefined>()
-  const [map, setMap] = useState<Tile[] | undefined>()
-  const [stats, setStats] = useState<{[k: string]: Stat} | undefined>()
+  const [metaInfo, setMetaInfo] = useState<GameInfoLobby | GameInfoPlaying | undefined>()
+  const [gameInfo, setGameInfo] = useState<{stats: {[k: string]: Stat}, map: Tile[]} | undefined>()
 
   const trySelect = (newx: number, newy: number) => {
-    if (gameInfo === undefined) return
-    if (newx < 0 || newx >= gameInfo.mapSize || newy < 0 || newy >= gameInfo.mapSize) return
+    if (metaInfo === undefined) return
+    if (newx < 0 || newx >= metaInfo.mapSize || newy < 0 || newy >= metaInfo.mapSize) return
     select([newx, newy])
   }
 
@@ -131,9 +130,8 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
       setMessages((m) => [...m, { text: message.motd }])
     })
     s.on('chat', (message) => setMessages((m) => [...m, message]))
+    s.on('metaInfo', setMetaInfo)
     s.on('gameInfo', setGameInfo)
-    s.on('mapInfo', setMap)
-    s.on('statsInfo', (stats) => setStats(stats))
 
     return () => {
       s.io.removeListener('error', handleError)
@@ -174,7 +172,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   }
 
   function getTile(x: number, y: number): Tile | undefined {
-    return map?.find((tile: Tile) => tile.x === x && tile.y === y)
+    return gameInfo?.map.find((tile: Tile) => tile.x === x && tile.y === y)
   }
 
   return (
@@ -188,16 +186,16 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           </Panel>
         </div>
       )}
-      {serverInfo !== undefined && gameInfo !== undefined ? (
+      {serverInfo !== undefined && metaInfo !== undefined ? (
         <>
           <div>
             <Bar>Players</Bar>
-            {gameInfo.players.map((player) => (
-              <PlayerBox player={player} myTurn={gameInfo.gameState === GameState.PLAYING ? player.name === gameInfo.turn : false} key={player.name} selected={map !== undefined ? getTile(selected[0], selected[1])?.owner?.name === player.name : false} />
+            {metaInfo.players.map((player) => (
+              <PlayerBox player={player} myTurn={metaInfo.gameState === GameState.PLAYING ? player.name === metaInfo.turn : false} key={player.name} selected={gameInfo !== undefined ? getTile(selected[0], selected[1])?.owner?.name === player.name : false} />
             ))}
           </div>
           <div className='flex flex-col'>
-            {gameInfo !== undefined && gameInfo.gameState === GameState.LOBBY ? (
+            {metaInfo !== undefined && metaInfo.gameState === GameState.LOBBY && (
               <>
                 <Bar>Lobby</Bar>
                 <div className='p-2'>
@@ -209,59 +207,60 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                     </div>
                     <div>
                       <Bar>Map</Bar>
-                      {gameInfo.mapName}
+                      {metaInfo.mapName}
                     </div>
                     <div>
                       <Bar>Teams</Bar>
-                      {gameInfo.numTeams === 0 ? 'None' : gameInfo.numTeams}
+                      {metaInfo.numTeams === 0 ? 'None' : metaInfo.numTeams}
                     </div>
                     <div>
                       <Bar>Map Size</Bar>
-                      {gameInfo.mapSize}
+                      {metaInfo.mapSize}
                     </div>
                   </div>
                   <Button onClick={startGame}>Start Game</Button>
                 </div>
               </>
-            ) : (
+            )}
+            {gameInfo !== undefined && (metaInfo.gameState === GameState.PLAYING || metaInfo.gameState === GameState.POSTGAME) && (
               <>
                 <Bar className='flex justify-between'>
-                  <span>{gameInfo.turn}'s turn</span>
+                  <span>{metaInfo.gameState === GameState.POSTGAME ? 'Game finished!' : `${metaInfo.turn}'s turn`}</span>
                   <span>{selected[0]+1}x{selected[1]+1}</span>
                 </Bar>
                 <style>
                   {'.m-map {'}
-                    {gameInfo.players.map((player) => `--p-${player.name}-bg: rgb(${player.eliminated ? eliminatedColor : player.color},0.5); --p-${player.name}: rgb(${player.eliminated ? eliminatedColor : player.color},1);`)}
+                    {metaInfo.players.map((player) => `--p-${player.name}-bg: rgb(${player.eliminated ? eliminatedColor : player.color},0.5); --p-${player.name}: rgb(${player.eliminated ? eliminatedColor : player.color},1);`)}
                   {'}'}
-                  {gameInfo.players.map((player) => `.m-map .p-${player.name} {--owner-bg: var(--p-${player.name}-bg); --owner: var(--p-${player.name});}`)}
+                  {metaInfo.players.map((player) => `.m-map .p-${player.name} {--owner-bg: var(--p-${player.name}-bg); --owner: var(--p-${player.name});}`)}
                 </style>
-                <Map tiles={map} mapSize={gameInfo.mapSize} select={trySelect as any} selected={selected} />
+                <Map tiles={gameInfo.map} mapSize={metaInfo.mapSize} select={trySelect as any} selected={selected} />
               </>
             )}
           </div>
           <div className='row-span-2'>
-            {gameInfo.gameState === GameState.LOBBY && (
+            {metaInfo.gameState === GameState.LOBBY && (
               <>
                 {/* TODO: join team buttons */}
               </>
             )}
-            {gameInfo.gameState === GameState.PLAYING && map !== undefined && (
+            {metaInfo.gameState === GameState.PLAYING && gameInfo !== undefined && (
               <>
-                <Bar>Turn: {gameInfo.turnNumber}</Bar>
-                {stats !== undefined && Object.entries(stats).map(([statName, stat]) => (
+                <Bar>Turn: {metaInfo.turnNumber}</Bar>
+                {Object.entries(gameInfo.stats).map(([statName, stat]) => (
                   <StatBox src={config.stats[statName].img} stat={stat} key={statName} />
                 ))}
                 {Object.entries(config.actions).map(([actionName, action]) => {
                   if (action === null){
-                    return <EndTurnButton key={actionName} disabled={gameInfo.turn !== currentPlayer?.name} />
+                    return <EndTurnButton key={actionName} disabled={metaInfo.turn !== currentPlayer?.name} />
                   }
                   if (typeof action.button === 'function'){
                     const ActionElement = action.button
-                    return <ActionElement onClick={() => { invokeAction(actionName, selected) }} disabled={gameInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} />
+                    return <ActionElement onClick={() => { invokeAction(actionName, selected) }} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} />
                   }
-                  return <SimpleAction img={action.button.img} name={action.button.name} onClick={() => { invokeAction(actionName, selected) }} disabled={gameInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} />
+                  return <SimpleAction img={action.button.img} name={action.button.name} onClick={() => { invokeAction(actionName, selected) }} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} />
                 })}
-                {!('endturn' in config.actions) && <EndTurnButton disabled={gameInfo.turn !== currentPlayer?.name} />}
+                {!('endturn' in config.actions) && <EndTurnButton disabled={metaInfo.turn !== currentPlayer?.name} />}
               </>
             )}
           </div>
