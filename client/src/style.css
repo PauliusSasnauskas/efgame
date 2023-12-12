@@ -47,7 +47,7 @@
   .m-box {
     @apply border-8 p-1;
     background: url('./img/menus/box-bg.svg') 0 / 112px repeat padding-box;
-    border-image: url('./img/menus/box-border.svg') 20.8333% / 9px round;
+    border-image: url('./img/menus/box-border.svg') 20.8333% / 10px round;
   }
   .m-panel {
     @apply border-8 p-1 pt-1.5 relative;
@@ -92,6 +92,11 @@
     grid-template-columns: repeat(20, 24px);
     grid-template-rows: repeat(20, 24px);
     user-select: none;
+  }
+  .m-key {
+    @apply text-white p-2.5 mb-0.5;
+    border-image: url('./img/menus/key.svg') 33.3% / 10px round;
+    background: #2c2f35 content-box;
   }
 }
 

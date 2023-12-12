@@ -16,9 +16,9 @@ import { ConfigAction } from "../../ConfigSpec"
 import { Tile } from "common/src/Tile"
 import { Player } from "common/src/Player"
 
-const VanillaAction = (src: string, actionName: string, className?: string) => ({ onClick, disabled }: { onClick: () => void, disabled?: boolean }): ReactNode => {
+const VanillaAction = (src: string, actionName: string, className?: string) => ({ onClick, disabled, hoverElement }: { onClick: () => void, disabled?: boolean, hoverElement?: ReactNode | JSX.Element }): ReactNode => {
   return (
-    <Button icon={src} onClick={onClick} sound={null} className={clsx('pl-2', className)} disabled={disabled}>{actionName}</Button>
+    <Button icon={src} onClick={onClick} sound={null} className={clsx('pl-2', className)} disabled={disabled} hoverElement={hoverElement}>{actionName}</Button>
   )
 }
 

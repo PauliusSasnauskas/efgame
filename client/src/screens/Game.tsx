@@ -15,6 +15,7 @@ import { GameState } from '../game/GameState'
 import { Tile } from 'common/src/Tile'
 import { Player, Stat } from 'common/src/Player'
 import StatBox from '../game/StatBox'
+import KeyIcon from '../menu/KeyIcon'
 
 const reconnectionAttempts = 5
 
@@ -168,7 +169,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   }
 
   function EndTurnButton({ disabled }: { disabled?: boolean }): JSX.Element {
-    return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={endTurn} disabled={disabled} />
+    return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={endTurn} disabled={disabled} hoverElement={<KeyIcon name={'Space'} />} />
   }
 
   function getTile(x: number, y: number): Tile | undefined {
@@ -256,9 +257,9 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                   }
                   if (typeof action.button === 'function'){
                     const ActionElement = action.button
-                    return <ActionElement onClick={() => { invokeAction(actionName, selected) }} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} />
+                    return <ActionElement onClick={() => { invokeAction(actionName, selected) }} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} hoverElement={<KeyIcon name={action.key} />} />
                   }
-                  return <SimpleAction img={action.button.img} name={action.button.name} onClick={() => { invokeAction(actionName, selected) }} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} />
+                  return <SimpleAction img={action.button.img} name={action.button.name} onClick={() => { invokeAction(actionName, selected) }} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} hoverElement={<KeyIcon name={action.key} />} />
                 })}
                 {!('endturn' in config.actions) && <EndTurnButton disabled={metaInfo.turn !== currentPlayer?.name} />}
               </>
