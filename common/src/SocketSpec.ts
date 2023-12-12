@@ -10,8 +10,7 @@ export interface ServerEvents {
 
 export interface ClientEvents {
   welcome: (data: { name: string, color: string }) => void
-  chat: (message: string) => void
-  chatPrivate: (message: string, to: number) => void
+  chat: (message: string, recipient?: string) => void
   startGame: () => void
   endTurn: () => void
   action: (data: { action: string, x: number, y: number }) => void
@@ -21,6 +20,8 @@ export interface Message {
   text: string
   from?: string
   fromColor?: string
+  to?: string
+  toColor?: string
   private?: boolean
 }
 

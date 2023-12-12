@@ -1,6 +1,6 @@
 import { DisconnectReason, Server } from 'socket.io';
 import Game from './Game';
-import { ClientEvents, GameState, ServerEvents } from 'common/src/SocketSpec'
+import { ClientEvents, GameState, Message, ServerEvents } from 'common/src/SocketSpec'
 import config from './Config'
 
 const dcReasons: {[k: DisconnectReason | string]: string} = {
@@ -69,10 +69,21 @@ io.on('connection', (socket) => {
     sendGameInfo(io, game)
   })
 
-  socket.on('chat', (message) => {
-    console.log(`<${socket.handshake.address}> ${message}`)
-    const player = game.getPlayer(socketIdToPlayerName[socket.id])
-    io.emit('chat', { from: player?.name ?? 'unknown', fromColor: player?.color, text: message })
+  socket.on('chat', (message, recipient) => {
+    const senderPlayer = game.getPlayer(socketIdToPlayerName[socket.id])
+    if (recipient == null) {
+      console.log(`<${socket.handshake.address}> ${message}`)
+      io.emit('chat', { from: senderPlayer?.name ?? 'unknown', fromColor: senderPlayer?.color, text: message })
+      return
+    }
+    const recipientPlayer = game.getPlayer(recipient)
+    const recipientSocketId = Object.entries(socketIdToPlayerName).find(([_, playerName]) => playerName === recipientPlayer.name)?.[0]
+    const fullMessage: Message = { private: true, from: senderPlayer.name, fromColor: senderPlayer.color, to: recipientPlayer.name, toColor: recipientPlayer.color, text: message }
+    io.fetchSockets().then((sockets) => sockets.forEach((s) => {
+      if (s.id !== recipientSocketId) return
+      s.emit('chat', fullMessage)
+    }))
+    socket.emit('chat', fullMessage)
   })
 
   socket.on('startGame', () => {

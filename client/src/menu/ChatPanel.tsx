@@ -3,13 +3,13 @@ import { KeyboardEvent, useEffect, useRef, useState } from "react"
 import { Box } from "./Box"
 import { Message } from "common/src/SocketSpec";
 
-export function ChatPanel ({ active, className, messages, sendMessage }: { active: boolean, className?: string, messages: Message[], sendMessage: (message: string) => void }): JSX.Element {
+export function ChatPanel ({ active, className, messages, sendMessage, recipient, recipientColor }: { active: boolean, className?: string, messages: Message[], sendMessage: (message: string, recipient?: string) => void, recipient?: string, recipientColor?: string }): JSX.Element {
   const [chatMessage, setChatMessage] = useState('')
-  const messageRef = useRef<HTMLElement>();
+  const messageRef = useRef<HTMLElement>(null);
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.code !== 'Enter') return
-    if (chatMessage !== '') sendMessage(chatMessage.trim())
+    if (chatMessage !== '') sendMessage(chatMessage.trim(), recipient)
     setChatMessage('')
   }
 
@@ -23,18 +23,27 @@ export function ChatPanel ({ active, className, messages, sendMessage }: { activ
   useEffect(() => {
     messageRef?.current?.scrollIntoView({ block: "end", inline: "end" })
   }, [messages])
+
+  const MessageElement = ({ message }: { message: Message }): JSX.Element => {
+    let describerElement;
+    
+    if (message.private && message.from !== undefined && message.to !== undefined) describerElement = <>{`<`}<span style={{ color: `rgb(${message.fromColor})` }}>{message.from}</span><span className='text-grey-lighter'> to </span><span style={{ color: `rgb(${message.toColor})` }}>{message.to}</span>{`> `}</>
+    else if (message.from !== undefined) describerElement = <>{`<`}<span style={{ color: `rgb(${message.fromColor})` }}>{message.from}</span>{`> `}</>
+
+    return (
+      <p>
+        {describerElement}
+        <span className={clsx(message.private && 'text-grey-lighter')}>{message.text}</span>
+      </p>
+    );
+  }
   
   return (
-    <Box className={clsx('flex flex-col overflow-y-auto', className)} reff={messageRef}>
-      {messages.map((message, idx) => (
-        <p className={clsx(message.private && message.from === undefined && 'text-grey-lighter')} key={idx}>
-          {message.from !== undefined && <>{`<`}<span style={{ color: `rgb(${message.fromColor})` }}>{message.from}</span>{`> `}</>}
-          {message.text}
-        </p>
-      ))}
+    <Box className={clsx('flex flex-col overflow-y-auto', className)} ref={messageRef}>
+      {messages.map((message, idx) => (<MessageElement message={message} key={idx} />))}
       {active && (
         <div className='flex items-center gap-2 w-full'>
-          <span className='text-gray-400'>{'> '}</span>
+          <span className='text-gray-400'>{recipient !== undefined ? <>To <span style={{ color: `rgb(${recipientColor})` }}>{recipient}</span> {`>`}</> : '> '}</span>
           <input
             type='text'
             ref={input}

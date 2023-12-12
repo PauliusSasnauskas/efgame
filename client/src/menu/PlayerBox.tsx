@@ -8,6 +8,7 @@ import teambt from '../img/menus/player/teambt.svg'
 import teamgc from '../img/menus/player/teamgc.svg'
 import teamoc from '../img/menus/player/teamoc.svg'
 import teamrr from '../img/menus/player/teamrr.svg'
+import { MouseEventHandler } from 'react'
 
 const getTeamIcon: { [k: string]: string } = {
   'bluetriangle': teambt,
@@ -16,17 +17,17 @@ const getTeamIcon: { [k: string]: string } = {
   'redrectangle': teamrr,
 }
 
-export function PlayerBox ({ player, className, myTurn, selected = false }: { player: PlayerDTO, className?: string, myTurn: boolean, selected?: boolean }): JSX.Element {
+export function PlayerBox ({ player, className, myTurn, onClick, selected = false }: { player: PlayerDTO, className?: string, myTurn: boolean, onClick?: MouseEventHandler<HTMLDivElement>, selected?: boolean }): JSX.Element {
   if (player.team === 'spectator') {
     return (
-      <div className={clsx('m-item m-darkbox pb-0.25 justify-start pl-10 relative', className, 'text-gray-500')}>
+      <div onClick={onClick} className={clsx('m-item m-darkbox pb-0.25 justify-start pl-10 relative cursor-pointer', className, 'text-gray-500')}>
         {player.name}
       </div>
     )
   }
 
   return (
-    <div className={clsx('m-item m-playerbox pb-0.25 justify-start pl-10 relative', className, player.eliminated && 'text-gray-500')}>
+    <div onClick={onClick} className={clsx('m-item m-playerbox pb-0.25 justify-start pl-10 relative cursor-pointer', className, player.eliminated && 'text-gray-500')}>
       <span className='absolute left-4 top-3 w-3 h-3' style={{ backgroundColor: `rgb(${player.color})` }}>
         {player.eliminated && <img src={eliminated} alt='' />}
       </span>

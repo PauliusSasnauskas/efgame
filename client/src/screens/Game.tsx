@@ -37,13 +37,13 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   const [menuVisible, setMenuVisible] = useState(false)
   const [chatActive, setChatActive] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
-  const [selected, select] = useState<[number, number]>([0, 0])
+  const [messageRecipient, setMessageRecipient] = useState<{ name: string, color: string } | undefined>(undefined)
 
+  const [selected, select] = useState<[number, number]>([0, 0])
   const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>()
   const [serverInfo, setServerInfo] = useState<ServerGreeting | undefined>()
   const [metaInfo, setMetaInfo] = useState<GameInfoLobby | GameInfoPlaying | undefined>()
   const [gameInfo, setGameInfo] = useState<{stats: {[k: string]: Stat}, map: Tile[]} | undefined>()
-
   const [statReq, setStatReq] = useState<StatReq | undefined>()
 
   const trySelect = (newx: number, newy: number) => {
@@ -64,6 +64,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           setMenuVisible((oldval) => !oldval)
           return
         case 'Enter':
+          setMessageRecipient(undefined)
           setChatActive(true)
           return
         case 'ArrowUp':
@@ -152,8 +153,10 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const sendChat = (message: string) => {
-    socket?.emit('chat', message)
+  const sendChat = (message: string, recipient?: string) => {
+    setMessageRecipient(undefined)
+    if (recipient === currentPlayer?.name) return
+    socket?.emit('chat', message, recipient)
   }
 
   const quitGame = () => {
@@ -211,7 +214,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           <div>
             <Bar>Players</Bar>
             {metaInfo.players.map((player) => (
-              <PlayerBox player={player} myTurn={metaInfo.gameState === GameState.PLAYING ? player.name === metaInfo.turn : false} key={player.name} selected={gameInfo !== undefined ? getSelectedTile()?.owner?.name === player.name : false} />
+              <PlayerBox player={player} myTurn={metaInfo.gameState === GameState.PLAYING ? player.name === metaInfo.turn : false} key={player.name} selected={gameInfo !== undefined ? getSelectedTile()?.owner?.name === player.name : false} onClick={() => { setMessageRecipient({ name: player.name, color: player.color }); setChatActive(true) }} />
             ))}
           </div>
           <div className='flex flex-col'>
@@ -289,7 +292,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           <Button onClick={quitGame}>X Cancel</Button>
         </div>
       )}
-      <ChatPanel active={chatActive} messages={messages} sendMessage={sendChat} className='col-span-2 row-start-2 h-64' />
+      <ChatPanel active={chatActive} messages={messages} sendMessage={sendChat} recipient={messageRecipient?.name} recipientColor={messageRecipient?.color} className='col-span-2 row-start-2 h-64' />
     </div>
   )
 }
