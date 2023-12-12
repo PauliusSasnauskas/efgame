@@ -8,12 +8,22 @@ export default function Slider({ value, setValue, muted = false }: { value: numb
   const [slideAudio, setSlideAudio] = useState<HTMLMediaElement | undefined>(undefined)
 
   useEffect(() => {
+    if (slideAudio === undefined) return
+    slideAudio.volume = gameContext.settings.soundVolume / 100
+  }, [gameContext.settings.soundVolume])
+
+  useEffect(() => {
     const audio = new Audio('sound/menu-slider.wav')
     audio.loop = true
-    audio.volume = muted ? 0 : gameContext.settings.soundVolume / 100
+    audio.volume = gameContext.settings.soundVolume / 100
     audio.muted = muted
     setSlideAudio(audio)
-  }, [gameContext.settings.soundVolume, muted])
+    return () => {
+      audio.pause()
+      audio.remove()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [muted])
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(Number.parseInt(e.target.value))

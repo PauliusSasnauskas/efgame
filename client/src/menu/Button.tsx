@@ -9,6 +9,7 @@ export function Button ({ children, onClick, onMouseEnter, onMouseLeave, icon, c
   hoverAudio.volume = gameContext.settings.soundVolume / 100
 
   let clickSound = new Audio()
+  clickSound.volume = gameContext.settings.soundVolume / 100
   if (sound != null) clickSound.src = sound
 
   const [showHoverTimeout, setShowHoverTimeout] = useState<number | NodeJS.Timeout | undefined>(undefined)

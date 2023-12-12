@@ -47,6 +47,7 @@ const clickAudio = new Audio('sound/menu-click.wav')
 function ColorButton ({ color, onClick }: { color: string, onClick: (color: string) => void }): JSX.Element {
   const gameContext = useContext(MenuContext)
   hoverAudio.volume = gameContext.settings.soundVolume / 100
+  clickAudio.volume = gameContext.settings.soundVolume / 100
 
   const onClickFull = (color: string) => {
     clickAudio.play()
