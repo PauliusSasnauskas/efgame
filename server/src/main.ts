@@ -2,6 +2,8 @@ import { DisconnectReason, Server } from 'socket.io';
 import Game from './Game';
 import { ClientEvents, GameState, Message, ServerEvents } from 'common/src/SocketSpec'
 import config from './Config'
+import { createServer } from 'https'
+import { readFileSync } from 'fs'
 
 const dcReasons: {[k: DisconnectReason | string]: string} = {
   "io server disconnect": "Server (io) removed connection",
@@ -18,8 +20,15 @@ const port = 3001
 
 const game = new Game();
 
-const io = new Server<ClientEvents, ServerEvents>({ cors: { origin: '*' } });
-io.listen(port)
+const certLocation = process.env.CERT_LOC
+
+const httpsServer = createServer({
+  key: readFileSync(certLocation + '/server.key'),
+  cert: readFileSync(certLocation + '/server.crt')
+})
+
+const io = new Server<ClientEvents, ServerEvents>(httpsServer, { cors: { origin: '*' } })
+httpsServer.listen(port)
 console.log(`Started server on port ${port}`)
 
 const socketIdToPlayerName: {[k: string]: string} = {}
