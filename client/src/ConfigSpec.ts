@@ -1,11 +1,11 @@
 import { ReactNode } from "react"
 import { Entity, Resource, Tile } from "common/src/Tile"
-import { Player } from "common/src/Player"
+import { Player, StatReq } from "common/src/Player"
 
 export default interface ConfigSpec {
   name: string,
   version: string
-  actions: { [k: string]: ConfigAction | null }
+  actions: { [k: string]: ConfigAction | 'endturn' }
   entities: { [k: string]: EntityTile | ConfigStaticEntity }
   resources: { [k: string]: ResourceTile | ConfigStaticEntity }
   stats: { [k: string]: ConfigStat }
@@ -14,9 +14,9 @@ export default interface ConfigSpec {
 export interface ConfigAction {
   key: string | string[] // keyboard shortcut
   button: Function | ConfigSimpleAction // button implementation
-  req?: {[k: string]: number | string} // stat requirements to show on stat panel
-  showOnTile?: (tile: Tile | undefined, currentPlayer: Player) => boolean // should this button be shown on a tile
-  allowOnTile?: (tile: Tile | undefined, currentPlayer: Player) => boolean // should this button be enabled on a tile
+  req?: {[k: string]: number | string} | ((tile: Tile | undefined, map: Tile[], player: Player) => StatReq | undefined) // stat requirements to show on stat panel
+  showOnTile?: (tile: Tile | undefined, map: Tile[], player: Player) => boolean // should this button be shown on a tile
+  allowOnTile?: (tile: Tile | undefined, map: Tile[], player: Player) => boolean // should this button be enabled on a tile
 }
 
 export interface ConfigSimpleAction {

@@ -45,3 +45,5 @@ export interface Stat {
   val: number | string,
   max?: number
 }
+
+export type StatReq = { [k: string]: number | string }

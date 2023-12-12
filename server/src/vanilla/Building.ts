@@ -1,4 +1,3 @@
-import { Player } from "common/src/Player"
 import { ServerEntity, ServerPlayer, ServerTile, ServerTileEventArgs } from "../ConfigSpec"
 import { getRandomInt } from "../util"
 

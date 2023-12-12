@@ -22,7 +22,7 @@ const config: ConfigSpec = {
   version: '1',
   actions: {
     'v:attack': AttackAction,
-    'endturn': null,
+    'endturn': 'endturn',
     'v:buildcapitol': BuildCapitolAction,
     'v:buildmine': BuildMineAction,
     'v:buildbarracks': BuildBarracksAction,

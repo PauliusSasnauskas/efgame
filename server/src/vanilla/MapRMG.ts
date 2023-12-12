@@ -1,8 +1,8 @@
 import { Player } from "common/src/Player"
 import config from "../Config"
-import { getRandomInt } from "../util"
 import { Capitol } from "./Building"
 import { ServerTile } from "../ConfigSpec"
+import { getRandomInt } from "../util"
 
 const maxDistTo1stGold = 3
 

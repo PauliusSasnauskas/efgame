@@ -1,5 +1,3 @@
-import { ReactNode } from "react";
-
 export default function KeyIcon({ name }: { name?: string | string[] }): JSX.Element {
   let renderKey = name
 

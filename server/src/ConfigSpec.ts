@@ -1,4 +1,4 @@
-import { Player, Stat } from "common/src/Player"
+import { Player, Stat, StatReq } from "common/src/Player"
 import { GameState } from "common/src/SocketSpec"
 import { Entity, Owner, Resource, Tile } from "common/src/Tile"
 
@@ -14,8 +14,6 @@ export default interface ConfigSpec {
   processEndTurnForPlayer: (player: ServerPlayer, map: ServerTile[][], mapSize: number, players: ServerPlayer[]) => void
   checkWinner: (map: ServerTile[][], mapSize: number, players: ServerPlayer[]) => Player | undefined
 }
-
-export type StatReq = { [k: string]: number | string }
 
 export interface ServerAction {
   canInvoke: (data: ServerTileEventArgs) => boolean

@@ -1,13 +1,13 @@
 import { Player } from "common/src/Player"
-import { ServerTile } from "./ConfigSpec"
+import { Tile } from "common/src/Tile"
 
 export function getRandomInt(max: number): number {
   max = Math.floor(max)
   return Math.floor(Math.random() * max) // The maximum is exclusive
 }
 
-export function getTilesWhere (map: ServerTile[][], mapSize: number, where: (t: ServerTile) => boolean): ServerTile[] {
-  const tiles: ServerTile[] = []
+export function getTilesWhere (map: Tile[][], mapSize: number, where: (t: Tile) => boolean): Tile[] {
+  const tiles: Tile[] = []
   for (let i = 0; i < mapSize; i++){
     for (let j = 0; j < mapSize; j++){
       if (where(map[i][j])) tiles.push(map[i][j])
@@ -16,7 +16,7 @@ export function getTilesWhere (map: ServerTile[][], mapSize: number, where: (t: 
   return tiles
 }
 
-export function countTilesWhere (map: ServerTile[][], mapSize: number, where: (t: ServerTile) => boolean): number {
+export function countTilesWhere (map: Tile[][], mapSize: number, where: (t: Tile) => boolean): number {
   let count = 0
   for (let i = 0; i < mapSize; i++){
     for (let j = 0; j < mapSize; j++){
@@ -26,15 +26,15 @@ export function countTilesWhere (map: ServerTile[][], mapSize: number, where: (t
   return count
 }
 
-export function isOwned (tile: ServerTile, player: Player): boolean {
+export function isOwned (tile: Tile, player: Player): boolean {
   return tile.owner?.name === player.name
 }
 
-export function isOwnedEntity (tile: ServerTile, player: Player): boolean {
+export function isOwnedEntity (tile: Tile, player: Player): boolean {
   return isOwned(tile, player) && tile.entity !== undefined
 }
 
-export function isOwnedNoEntity (tile: ServerTile, player: Player): boolean {
+export function isOwnedNoEntity (tile: Tile, player: Player): boolean {
   return isOwned(tile, player) && tile.entity === undefined
 }
 
@@ -45,7 +45,7 @@ export function hasStat (statName: string, player: Player, amount: number): bool
   return false
 }
 
-export function isTileSurrounded(map: ServerTile[][], mapSize: number, x: number, y: number, playerName: string): boolean {
+export function isTileSurrounded(map: Tile[][], mapSize: number, x: number, y: number, playerName: string): boolean {
   let [dir1, dir2, dir3, dir4] = [false, false, false, false]
   if (y > 0         && map[y-1][x].owner?.name === playerName) dir1 = true
   if (x < mapSize-1 && map[y][x+1].owner?.name === playerName) dir2 = true

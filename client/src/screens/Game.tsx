@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { MouseEventHandler, useContext, useEffect, useState } from 'react'
 import { MenuContext, GameScreen } from '../App'
 import { Button } from '../menu/Button'
 import { Bar } from '../menu/Bar'
@@ -13,9 +13,10 @@ import { Socket, io } from 'socket.io-client'
 import { ClientEvents, GameInfoLobby, GameInfoPlaying, Message, ServerEvents, ServerGreeting } from 'common/src/SocketSpec'
 import { GameState } from '../game/GameState'
 import { Tile } from 'common/src/Tile'
-import { Player, Stat } from 'common/src/Player'
+import { Player, Stat, StatReq } from 'common/src/Player'
 import StatBox from '../game/StatBox'
 import KeyIcon from '../menu/KeyIcon'
+import { ConfigAction } from '../ConfigSpec'
 
 const reconnectionAttempts = 5
 
@@ -32,7 +33,7 @@ const eliminatedColor = '127,127,127'
 export function Game ({ ip }: { ip: string }): JSX.Element {
   const gameContext = useContext(MenuContext)
 
-  const [socket, setSocket] = useState<Socket<ServerEvents, ClientEvents> | undefined>(undefined)
+  const [socket, setSocket] = useState<Socket<ServerEvents, ClientEvents> | undefined>()
   const [menuVisible, setMenuVisible] = useState(false)
   const [chatActive, setChatActive] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -43,14 +44,18 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   const [metaInfo, setMetaInfo] = useState<GameInfoLobby | GameInfoPlaying | undefined>()
   const [gameInfo, setGameInfo] = useState<{stats: {[k: string]: Stat}, map: Tile[]} | undefined>()
 
+  const [statReq, setStatReq] = useState<StatReq | undefined>()
+
   const trySelect = (newx: number, newy: number) => {
     if (metaInfo === undefined) return
     if (newx < 0 || newx >= metaInfo.mapSize || newy < 0 || newy >= metaInfo.mapSize) return
     select([newx, newy])
+    setStatReq(undefined)
   }
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent): void => {
+      // TODO: if chat open, don't handle game actions
       switch (e.code) {
         case 'Escape':
           if (chatActive) {
@@ -79,11 +84,12 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           return
       }
       Object.entries(config.actions).forEach(([action, actionSpec]) => {
-        if (typeof actionSpec?.key === 'string' && e.code === actionSpec.key) {
+        if (actionSpec === 'endturn') return
+        if (typeof actionSpec.key === 'string' && e.code === actionSpec.key) {
           invokeAction(action, selected)
           return
         }
-        if (typeof actionSpec?.key === 'object' && actionSpec.key.includes(e.code)) invokeAction(action, selected)
+        if (typeof actionSpec.key === 'object' && actionSpec.key.includes(e.code)) invokeAction(action, selected)
       })
     }
     document.addEventListener('keydown', handleKey)
@@ -162,9 +168,11 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
 
   const endTurn = () => {
     socket?.emit('endTurn')
+    setStatReq(undefined)
   }
 
   const invokeAction = (action: string, tile: [number, number]) => {
+    setStatReq(undefined)
     socket?.emit('action', { action, x: tile[0], y: tile[1] })
   }
 
@@ -172,8 +180,20 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={endTurn} disabled={disabled} hoverElement={<KeyIcon name={'Space'} />} />
   }
 
-  function getTile(x: number, y: number): Tile | undefined {
+  const getTile = (x: number, y: number): Tile | undefined => {
     return gameInfo?.map.find((tile: Tile) => tile.x === x && tile.y === y)
+  }
+
+  const getSelectedTile = (): Tile | undefined => getTile(selected[0], selected[1])
+
+  const clearStatReq = () => setStatReq(undefined)
+  const getFunctionSetStatReq = (statReq: ConfigAction['req']): MouseEventHandler<any> => () => {
+    if (statReq === undefined || gameInfo === undefined || metaInfo === undefined || currentPlayer === undefined) return
+    if (typeof statReq === 'function') {
+      setStatReq(statReq(getSelectedTile(), gameInfo.map, currentPlayer))
+    }else{
+      setStatReq(statReq)
+    }
   }
 
   return (
@@ -192,7 +212,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           <div>
             <Bar>Players</Bar>
             {metaInfo.players.map((player) => (
-              <PlayerBox player={player} myTurn={metaInfo.gameState === GameState.PLAYING ? player.name === metaInfo.turn : false} key={player.name} selected={gameInfo !== undefined ? getTile(selected[0], selected[1])?.owner?.name === player.name : false} />
+              <PlayerBox player={player} myTurn={metaInfo.gameState === GameState.PLAYING ? player.name === metaInfo.turn : false} key={player.name} selected={gameInfo !== undefined ? getSelectedTile()?.owner?.name === player.name : false} />
             ))}
           </div>
           <div className='flex flex-col'>
@@ -249,19 +269,17 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
               <>
                 <Bar>Turn: {metaInfo.turnNumber}</Bar>
                 {Object.entries(gameInfo.stats).map(([statName, stat]) => (
-                  <StatBox src={config.stats[statName].img} stat={stat} key={statName} />
+                  <StatBox src={config.stats[statName].img} stat={stat} key={statName} showReq={statReq?.[statName]} />
                 ))}
+                {!('endturn' in config.actions) && <EndTurnButton disabled={metaInfo.turn !== currentPlayer?.name} />}
                 {Object.entries(config.actions).map(([actionName, action]) => {
-                  if (action === null){
-                    return <EndTurnButton key={actionName} disabled={metaInfo.turn !== currentPlayer?.name} />
-                  }
+                  if (action === 'endturn') return <EndTurnButton key={actionName} disabled={metaInfo.turn !== currentPlayer?.name} />
                   if (typeof action.button === 'function'){
                     const ActionElement = action.button
-                    return <ActionElement onClick={() => { invokeAction(actionName, selected) }} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} hoverElement={<KeyIcon name={action.key} />} />
+                    return <ActionElement onClick={() => { invokeAction(actionName, selected) }} onMouseEnter={getFunctionSetStatReq(action.req)} onMouseLeave={clearStatReq} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getSelectedTile(), gameInfo.map, currentPlayer) ?? false)} key={actionName} hoverElement={<KeyIcon name={action.key} />} />
                   }
-                  return <SimpleAction img={action.button.img} name={action.button.name} onClick={() => { invokeAction(actionName, selected) }} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getTile(selected[0], selected[1]), currentPlayer) ?? false)} key={actionName} hoverElement={<KeyIcon name={action.key} />} />
+                  return <SimpleAction img={action.button.img} name={action.button.name} onClick={() => { invokeAction(actionName, selected) }} onMouseEnter={getFunctionSetStatReq(action.req)} onMouseLeave={clearStatReq} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getSelectedTile(), gameInfo.map, currentPlayer) ?? false)} key={actionName} hoverElement={<KeyIcon name={action.key} />} />
                 })}
-                {!('endturn' in config.actions) && <EndTurnButton disabled={metaInfo.turn !== currentPlayer?.name} />}
               </>
             )}
           </div>

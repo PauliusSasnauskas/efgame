@@ -1,7 +1,8 @@
 import { Player } from "common/src/Player"
-import { ServerAction, ServerPlayer, ServerTile, StatReq } from "../ConfigSpec"
+import { ServerAction, ServerPlayer, ServerTile } from "../ConfigSpec"
 import { Barracks, Mine, Tower, WoodWall, StoneWall, Capitol } from "./Building"
 import { countTilesWhere, hasStat, isOwned, isOwnedEntity, isOwnedNoEntity, isTileSurrounded } from "../util"
+import { buildingInfo } from "common/src/vanilla/Building"
 
 function isAttackable (tile: ServerTile, player: Player) {
   if (tile.owner === undefined && tile.entity === undefined){
@@ -98,15 +99,6 @@ function tryClaimSurrounded (x: number, y: number, player: ServerPlayer, map: Se
   tryTileSurroundCapture(x, y+1, player, map, mapSize, players)
 }
 
-const buildingXpReward: {[k:string]: number} = {
-  'v:capitol': 15,
-  'v:mine': 10,
-  'v:barracks': 10,
-  'v:tower': 5,
-  'v:woodwall': 8,
-  'v:stonewall': 15,
-}
-
 export const AttackAction: ServerAction = {
   canInvoke: ({ tile, player, map, mapSize }) => {
     if (!isAttackable(tile, player)) return false
@@ -122,7 +114,7 @@ export const AttackAction: ServerAction = {
       return
     }
     if (tile.entity !== undefined && tile.entity.health === 1) {
-      addStat('v:xp', player, buildingXpReward[tile.entity.id] * (tileIsNeutral ? 0.25 : 1))
+      addStat('v:xp', player, buildingInfo[tile.entity.id].destroyXpReward * (tileIsNeutral ? 0.25 : 1))
       if (tile.entity.id === 'v:capitol') {
         const defendingPlayer = findPlayer(tile.owner!.name, players)
         if (defendingPlayer !== undefined && hasOnlyOneCapitol(map, mapSize, defendingPlayer.name)){
@@ -184,35 +176,17 @@ export const DemolishAction: ServerAction = {
   }
 }
 
-const repairReqForBuilding: { [k: string]: StatReq } = {
-  'v:capitol': { 'v:action': 3, 'v:gold': 230, 'v:army': 2 },
-  'v:mine': { 'v:action': 2, 'v:gold': 35, 'v:army': 3 },
-  'v:barracks': { 'v:action': 2, 'v:gold': 50, 'v:army': 3 },
-  'v:tower': { 'v:action': 2, 'v:gold': 50, 'v:army': 1 },
-  'v:woodwall': { 'v:action': 1, 'v:gold': 30, 'v:army': 1 },
-  'v:stonewall': { 'v:action': 1, 'v:gold': 30, 'v:army': 1 }
-}
-
-const maxHealthForBuilding: { [k: string]: number } = {
-  'v:capitol': 3,
-  'v:mine': 2,
-  'v:barracks': 2,
-  'v:tower': 2,
-  'v:woodwall': 4,
-  'v:stonewall': 7
-}
-
 export const RepairAction: ServerAction = {
   canInvoke: ({ tile, player }) => {
     if (!isOwnedEntity(tile, player)) return false
 
     const building = tile.entity!
-    const repairReq = repairReqForBuilding[building.id]
+    const repairReq = buildingInfo[building.id].repairReq
     const hasStats = Object.entries(repairReq).map(([statName, statReq]) => hasStat(statName, player, statReq as number))
     const hasStatsAll = hasStats.reduce((prev, cur) => prev && cur, true)
     if (!hasStatsAll) return false
 
-    if (building.health! < maxHealthForBuilding[building.id]) return true
+    if (building.health! < buildingInfo[building.id].maxHealth) return true
 
     return false
   },
@@ -221,7 +195,7 @@ export const RepairAction: ServerAction = {
 
     building.health! += 1
 
-    const repairReq = repairReqForBuilding[building.id]
+    const repairReq = buildingInfo[building.id].repairReq
     Object.entries(repairReq).forEach(([statName, statReq]) => deductStat(statName, player, statReq as number))
   }
 }
@@ -247,7 +221,7 @@ export const BuildCapitolAction: ServerAction = {
 
 export const BuildMineAction: ServerAction = {
   canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player),
-  statsCost: { 'v:action': 6, 'v:gold': 125 },
+  statsCost: buildingInfo['v:mine'].buildReq,
   invoke: ({ tile, player, turnNumber }) => {
     addStat('v:xp', player, 0.5)
     tile.entity = new Mine(turnNumber)
@@ -256,7 +230,7 @@ export const BuildMineAction: ServerAction = {
 
 export const BuildBarracksAction: ServerAction = {
   canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player),
-  statsCost: { 'v:action': 6, 'v:gold': 100 },
+  statsCost: buildingInfo['v:barracks'].buildReq,
   invoke: ({ tile, player, map, mapSize, turnNumber }) => {
     const barracksHealthy = countTilesWhere(map, mapSize, (tile) => isOwned(tile, player) && tile.entity?.id === 'v:barracks' && tile.entity.health === 2)
     const barracksDamaged = countTilesWhere(map, mapSize, (tile) => isOwned(tile, player) && tile.entity?.id === 'v:barracks' && tile.entity.health === 1)
@@ -268,8 +242,8 @@ export const BuildBarracksAction: ServerAction = {
 }
 
 export const BuildTowerAction: ServerAction = {
-  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, 25),
-  statsCost: { 'v:action': 4, 'v:gold': 90, 'v:army': 1 },
+  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, buildingInfo['v:tower'].xpReq!),
+  statsCost: buildingInfo['v:tower'].buildReq,
   invoke: ({ tile, player, turnNumber }) => {
     addStat('v:xp', player, 0.5)
     tile.entity = new Tower(turnNumber)
@@ -277,8 +251,8 @@ export const BuildTowerAction: ServerAction = {
 }
 
 export const BuildWoodWallAction: ServerAction = {
-  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, 50),
-  statsCost: { 'v:action': 4, 'v:gold': 115, 'v:army': 3 },
+  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, buildingInfo['v:woodwall'].xpReq!),
+  statsCost: buildingInfo['v:woodwall'].buildReq,
   invoke: ({ tile, player, turnNumber }) => {
     addStat('v:xp', player, 0.5)
     tile.entity = new WoodWall(turnNumber)
@@ -286,8 +260,8 @@ export const BuildWoodWallAction: ServerAction = {
 }
 
 export const BuildStoneWallAction: ServerAction = {
-  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, 135),
-  statsCost: { 'v:action': 7, 'v:gold': 180, 'v:army': 5 },
+  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, buildingInfo['v:stonewall'].xpReq!),
+  statsCost: buildingInfo['v:stonewall'].buildReq,
   invoke: ({ tile, player, turnNumber }) => {
     addStat('v:xp', player, 0.5)
     tile.entity = new StoneWall(turnNumber)
