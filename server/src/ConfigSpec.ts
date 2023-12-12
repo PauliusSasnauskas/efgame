@@ -9,28 +9,18 @@ export default interface ConfigSpec {
   entities: { [k: string]: null | (new (turn: number) => ServerEntity) }
   resources: { [k: string]: null | (new () => ServerResource) }
   stats: { [k: string]: (new () => ServerStat) }
-  mapNames: { [k: string]: (size: number, players: Player[]) => ServerTile[][] }
-  getMapForPlayer: (map: ServerTile[][], mapSize: number, player: Player, gameState: GameState) => Tile[]
-  processEndTurnForPlayer: (player: Player, map: ServerTile[][], mapSize: number, players: Player[]) => void
-  checkWinner: (map: ServerTile[][], mapSize: number, players: Player[]) => Player | undefined
+  mapNames: { [k: string]: (size: number, players: ServerPlayer[]) => ServerTile[][] }
+  getMapForPlayer: (map: ServerTile[][], mapSize: number, player: ServerPlayer, gameState: GameState) => Tile[]
+  processEndTurnForPlayer: (player: ServerPlayer, map: ServerTile[][], mapSize: number, players: ServerPlayer[]) => void
+  checkWinner: (map: ServerTile[][], mapSize: number, players: ServerPlayer[]) => Player | undefined
 }
 
 export type StatReq = { [k: string]: number | string }
 
 export interface ServerAction {
-  canInvoke: (data: ActionData) => boolean
-  statsCost?: StatReq | ((data: ActionData) => StatReq)
-  invoke: (data: ActionData) => void
-}
-
-interface ActionData {
-  tile: ServerTile
-  player: Player
-  map: ServerTile[][]
-  mapSize: number
-  players: Player[]
-  turnNumber: number
-  sendMessage: (message: string) => void
+  canInvoke: (data: ServerTileEventArgs) => boolean
+  statsCost?: StatReq | ((data: ServerTileEventArgs) => StatReq)
+  invoke: (data: ServerTileEventArgs) => void
 }
 
 export interface ServerEntity extends Entity {
@@ -38,8 +28,18 @@ export interface ServerEntity extends Entity {
   readonly turnBuilt: number
   health?: number
   state?: { [k: string]: string | number }
-  onTurnChange?: (lastTurnPlayer: Player, tile: ServerTile, map: ServerTile[][], mapSize: number, players: Player[]) => void
-  onDestroy?: (destroyer: Player, tile: ServerTile, map: ServerTile[][], mapSize: number, players: Player[]) => void
+  onTurnChange?: (data: ServerTileEventArgs) => void
+  onDestroy?: (data: ServerTileEventArgs) => void
+}
+
+export interface ServerTileEventArgs {
+  tile: ServerTile
+  player: ServerPlayer
+  map: ServerTile[][]
+  mapSize: number
+  players: ServerPlayer[]
+  turnNumber: number
+  sendMessage: (message: string) => void
 }
 
 export interface ServerResource extends Resource {
@@ -47,10 +47,31 @@ export interface ServerResource extends Resource {
   state?: { [k: string]: string | number }
 }
 
-export interface ServerStat extends Stat {
+export class ServerPlayer extends Player {
+  stats?: { [k: string]: ServerStat }
+}
+
+export class ServerStat implements Stat {
   val: string | number
-  max?: number | undefined
-  hiddenMax?: number | undefined
+  max?: number
+  hiddenMax?: number
+
+  set(val: string | number) {
+    this.val = val
+  }
+
+  add(val: number) {
+    if (typeof this.val !== 'number' || typeof val !== "number") throw new Error('Cannot add stat which is not a number.')
+    this.val += val
+    if (this.max !== undefined && this.val > this.max) this.val = this.max
+    if (this.hiddenMax !== undefined && this.val > this.hiddenMax) this.val = this.hiddenMax
+  }
+
+  deduct(val: number) {
+    if (typeof this.val !== 'number' || typeof val !== "number") throw new Error('Cannot deduct stat which is not a number.')
+    this.val -= val
+    if (this.val < 0) throw new Error('Stat below 0')
+  }
 }
 
 export class ServerTile implements Tile {

@@ -1,25 +1,25 @@
 import { ServerStat } from "../ConfigSpec"
 
-export class StatAction implements ServerStat {
+export class StatAction extends ServerStat {
   val = 8
   max = 12
   hiddenMax = 200
 }
 
-export class StatArmy implements ServerStat {
+export class StatArmy extends ServerStat {
   val = 20
   hiddenMax = 200
 }
 
-export class StatGold implements ServerStat {
+export class StatGold extends ServerStat {
   val = 350
   hiddenMax = 20000
 }
 
-export class StatXp implements ServerStat {
+export class StatXp extends ServerStat {
   val = 0
 }
 
-export class StatTerritory implements ServerStat {
+export class StatTerritory extends ServerStat {
   val = 1
 }

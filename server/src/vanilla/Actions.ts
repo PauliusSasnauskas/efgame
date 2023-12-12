@@ -1,5 +1,5 @@
 import { Player } from "common/src/Player"
-import { ServerAction, ServerTile, StatReq } from "../ConfigSpec"
+import { ServerAction, ServerPlayer, ServerTile, StatReq } from "../ConfigSpec"
 import { Barracks, Mine, Tower, WoodWall, StoneWall, Capitol } from "./Building"
 import { countTilesWhere, hasStat, isOwned, isOwnedEntity, isOwnedNoEntity, isTileSurrounded } from "../util"
 
@@ -22,7 +22,7 @@ function getTile (map: ServerTile[][], mapSize: number, x: number, y: number): S
   return map[y][x]
 }
 
-function isConnected (tile: ServerTile, player: Player, map: ServerTile[][], mapSize: number) {
+function isConnected (tile: ServerTile, player: ServerPlayer, map: ServerTile[][], mapSize: number) {
   const x = tile.x
   const y = tile.y
 
@@ -44,24 +44,20 @@ function isConnected (tile: ServerTile, player: Player, map: ServerTile[][], map
   return false
 }
 
-function findPlayer (playerName: string, players: Player[]): Player | undefined {
+function findPlayer (playerName: string, players: ServerPlayer[]): ServerPlayer | undefined {
   return players.find((player) => player.name === playerName)
 }
 
-function deductStat (statName: string, player: Player, amount: number): void {
+function deductStat (statName: string, player: ServerPlayer, amount: number): void {
   if (player.eliminated) return
-  const playerStats = player.stats!
-  const stat = playerStats[statName]
-  ;(stat.val as number) -= amount
+  (player.stats!)[statName].deduct(amount)
 }
 
-function addStat (statName: string, player: Player, amount: number): void {
-  const playerStats = player.stats!
-  const stat = playerStats[statName]
-  ;(stat.val as number) += amount
+function addStat (statName: string, player: ServerPlayer, amount: number): void {
+  (player.stats!)[statName].add(amount)
 }
 
-function isNeutralTile (tile: ServerTile, player: Player, players: Player[]): boolean {
+function isNeutralTile (tile: ServerTile, player: ServerPlayer, players: ServerPlayer[]): boolean {
   if (tile.owner === undefined) return true
   const tilePlayer = findPlayer(tile.owner.name, players)
   if (tilePlayer === undefined) return true
@@ -75,7 +71,7 @@ function hasOnlyOneCapitol (map: ServerTile[][], mapSize: number, playerName: st
   return numOwnedCapitols === 1
 }
 
-function tryTileSurroundCapture (x: number, y: number, player: Player, map: ServerTile[][], mapSize: number, players: Player[]) {
+function tryTileSurroundCapture (x: number, y: number, player: ServerPlayer, map: ServerTile[][], mapSize: number, players: ServerPlayer[]) {
   if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) return
   if (!isTileSurrounded(map, mapSize, x, y, player.name)) return
   const tile = map[y][x]
@@ -95,7 +91,7 @@ function tryTileSurroundCapture (x: number, y: number, player: Player, map: Serv
   addStat('v:territory', player, 1)
 }
 
-function tryClaimSurrounded (x: number, y: number, player: Player, map: ServerTile[][], mapSize: number, players: Player[]) {
+function tryClaimSurrounded (x: number, y: number, player: ServerPlayer, map: ServerTile[][], mapSize: number, players: ServerPlayer[]) {
   tryTileSurroundCapture(x-1, y, player, map, mapSize, players)
   tryTileSurroundCapture(x+1, y, player, map, mapSize, players)
   tryTileSurroundCapture(x, y-1, player, map, mapSize, players)
@@ -171,7 +167,7 @@ export const TransferAction: ServerAction = {
   invoke: ({ tile, players }) => {
     const receiver = findPlayer(tile.owner!.name, players)
     if (receiver?.stats !== undefined) {
-      (receiver.stats['v:gold'].val as number) += 50
+      receiver.stats['v:gold'].add(50)
     }
   }
 }

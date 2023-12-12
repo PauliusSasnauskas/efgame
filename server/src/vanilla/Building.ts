@@ -1,8 +1,8 @@
 import { Player } from "common/src/Player"
-import { ServerEntity, ServerTile } from "../ConfigSpec"
+import { ServerEntity, ServerPlayer, ServerTile, ServerTileEventArgs } from "../ConfigSpec"
 import { getRandomInt } from "../util"
 
-function isTileOwnerEndingTurn (tile: ServerTile, lastTurnPlayer: Player): boolean {
+function isTileOwnerEndingTurn (tile: ServerTile, lastTurnPlayer: ServerPlayer): boolean {
   return (tile.owner?.name === lastTurnPlayer.name)
 }
 
@@ -15,7 +15,7 @@ export class Capitol implements ServerEntity {
     this.turnBuilt = turn
   }
 
-  onTurnChange (lastTurnPlayer: Player, tile: ServerTile) {
+  onTurnChange ({ player: lastTurnPlayer, tile }: ServerTileEventArgs) {
     if (!(isTileOwnerEndingTurn(tile, lastTurnPlayer))) return
     const playerStats = lastTurnPlayer.stats!
     ;(playerStats['v:action'].val as number) += 1
@@ -31,7 +31,7 @@ export class Mine implements ServerEntity {
     this.turnBuilt = turn
   }
 
-  onTurnChange (lastTurnPlayer: Player, tile: ServerTile) {
+  onTurnChange ({ player: lastTurnPlayer, tile }: ServerTileEventArgs) {
     if (!(isTileOwnerEndingTurn(tile, lastTurnPlayer))) return
     const playerStats = lastTurnPlayer.stats!
     ;(playerStats['v:gold'].val as number) += (tile.resource?.id === 'v:gold' ? 16 : 4) + getRandomInt(5)

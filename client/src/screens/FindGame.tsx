@@ -20,7 +20,7 @@ export function FindGame (): JSX.Element {
       <div className='flex flex-col items-center gap-6'>
         <div>
           <div className='bg-[url("./img/menus/slider-base.svg")] h-10.5 w-56 px-3 py-2.5'>
-            <input type='text' maxLength={21} className='bg-transparent border-none outline-none' value={ip} onChange={(e) => { setIp(e.target.value); gameContext.setConnectError('') }} placeholder='0.0.0.0' />
+            <input type='text' className='bg-transparent border-none outline-none' value={ip} onChange={(e) => { setIp(e.target.value); gameContext.setConnectError('') }} placeholder='0.0.0.0' />
           </div>
           <Button icon={connectIcon} onClick={() => gameContext.connect(ip)}>Connect</Button>
         </div>

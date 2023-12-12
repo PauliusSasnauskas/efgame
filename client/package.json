@@ -2,6 +2,7 @@
   "name": "efgame-client",
   "version": "2.0.0",
   "private": true,
+  "homepage": ".",
   "scripts": {
     "start": "set PORT=3000 && react-scripts start",
     "build": "react-scripts build",

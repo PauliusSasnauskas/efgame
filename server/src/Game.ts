@@ -2,7 +2,7 @@ import { Player, PlayerDTO, Stat } from "common/src/Player"
 import { GameState } from "common/src/SocketSpec"
 import config from "./Config"
 import { groupBy } from "common/src/util/array"
-import { ServerAction, ServerEntity, ServerTile } from "./ConfigSpec"
+import { ServerAction, ServerEntity, ServerPlayer, ServerTile } from "./ConfigSpec"
 import { Owner, Tile } from "common/src/Tile"
 
 function log(...params: any[]) {
@@ -11,7 +11,7 @@ function log(...params: any[]) {
 
 export default class Game {
   state: GameState = GameState.LOBBY
-  players: {[k: string]: Player} = {}
+  players: {[k: string]: ServerPlayer} = {}
   mapSize: number = 20
   mapName: string = 'RMG'
   map: ServerTile[][] = []
@@ -43,7 +43,7 @@ export default class Game {
 
   addPlayer (name: string, color: string) {
     if (name in this.players) return
-    this.players[name] = new Player(
+    this.players[name] = new ServerPlayer(
       name,
       color,
       this.state === GameState.PLAYING ? 'spectator' : undefined
@@ -54,7 +54,7 @@ export default class Game {
     return this.players[name]
   }
 
-  removePlayer (name: string): Player {
+  removePlayer (name: string): ServerPlayer {
     const player = this.players[name]
     if (this.state === GameState.PLAYING){
       if (player.team !== 'spectator') {
@@ -160,7 +160,7 @@ export default class Game {
     }
     turnChangeEvents.sort((a, b) => a[0] - b[0])
     turnChangeEvents.forEach(([_, tile, turnChangeEvent]) => {
-      turnChangeEvent(player, tile, this.map, this.mapSize, players)
+      turnChangeEvent({player, tile, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this)})
     })
 
     config.processEndTurnForPlayer(player, this.map, this.mapSize, players)
@@ -172,7 +172,7 @@ export default class Game {
     }
   }
 
-  private doesMeetReq (action: ServerAction, tile: ServerTile, player: Player, players: Player[]) {
+  private doesMeetReq (action: ServerAction, tile: ServerTile, player: ServerPlayer, players: ServerPlayer[]) {
     if (action.statsCost === undefined) return true
 
     let req = action.statsCost
@@ -193,7 +193,7 @@ export default class Game {
     return true 
   }
 
-  private subtractReq (action: ServerAction, tile: ServerTile, player: Player, players: Player[]) {
+  private subtractReq (action: ServerAction, tile: ServerTile, player: ServerPlayer, players: ServerPlayer[]) {
     if (action.statsCost === undefined) return
 
     let req = action.statsCost
@@ -204,7 +204,7 @@ export default class Game {
     for (const [statName, reqStat] of Object.entries(action.statsCost)) {
       const playerStat = (player.stats!)[statName]
       if (typeof playerStat.val === 'number'){
-        playerStat.val -= reqStat
+        playerStat.deduct(reqStat)
       }
     }
   }
@@ -225,7 +225,6 @@ export default class Game {
     const players = Object.values(this.players)
 
     const meetsReq = this.doesMeetReq(action, tile, player, players)
-
     if (!meetsReq) return
     if (!action.canInvoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })) return
     action.invoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })

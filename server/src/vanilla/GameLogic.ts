@@ -1,6 +1,5 @@
 import { Tile } from "common/src/Tile"
-import { ServerStat, ServerTile } from "../ConfigSpec"
-import { Player } from "common/src/Player"
+import { ServerPlayer, ServerStat, ServerTile } from "../ConfigSpec"
 import { GameState } from "common/src/SocketSpec"
 import { getTilesWhere, isTileSurrounded } from "../util"
 
@@ -15,7 +14,7 @@ function seeDiamond (seeMap: boolean[][], mapSize: number, x: number, y: number,
   }
 }
 
-export function getMapForPlayer (map: ServerTile[][], mapSize: number, player: Player, gameState: GameState): Tile[] {
+export function getMapForPlayer (map: ServerTile[][], mapSize: number, player: ServerPlayer, gameState: GameState): Tile[] {
   if (player.team === 'spectator' || player.eliminated || gameState === GameState.POSTGAME) {
     return map.flat()
   }
@@ -41,7 +40,7 @@ export function getMapForPlayer (map: ServerTile[][], mapSize: number, player: P
   return tiles
 }
 
-export function processEndTurnForPlayer (player: Player, map: ServerTile[][], mapSize: number, players: Player[]) {
+export function processEndTurnForPlayer (player: ServerPlayer, map: ServerTile[][], mapSize: number, players: ServerPlayer[]) {
   const playerStats = player.stats!
   ;(playerStats['v:gold'].val as number) += 2
   
@@ -63,7 +62,7 @@ export function processEndTurnForPlayer (player: Player, map: ServerTile[][], ma
   if (actionStat.max! > actionStat.hiddenMax!) actionStat.max = actionStat.hiddenMax
 }
 
-export function checkWinner (map: ServerTile[][], mapSize: number, players: Player[]): Player | undefined {
+export function checkWinner (map: ServerTile[][], mapSize: number, players: ServerPlayer[]): ServerPlayer | undefined {
   const capitols = getTilesWhere(map, mapSize, (tile) => tile.entity?.id === 'v:capitol')
   const playersWithCapitols = new Set(capitols.map((capitolTile) => capitolTile.owner?.name))
   playersWithCapitols.delete(undefined)
