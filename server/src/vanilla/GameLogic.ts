@@ -42,7 +42,7 @@ export function getMapForPlayer (map: ServerTile[][], mapSize: number, player: S
 
 export function processEndTurnForPlayer (player: ServerPlayer, map: ServerTile[][], mapSize: number, players: ServerPlayer[]) {
   const playerStats = player.stats!
-  ;(playerStats['v:gold'].val as number) += 2
+  playerStats['v:gold'].add(2)
   
   let [ownedInner, ownedOuter] = [0, 0]
   
@@ -57,9 +57,9 @@ export function processEndTurnForPlayer (player: ServerPlayer, map: ServerTile[]
   }
   
   const actionStat: ServerStat = playerStats['v:action']
-  ;(actionStat.val as number) += 7 + Math.floor(ownedInner / 50) + Math.floor(ownedOuter / 100)
   actionStat.max! = 12 + Math.floor((playerStats['v:xp'].val as number) / 8)
   if (actionStat.max! > actionStat.hiddenMax!) actionStat.max = actionStat.hiddenMax
+  actionStat.add(7 + Math.floor(ownedInner / 50) + Math.floor(ownedOuter / 100))
 }
 
 export function checkWinner (map: ServerTile[][], mapSize: number, players: ServerPlayer[]): ServerPlayer | undefined {
