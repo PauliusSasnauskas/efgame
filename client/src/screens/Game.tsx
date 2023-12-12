@@ -55,17 +55,16 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent): void => {
-      // TODO: if chat open, don't handle game actions
+      if (chatActive){
+        if (['Escape', 'Enter'].includes(e.code)) setChatActive(false)
+        return
+      }
       switch (e.code) {
         case 'Escape':
-          if (chatActive) {
-            setChatActive(false)
-            return
-          }
           setMenuVisible((oldval) => !oldval)
           return
         case 'Enter':
-          setChatActive((oldval) => !oldval)
+          setChatActive(true)
           return
         case 'ArrowUp':
           trySelect(selected[0], selected[1]-1)
