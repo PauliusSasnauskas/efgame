@@ -119,6 +119,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
 
     const onConnect = () => { 
       setMessages((m) => [...m, { text: `Connected to ${ip}.`, private: true }])
+      saveIpToLastIps(ip)
       setSocket(s)
       const player = { name: gameContext.settings.name, color: gameContext.settings.color } as Player
       setCurrentPlayer(player)
@@ -196,6 +197,16 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     }else{
       setStatReq(statReq)
     }
+  }
+
+  const saveIpToLastIps = (ip: string) => {
+    const oldLastIps = gameContext.settings.lastIps
+    if (oldLastIps.includes(ip)) {
+      gameContext.setSettings({ ...gameContext.settings, lastIps: [ip, ...oldLastIps.filter((lastIp) => lastIp !== ip)] })
+      return
+    }
+    if (oldLastIps.length >= 5) oldLastIps.pop()
+    gameContext.setSettings({ ...gameContext.settings, lastIps: [ip, ...oldLastIps] })
   }
 
   return (

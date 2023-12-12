@@ -28,7 +28,7 @@ export interface SettingsSpec {
   name: string
   musicVolume: number
   soundVolume: number
-  lastIp: string
+  lastIps: string[]
 }
 
 export const MenuContext = createContext<{
@@ -40,18 +40,18 @@ export const MenuContext = createContext<{
   setConnectError: Function,
   connectError: string,
   socket?: Socket
-}>({ setGameScreen: () => {}, settings: { color: '', name: '', musicVolume: 0, soundVolume: 0, lastIp: '' }, setSettings: () => {}, connect: () => {}, cancelConnect: () => {}, connectError: '', setConnectError: () => {} })
+}>({ setGameScreen: () => {}, settings: { color: '', name: '', musicVolume: 0, soundVolume: 0, lastIps: [] }, setSettings: () => {}, connect: () => {}, cancelConnect: () => {}, connectError: '', setConnectError: () => {} })
 
 function App (): JSX.Element {
   const [gameScreen, setGameScreen] = useState(GameScreen.TITLE)
   const [ip, setIp] = useState('')
   const [connectError, setConnectError] = useState('')
   const [settings, updateSettings] = useState<SettingsSpec>({
-    color: localStorage.getItem('settings.color') || '127,127,127',
-    name: localStorage.getItem('settings.name') || 'player',
-    musicVolume: Number.parseInt(localStorage.getItem('settings.musicVolume') || '80'),
-    soundVolume: Number.parseInt(localStorage.getItem('settings.soundVolume') || '80'),
-    lastIp: localStorage.getItem('settings.lastIp') || ''
+    color: localStorage.getItem('settings.color') ?? '127,127,127',
+    name: localStorage.getItem('settings.name') ?? 'player',
+    musicVolume: Number.parseInt(localStorage.getItem('settings.musicVolume') ?? '80'),
+    soundVolume: Number.parseInt(localStorage.getItem('settings.soundVolume') ?? '80'),
+    lastIps: localStorage.getItem('settings.lastIps')?.split(',') ?? []
   })
 
   const setSettings = (newSettings: SettingsSpec) => {
@@ -60,6 +60,7 @@ function App (): JSX.Element {
     localStorage.setItem('settings.name', newSettings.name)
     localStorage.setItem('settings.musicVolume', newSettings.musicVolume.toString())
     localStorage.setItem('settings.soundVolume', newSettings.soundVolume.toString())
+    localStorage.setItem('settings.lastIps', newSettings.lastIps.join(','))
   }
 
   const connect = (ip: string) => {

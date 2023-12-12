@@ -24,7 +24,7 @@ export function FindGame (): JSX.Element {
           </div>
           <Button icon={connectIcon} onClick={() => gameContext.connect(ip)}>Connect</Button>
         </div>
-        {gameContext.settings.lastIp !== '' && <Button onClick={() => gameContext.connect(gameContext.settings.lastIp)}>{gameContext.settings.lastIp}</Button>}
+        {gameContext.settings.lastIps.map((lastIp) => <Button onClick={() => gameContext.connect(lastIp)} key={lastIp}>{lastIp}</Button>)}
         <p className='text-red-500'>{gameContext.connectError}</p>
       </div>
       <div className='flex-grow'></div>
