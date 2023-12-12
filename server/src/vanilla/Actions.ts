@@ -120,7 +120,7 @@ export const AttackAction: ServerAction = {
     if (tile.entity !== undefined && tile.entity.health !== undefined && tile.entity.health > 1) {
       tile.entity.health -= 1
       return
-    } 
+    }
     if (tile.entity !== undefined && tile.entity.health === 1) {
       addStat('v:xp', player, buildingXpReward[tile.entity.id] * (tileIsNeutral ? 0.25 : 1))
       if (tile.entity.id === 'v:capitol') {
@@ -131,6 +131,8 @@ export const AttackAction: ServerAction = {
           sendMessage(`${defendingPlayer.name} has been eliminated by ${player.name}!`)
         }
       }
+    }else{
+      addStat('v:xp', player, tileIsNeutral ? 0.25 : 1)
     }
     if (tile.owner !== undefined) {
       const defendingPlayer = findPlayer(tile.owner!.name, players)!
