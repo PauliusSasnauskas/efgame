@@ -35,11 +35,9 @@ function sendGameInfo(io: Server<ClientEvents, ServerEvents>, game: Game) {
     io.emit('metaInfo', { gameState: game.state, players: game.listPlayers(), mapSize: game.mapSize, mapName: game.mapName, teams: game.teams })
   } else {
     io.emit('metaInfo', { gameState: game.state, players: game.listPlayers(), mapSize: game.mapSize, teams: game.teams, turnNumber: game.turnNumber, turn: game.turn })
-    io.fetchSockets().then((sockets) => {
-      sockets.forEach((socket) => {
-        socket.emit('gameInfo', { map: game.getMapForPlayer(socketIdToPlayerName[socket.id]), stats: game.getStatsForPlayer(socketIdToPlayerName[socket.id])})
-      })
-    })
+    io.fetchSockets().then((sockets) => sockets.forEach((socket) => {
+      socket.emit('gameInfo', { map: game.getMapForPlayer(socketIdToPlayerName[socket.id]), stats: game.getStatsForPlayer(socketIdToPlayerName[socket.id])})
+    }))
   }
 }
 

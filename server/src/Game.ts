@@ -88,8 +88,10 @@ export default class Game {
   }
 
   getStatsForPlayer (playerName: string): {[k: string]: Stat} {
-    if (!this.players[playerName].eliminated) {
-      return this.players[playerName].serializeStats()
+    const player = this.players[playerName]
+    if (player === undefined) return {}
+    if (!player.eliminated) {
+      return player.serializeStats()
     } else {
       return {}
     }

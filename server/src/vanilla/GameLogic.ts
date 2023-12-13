@@ -70,8 +70,8 @@ export function processEndTurnForPlayer (player: ServerPlayer, map: ServerTile[]
 export function checkWinnerTeams (players: ServerPlayer[], capitols: Tile[], playersWithCapitols: Set<string | undefined>): ServerPlayer | string | undefined {
   const teamsWithCapitols = new Set(capitols.map((capitolTile) => capitolTile.owner?.team))
   if (teamsWithCapitols.size !== 1) return undefined
-  const winningTeam = teamsWithCapitols.values().next().value as string
-  if (winningTeam === 'neutral') {
+  const winningTeam = teamsWithCapitols.values().next().value
+  if (winningTeam === undefined) {
     if (playersWithCapitols.size === 1) return players.find((player) => player.name === playersWithCapitols.values().next().value)
     return undefined
   }
@@ -79,7 +79,6 @@ export function checkWinnerTeams (players: ServerPlayer[], capitols: Tile[], pla
 }
 
 export function checkWinner (map: ServerTile[][], mapSize: number, players: ServerPlayer[], teams: string[]): ServerPlayer | string | undefined {
-  // TODO: check if team game and is only team remaining
   const capitols = getTilesWhere(map, mapSize, (tile) => tile.entity?.id === 'v:capitol')
   const playersWithCapitols = new Set(capitols.map((capitolTile) => capitolTile.owner?.name))
   playersWithCapitols.delete(undefined)
