@@ -134,6 +134,9 @@ body {
 .tile.fog {
   @apply bg-black bg-opacity-50;
 }
+.tile.oldfog {
+  @apply bg-black bg-opacity-50 opacity-70 saturate-[0.5];
+}
 .tile::after {
   @apply tile-selected opacity-0;
   content: '';

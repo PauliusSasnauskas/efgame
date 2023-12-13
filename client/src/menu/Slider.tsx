@@ -10,6 +10,7 @@ export default function Slider({ value, setValue, muted = false }: { value: numb
   useEffect(() => {
     if (slideAudio === undefined) return
     slideAudio.volume = gameContext.settings.soundVolume / 100
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameContext.settings.soundVolume])
 
   useEffect(() => {

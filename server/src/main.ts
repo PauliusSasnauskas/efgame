@@ -2,7 +2,8 @@ import { DisconnectReason, Server } from 'socket.io';
 import Game from './Game';
 import { ClientEvents, GameState, Message, ServerEvents } from 'common/src/SocketSpec'
 import config from './Config'
-import { createServer } from 'https'
+import { createServer as createServerHttps } from 'https'
+import { createServer as createServerHttp } from 'http'
 import { readFileSync } from 'fs'
 
 const dcReasons: {[k: DisconnectReason | string]: string} = {
@@ -16,20 +17,16 @@ const dcReasons: {[k: DisconnectReason | string]: string} = {
   "parse error": "Server received invalid data",
 }
 
-const port = 3001
+const port = process.env.PORT ?? 3001
+const server = process.env.USE_HTTPS === 'true' ? createServerHttps({
+  key: readFileSync(process.env.CERT_LOC + '/server.key'),
+  cert: readFileSync(process.env.CERT_LOC + '/server.crt')
+}) : createServerHttp()
+const io = new Server<ClientEvents, ServerEvents>(server, { cors: { origin: '*' } })
+server.listen(port)
+console.log(`Started server on port ${port}`)
 
 const game = new Game();
-
-const certLocation = process.env.CERT_LOC
-
-const httpsServer = createServer({
-  key: readFileSync(certLocation + '/server.key'),
-  cert: readFileSync(certLocation + '/server.crt')
-})
-
-const io = new Server<ClientEvents, ServerEvents>(httpsServer, { cors: { origin: '*' } })
-httpsServer.listen(port)
-console.log(`Started server on port ${port}`)
 
 const socketIdToPlayerName: {[k: string]: string} = {}
 

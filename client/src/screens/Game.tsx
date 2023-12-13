@@ -38,6 +38,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   const [chatActive, setChatActive] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [messageRecipient, setMessageRecipient] = useState<{ name: string, color: string } | undefined>(undefined)
+  const [gameKey, setGameKey] = useState('')
 
   const [selected, select] = useState<[number, number]>([0, 0])
   const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>()
@@ -117,7 +118,8 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
       setMessages((m) => [...m, { text: `Connection closed. ${dcReasons[reason]}`, private: true }])
     }
 
-    const onConnect = () => { 
+    const onConnect = () => {
+      setGameKey(Math.random().toString(36).substring(2,  5))
       setMessages((m) => [...m, { text: `Connected to ${ip}.`, private: true }])
       saveIpToLastIps(ip)
       setSocket(s)
@@ -150,6 +152,10 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
       s.removeAllListeners()
       s.disconnect()
       setMessages([])
+      setServerInfo(undefined)
+      setMetaInfo(undefined)
+      setGameInfo(undefined)
+      setStatReq(undefined)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -268,7 +274,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                   {'}'}
                   {metaInfo.players.map((player) => `.m-map .p-${player.name} {--owner-bg: var(--p-${player.name}-bg); --owner: var(--p-${player.name});}`)}
                 </style>
-                <Map tiles={gameInfo.map} mapSize={metaInfo.mapSize} select={trySelect as any} selected={selected} />
+                <Map tiles={gameInfo.map} mapSize={metaInfo.mapSize} select={trySelect as any} selected={selected} player={currentPlayer} gameKey={gameKey} />
               </>
             )}
           </div>

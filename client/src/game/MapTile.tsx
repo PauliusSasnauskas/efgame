@@ -18,7 +18,7 @@ function getEntityElement(entitySpec: EntityTile | ConfigStaticEntity | null, se
   return null
 }
 
-export default function MapTile ({ tile, x, y, select, selected = false, borders }: { tile: Tile | undefined, x: number, y: number, select: (newx: number, newy: number) => any, selected?: boolean, borders?: string }): JSX.Element {
+export default function MapTile ({ tile, x, y, select, selected = false, borders, old = false }: { tile: Tile | undefined, x: number, y: number, select: (newx: number, newy: number) => any, selected?: boolean, borders?: string, old?: boolean }): JSX.Element {
   if (tile === undefined) {
     return (
       <div
@@ -40,7 +40,7 @@ export default function MapTile ({ tile, x, y, select, selected = false, borders
 
   return (
     <div
-      className='tile'
+      className={clsx('tile', old && 'oldfog')}
       onClick={() => select(tile.x, tile.y)}
     >
       {ownership}
