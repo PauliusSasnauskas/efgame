@@ -21,7 +21,7 @@ export function ChatPanel ({ active, className, messages, sendMessage, recipient
   }, [active])
 
   useEffect(() => {
-    messageRef?.current?.scrollIntoView({ block: "end", inline: "end" })
+    messageRef?.current?.scrollTo(0, messageRef.current.scrollHeight)
   }, [messages])
 
   const MessageElement = ({ message }: { message: Message }): JSX.Element => {

@@ -51,7 +51,7 @@ const getBuildCapitolReq = (tile: Tile, map: Tile[], player: Player): StatReq | 
 export const AttackAction = { key: 'KeyA', button: VanillaAction(attack, "Attack", 'mb-4'), req: { 'v:action': 2, 'v:army': 1 }, allowOnTile: tileNotOwned } as ConfigAction
 export const RepairAction = { key: 'KeyR', button: VanillaAction(repair, "Repair", 'mb-4'), req: getRepairReq, allowOnTile: tileOwned } as ConfigAction
 export const TransferAction = { key: 'KeyT', button: { img: transfer, name: 'Transfer 50 Gold' }, req: { 'v:action': 1, 'v:gold': 50 }, allowOnTile: tileFromTeammate } as ConfigAction
-export const LeaveAction = { key: 'KeyL', button: { img: leave, name: "Leave" }, req: { 'v:action': 1 }, allowOnTile: tileOwnedEmpty } as ConfigAction
+export const LeaveAction = { key: 'KeyL', button: { img: leave, name: "Leave Territory" }, req: { 'v:action': 1 }, allowOnTile: tileOwnedEmpty } as ConfigAction
 export const DemolishAction = { key: 'KeyD', button: { img: demolish, name: 'Demolish' }, req: { 'v:action': 1, 'v:army': 1 }, allowOnTile: tileOwnedNotEmpty } as ConfigAction
 
 export const BuildCapitolAction = { key: ['Numpad1', 'Digit1'], button: VanillaAction(capitol, "Build Capitol", 'pl-1.5'), req: getBuildCapitolReq, allowOnTile: tileOwnedEmpty } as ConfigAction
