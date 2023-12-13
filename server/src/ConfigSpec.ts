@@ -12,7 +12,7 @@ export default interface ConfigSpec {
   mapNames: { [k: string]: (size: number, players: ServerPlayer[]) => ServerTile[][] }
   getMapForPlayer: (map: ServerTile[][], mapSize: number, player: ServerPlayer, gameState: GameState) => Tile[]
   processEndTurnForPlayer: (player: ServerPlayer, map: ServerTile[][], mapSize: number, players: ServerPlayer[]) => void
-  checkWinner: (map: ServerTile[][], mapSize: number, players: ServerPlayer[]) => Player | undefined
+  checkWinner: (map: ServerTile[][], mapSize: number, players: ServerPlayer[], teams: string[]) => Player | string | undefined
 }
 
 export interface ServerAction {

@@ -175,9 +175,12 @@ export default class Game {
 
     config.processEndTurnForPlayer(player, this.map, this.mapSize, players)
     
-    const winner = config.checkWinner(this.map, this.mapSize, players)
-    if (winner !== undefined) {
+    const winner = config.checkWinner(this.map, this.mapSize, players, this.teams)
+    if (winner !== undefined && typeof winner === 'object') {
       this.sendMessage(`${winner.name} won the game by eliminating all players!`)
+      this.state = GameState.POSTGAME
+    }else if(winner !== undefined && typeof winner === 'string') {
+      this.sendMessage(`Team ${winner} won the game by eliminating all teams!`)
       this.state = GameState.POSTGAME
     }
   }

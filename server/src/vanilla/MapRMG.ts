@@ -35,12 +35,14 @@ export default function generateMapRMG(size: number, players: Player[]): ServerT
     let posy = getRandomInt(size)
     while (map[posy][posx].entity !== undefined) [posx, posy] = [getRandomInt(size), getRandomInt(size)]
 
+    // TODO: space out capitols if possible
     map[posy][posx].entity = new Capitol(0)
     map[posy][posx].owner = { name: player.name, isPlayer: true, team: player.team }
 
     while (map[posy][posx].entity !== undefined) [posx, posy] = [getRandomInt(maxDistTo1stGold), getRandomInt(maxDistTo1stGold)]
     map[posy][posx].resource = { id: 'v:gold' }
   }
+  // TODO: make capitols reachable from one another
 
   return map
 }
