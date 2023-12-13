@@ -4,7 +4,7 @@ import { MenuContext } from '../App'
 
 const hoverAudio = new Audio('sound/menu-hover.wav')
 
-export function Button ({ children, onClick, onMouseEnter, onMouseLeave, icon, className, sound = 'sound/menu-click.wav', disabled = false, hoverElement }: { children?: ReactNode, onClick?: MouseEventHandler<HTMLDivElement>, onMouseEnter?: MouseEventHandler<HTMLDivElement>, onMouseLeave?: MouseEventHandler<HTMLDivElement>, icon?: string, className?: string, sound?: string | null, disabled?: boolean, hoverElement?: ReactNode | JSX.Element }): JSX.Element {
+export function Button ({ children, onClick, onMouseEnter, onMouseLeave, icon, className, iconClass, sound = 'sound/menu-click.wav', disabled = false, hoverElement }: { children?: ReactNode, onClick?: MouseEventHandler<HTMLDivElement>, onMouseEnter?: MouseEventHandler<HTMLDivElement>, onMouseLeave?: MouseEventHandler<HTMLDivElement>, icon?: string, className?: string, iconClass?: string, sound?: string | null, disabled?: boolean, hoverElement?: ReactNode | JSX.Element }): JSX.Element {
   const gameContext = useContext(MenuContext)
   hoverAudio.volume = gameContext.settings.soundVolume / 100
 
@@ -45,7 +45,7 @@ export function Button ({ children, onClick, onMouseEnter, onMouseLeave, icon, c
   
   return (
     <div className={clsx('m-item m-button w-56 hover:text-gray-300 pl-2 relative', icon !== undefined && 'justify-start', disabled ? 'text-gray-300 m-button-hover cursor-default' : 'cursor-pointer', className)} onClick={onClickFull} onMouseEnter={onMouseOverFull} onMouseLeave={onMouseLeaveFull}>
-      {icon !== undefined && <img src={icon} alt='' className='w-6.5 h-6.5 -mt-1' />}
+      {icon !== undefined && <img src={icon} alt='' className={clsx(iconClass !== undefined ? iconClass : 'w-6.5 h-6.5 -mt-1')} />}
       {children}
       {showHover && hoverElement !== undefined && <div className='flex items-center justify-center gap-2 absolute text-white left-0 -translate-x-full -top-1 pointer-events-none'>{hoverElement}</div>}
     </div>

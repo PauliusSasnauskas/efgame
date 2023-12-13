@@ -1,9 +1,9 @@
-import { Player, PlayerDTO, Stat } from "common/src/Player"
+import { PlayerDTO, Stat } from "common/src/Player"
 import { GameState } from "common/src/SocketSpec"
 import config from "./Config"
 import { groupBy } from "common/src/util/array"
 import { ServerAction, ServerEntity, ServerPlayer, ServerTile } from "./ConfigSpec"
-import { Owner, Tile } from "common/src/Tile"
+import { Tile } from "common/src/Tile"
 
 function log(...params: any[]) {
   console.log('[game]', ...params)
@@ -15,7 +15,7 @@ export default class Game {
   mapSize: number = 20
   mapName: string = 'RMG'
   map: ServerTile[][] = []
-  teams: string[] = []
+  teams: string[] = ['Blue Triangle', 'Green Star', 'Orange Circle', 'Red Rectangle']
 
   turnQueue: string[] = []
   turnNumber: number = 1
@@ -67,12 +67,22 @@ export default class Game {
     return player
   }
 
+  setPlayerTeam (player: ServerPlayer, team: string): void {
+    if (this.state !== GameState.LOBBY) return
+    if (team === 'neutral'){
+      player.team = undefined
+    }else{
+      player.team = team
+    }
+  }
+
   listPlayers (): PlayerDTO[] {
     return Object.values(this.players).map((player) => player.serialize())
   }
 
   getMapForPlayer (playerName: string): Tile[] {
     const player = this.players[playerName]
+    if (player === undefined) return []
 
     return config.getMapForPlayer(this.map, this.mapSize, player, this.state)
   }

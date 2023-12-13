@@ -5,16 +5,16 @@ import turn from '../img/menus/player/turn.svg'
 import selectedImg from '../img/menus/player/selected.svg'
 import teamneutral from '../img/menus/player/neutral.svg'
 import teambt from '../img/menus/player/teambt.svg'
-import teamgc from '../img/menus/player/teamgc.svg'
+import teamgs from '../img/menus/player/teamgs.svg'
 import teamoc from '../img/menus/player/teamoc.svg'
 import teamrr from '../img/menus/player/teamrr.svg'
 import { MouseEventHandler } from 'react'
 
-const getTeamIcon: { [k: string]: string } = {
-  'bluetriangle': teambt,
-  'greencross': teamgc,
-  'orangecircle': teamoc,
-  'redrectangle': teamrr,
+export const getTeamIcon: { [k: string]: string } = {
+  'Blue Triangle': teambt,
+  'Green Star': teamgs,
+  'Orange Circle': teamoc,
+  'Red Rectangle': teamrr,
 }
 
 export function PlayerBox ({ player, className, myTurn, onClick, selected = false }: { player: PlayerDTO, className?: string, myTurn: boolean, onClick?: MouseEventHandler<HTMLDivElement>, selected?: boolean }): JSX.Element {
@@ -33,7 +33,7 @@ export function PlayerBox ({ player, className, myTurn, onClick, selected = fals
       </span>
       {player.name}
       {myTurn && <img src={turn} className='absolute h-6 -left-0.5 top-1.5' alt=''/>}
-      <img src={player.team !== undefined ? getTeamIcon[player.team] : teamneutral} className='absolute h-5 right-2.5 top-2' alt=''/>
+      <img src={player.team !== undefined ? getTeamIcon[player.team] ?? teamneutral : teamneutral} className='absolute h-5 right-2.5 top-2' alt=''/>
       {selected && <img src={selectedImg} className='absolute h-5 right-0 top-2' alt='' />}
     </div>
   )

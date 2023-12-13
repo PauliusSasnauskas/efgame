@@ -10,6 +10,7 @@ export interface ServerEvents {
 
 export interface ClientEvents {
   welcome: (data: { name: string, color: string }) => void
+  setTeam: (team: string) => void
   chat: (message: string, recipient?: string) => void
   startGame: () => void
   endTurn: () => void
@@ -35,7 +36,7 @@ export interface ServerGreeting {
 
 export interface GameInfoBase {
   players: PlayerDTO[]
-  numTeams: number
+  teams: string[]
   mapSize: number
 }
 

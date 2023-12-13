@@ -39,7 +39,7 @@ export function ChatPanel ({ active, className, messages, sendMessage, recipient
   }
   
   return (
-    <Box className={clsx('flex flex-col overflow-y-auto', className)} ref={messageRef}>
+    <Box className={clsx('flex flex-col overflow-y-auto', className)} reff={messageRef}>
       {messages.map((message, idx) => (<MessageElement message={message} key={idx} />))}
       {active && (
         <div className='flex items-center gap-2 w-full'>

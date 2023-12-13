@@ -27,7 +27,7 @@ const tileOwned = (tile: Tile | undefined, map: Tile[], currentPlayer: Player): 
 const tileOwnedEmpty = (tile: Tile | undefined, map: Tile[], currentPlayer: Player): boolean => tileOwned(tile, map, currentPlayer) && tile?.entity === undefined
 const tileOwnedNotEmpty = (tile: Tile | undefined, map: Tile[], currentPlayer: Player): boolean => tileOwned(tile, map, currentPlayer) && tile?.entity !== undefined
 const tileNotOwned = (tile: Tile | undefined, map: Tile[], currentPlayer: Player): boolean => tile?.owner?.name !== currentPlayer.name
-const tileFromTeammate = (tile: Tile | undefined, map: Tile[], currentPlayer: Player): boolean => tile?.owner?.team === currentPlayer.team && tile?.owner?.name !== currentPlayer.name
+const tileFromTeammate = (tile: Tile | undefined, map: Tile[], currentPlayer: Player): boolean => tile?.owner !== undefined && tile.owner.team === currentPlayer.team && tile.owner.name !== currentPlayer.name
 
 export function countTilesWhere (map: Tile[], where: (t: Tile) => boolean): number {
   let count = 0

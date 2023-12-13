@@ -32,9 +32,9 @@ const socketIdToPlayerName: {[k: string]: string} = {}
 
 function sendGameInfo(io: Server<ClientEvents, ServerEvents>, game: Game) {
   if (game.state === GameState.LOBBY) {
-    io.emit('metaInfo', { gameState: game.state, players: game.listPlayers(), mapSize: game.mapSize, mapName: game.mapName, numTeams: game.teams.length })
+    io.emit('metaInfo', { gameState: game.state, players: game.listPlayers(), mapSize: game.mapSize, mapName: game.mapName, teams: game.teams })
   } else {
-    io.emit('metaInfo', { gameState: game.state, players: game.listPlayers(), mapSize: game.mapSize, numTeams: game.teams.length, turnNumber: game.turnNumber, turn: game.turn })
+    io.emit('metaInfo', { gameState: game.state, players: game.listPlayers(), mapSize: game.mapSize, teams: game.teams, turnNumber: game.turnNumber, turn: game.turn })
     io.fetchSockets().then((sockets) => {
       sockets.forEach((socket) => {
         socket.emit('gameInfo', { map: game.getMapForPlayer(socketIdToPlayerName[socket.id]), stats: game.getStatsForPlayer(socketIdToPlayerName[socket.id])})
@@ -72,6 +72,14 @@ io.on('connection', (socket) => {
     socketIdToPlayerName[socket.id] = name
     game.addPlayer(name, color)
     io.emit('chat', { text: `${name} connected.` })
+    sendGameInfo(io, game)
+  })
+
+  socket.on('setTeam', (team) => {
+    if (game.state !== GameState.LOBBY) return
+    const player = game.getPlayer(socketIdToPlayerName[socket.id])
+
+    game.setPlayerTeam(player, team)
     sendGameInfo(io, game)
   })
 

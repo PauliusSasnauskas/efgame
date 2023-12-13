@@ -3,15 +3,20 @@ import { ServerPlayer, ServerStat, ServerTile } from "../ConfigSpec"
 import { GameState } from "common/src/SocketSpec"
 import { getTilesWhere, isTileSurrounded } from "../util"
 
-function seeDiamond (seeMap: boolean[][], mapSize: number, x: number, y: number, dist: number, manhattan: boolean = true) {
+function seeDiamond (seeMap: boolean[][], mapSize: number, x: number, y: number, dist: number) {
   for (let i = -dist; i <= dist; i++){
     for (let j = -dist; j <= dist; j++){
-      if (manhattan && Math.abs(i) + Math.abs(j) > dist) continue
-      if (!manhattan && Math.pow(i, 2) + Math.pow(j, 2) > dist) continue
+      if (Math.pow(i, 2) + Math.pow(j, 2) > dist) continue
       if (y + i < 0 || x + j < 0 || y + i >= mapSize || x + j >= mapSize) continue
       seeMap[y+i][x+j] = true
     }
   }
+}
+
+function isTerritoryFriendly (player: ServerPlayer, tile: ServerTile): boolean {
+  if (tile.owner?.name === player.name) return true
+  if (player.team !== undefined && tile.owner?.team === player.team) return true
+  return false
 }
 
 export function getMapForPlayer (map: ServerTile[][], mapSize: number, player: ServerPlayer, gameState: GameState): Tile[] {
@@ -24,10 +29,9 @@ export function getMapForPlayer (map: ServerTile[][], mapSize: number, player: S
   for (let i = 0; i < mapSize; i++) {
     for (let j = 0; j < mapSize; j++) {
       const tile = map[i][j]
-      // TODO: see map if in same team
-      if (tile.owner?.name === player.name) {
+      if (isTerritoryFriendly(player, tile)){
         const hasFullTower = tile.entity?.id === 'v:tower' && tile.entity?.health === 2
-        seeDiamond(seeMap, mapSize, j, i, hasFullTower ? 30 : 2, hasFullTower ? false : true)
+        seeDiamond(seeMap, mapSize, j, i, hasFullTower ? 30 : 4)
       }
     }
   }
@@ -64,6 +68,7 @@ export function processEndTurnForPlayer (player: ServerPlayer, map: ServerTile[]
 }
 
 export function checkWinner (map: ServerTile[][], mapSize: number, players: ServerPlayer[]): ServerPlayer | undefined {
+  // TODO: check if team game and is only team remaining
   const capitols = getTilesWhere(map, mapSize, (tile) => tile.entity?.id === 'v:capitol')
   const playersWithCapitols = new Set(capitols.map((capitolTile) => capitolTile.owner?.name))
   playersWithCapitols.delete(undefined)

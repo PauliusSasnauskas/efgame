@@ -5,7 +5,7 @@ import { Bar } from '../menu/Bar'
 import { Panel } from '../menu/Panel'
 import { ChatPanel } from '../menu/ChatPanel'
 import { Map } from '../game/Map'
-import { PlayerBox } from '../menu/PlayerBox'
+import { PlayerBox, getTeamIcon } from '../menu/PlayerBox'
 import config from '../Config'
 import SimpleAction from '../game/SimpleAction'
 import leaveActionIcon from '../img/end-turn.svg'
@@ -17,6 +17,7 @@ import { Player, Stat, StatReq } from 'common/src/Player'
 import StatBox from '../game/StatBox'
 import KeyIcon from '../menu/KeyIcon'
 import { ConfigAction } from '../ConfigSpec'
+import teamneutral from '../img/menus/player/neutral.svg'
 
 const reconnectionAttempts = 5
 
@@ -124,7 +125,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
       saveIpToLastIps(ip)
       setSocket(s)
       const player = { name: gameContext.settings.name, color: gameContext.settings.color } as Player
-      setCurrentPlayer(player)
+      // setCurrentPlayer(player)
       s.emit("welcome", player)
     }
 
@@ -140,7 +141,11 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
       setMessages((m) => [...m, { text: message.motd }])
     })
     s.on('chat', (message) => setMessages((m) => [...m, message]))
-    s.on('metaInfo', setMetaInfo)
+    s.on('metaInfo', (info) => {
+      setMetaInfo(info)
+      const me = info.players.find((player) => player.name === gameContext.settings.name)
+      setCurrentPlayer(me as Player)
+    })
     s.on('gameInfo', setGameInfo)
 
     return () => {
@@ -215,6 +220,10 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     gameContext.setSettings({ ...gameContext.settings, lastIps: [ip, ...oldLastIps] })
   }
 
+  const getTeamSetFunction = (team: string) => () => {
+    socket?.emit('setTeam', team)
+  }
+
   return (
     <div className='s-game bg1 w-full'>
       {menuVisible && (
@@ -251,7 +260,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                     </div>
                     <div>
                       <Bar>Teams</Bar>
-                      {metaInfo.numTeams === 0 ? 'None' : metaInfo.numTeams}
+                      {metaInfo.teams.length === 0 ? 'None' : metaInfo.teams.length}
                     </div>
                     <div>
                       <Bar>Map Size</Bar>
@@ -279,9 +288,13 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
             )}
           </div>
           <div className='row-span-2'>
-            {metaInfo.gameState === GameState.LOBBY && (
+            {metaInfo.gameState === GameState.LOBBY && metaInfo.teams.length > 0 && (
               <>
-                {/* TODO: join team buttons */}
+                <Bar>Join Team</Bar>
+                <Button icon={teamneutral} iconClass='h-5 w-5 mb-0.25' onClick={getTeamSetFunction('neutral')}>Neutral</Button>
+                {metaInfo.teams.map((team) => (
+                  <Button icon={getTeamIcon[team] ?? teamneutral} iconClass='h-5 w-5 mb-0.5' onClick={getTeamSetFunction(team)}>{team}</Button>
+                ))}
               </>
             )}
             {metaInfo.gameState === GameState.PLAYING && gameInfo !== undefined && (
