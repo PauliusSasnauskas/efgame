@@ -107,6 +107,11 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatActive, selected, gameInfo?.map])
 
+  useEffect(() => {
+    if (metaInfo?.gameState === GameState.PLAYING && metaInfo.turn === currentPlayer?.name) playSoundEffect('sound/turn.wav')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metaInfo?.turn])
+
   const addMessage = (message: Message) => {
     setMessages((m) => [...m, message])
   }

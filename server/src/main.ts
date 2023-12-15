@@ -46,11 +46,11 @@ game.addMessageListener((message) => {
 })
 
 io.on('connection', (socket) => {
-  if (socket.recovered) {
-    console.log('recovered connection')
-  } else {
-    console.log('new connection')
-  }
+  // if (socket.recovered) {
+  //   console.log('recovered connection')
+  // } else {
+  //   console.log('new connection')
+  // }
   console.log(`[connect] ${socket.id} ${socket.handshake.address}`);
   socket.emit("welcome", { name: 'efgame server', version: '2.0.0', gamemode: config.name, gamemodeVersion: config.version, motd: 'Welcome to the server!' })
 

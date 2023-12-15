@@ -43,6 +43,7 @@ export interface GameInfoBase {
 export interface GameInfoLobby extends GameInfoBase {
   gameState: GameState.LOBBY
   mapName?: string
+  turn?: string
 }
 
 export interface GameInfoPlaying extends GameInfoBase {
