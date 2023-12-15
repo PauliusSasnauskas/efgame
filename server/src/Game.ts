@@ -54,11 +54,12 @@ export default class Game {
     return this.players[name]
   }
 
-  removePlayer (name: string): ServerPlayer {
-    const player = this.players[name]
+  removePlayer (name: string): PlayerDTO {
+    const player = this.players[name].serialize()
     if (this.state === GameState.PLAYING){
       if (player.team !== 'spectator') {
         player.eliminated = true
+        this.playerEndTurn(player.name)
         this.turnQueue.splice(this.turnQueue.indexOf(player.name), 1)
       }
     } else {

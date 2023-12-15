@@ -229,7 +229,6 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
       if (result.success) {
         let actionAudio = action.audio
         const tile = getTile(tilex, tiley)
-        console.log(gameInfo?.map, tile)
         if (typeof actionAudio === 'function') actionAudio = actionAudio(tile, gameInfo?.map!, currentPlayer!)
         playSoundEffect(actionAudio)
       } else {
