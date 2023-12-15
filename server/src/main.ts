@@ -103,13 +103,15 @@ io.on('connection', (socket) => {
     sendGameInfo(io, game)
   })
 
-  socket.on('endTurn', () => {
-    game.playerEndTurn(socketIdToPlayerName[socket.id])
+  socket.on('endTurn', (callback) => {
+    const actionResult = game.playerEndTurn(socketIdToPlayerName[socket.id])
+    callback(actionResult)
     sendGameInfo(io, game)
   })
 
-  socket.on('action', ({ action, x, y }) => {
-    game.playerAction(socketIdToPlayerName[socket.id], action, x, y)
+  socket.on('action', ({ action, x, y }, callback) => {
+    const actionResult = game.playerAction(socketIdToPlayerName[socket.id], action, x, y)
+    callback(actionResult)
     sendGameInfo(io, game)
   })
 });

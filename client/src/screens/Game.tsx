@@ -48,6 +48,11 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   const [gameInfo, setGameInfo] = useState<{stats: {[k: string]: Stat}, map: Tile[]} | undefined>()
   const [statReq, setStatReq] = useState<StatReq | undefined>()
 
+  let audio1 = new Audio()
+  let audio2 = new Audio()
+  audio1.volume = gameContext.settings.soundVolume / 100
+  audio2.volume = gameContext.settings.soundVolume / 100
+
   const trySelect = (newx: number, newy: number) => {
     if (metaInfo === undefined) return
     if (newx < 0 || newx >= metaInfo.mapSize || newy < 0 || newy >= metaInfo.mapSize) return
@@ -85,43 +90,50 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
           endTurn()
           return
       }
-      Object.entries(config.actions).forEach(([action, actionSpec]) => {
-        if (actionSpec === 'endturn') return
-        if (typeof actionSpec.key === 'string' && e.code === actionSpec.key) {
-          invokeAction(action, selected)
+      Object.entries(config.actions).forEach(([actionName, action]) => {
+        if (action === 'endturn') return
+        if (typeof action.key === 'string' && e.code === action.key) {
+          getInvokeActionFn(actionName, action)()
           return
         }
-        if (typeof actionSpec.key === 'object' && actionSpec.key.includes(e.code)) invokeAction(action, selected)
+        if (typeof action.key === 'object' && action.key.includes(e.code)){
+          getInvokeActionFn(actionName, action)()
+          return
+        }
       })
     }
     document.addEventListener('keydown', handleKey)
     return () => document.removeEventListener('keydown', handleKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatActive, selected])
+  }, [chatActive, selected, gameInfo?.map])
+
+  const addMessage = (message: Message) => {
+    setMessages((m) => [...m, message])
+  }
 
   useEffect(() => {
     const s: Socket<ServerEvents, ClientEvents> = io(ip, { reconnectionAttempts, rejectUnauthorized: false })
-    setMessages((m) => [...m, { text: `Connecting to ${ip}...`, private: true }])
+    addMessage({ text: `Connecting to ${ip}...`, private: true })
 
     const handleError = (err: Error) => gameContext.setConnectError(`${err.message}. Caused by: ${err.cause ?? 'unknown'}`)
-    const handleReconnectAttempt = (attempt: number) => setMessages((m) => [...m, { text: `Reconnecting... (attempt ${attempt} out of ${reconnectionAttempts})...`, private: true }])
+    const handleReconnectAttempt = (attempt: number) => addMessage({ text: `Reconnecting... (attempt ${attempt} out of ${reconnectionAttempts})...`, private: true })
     const handleReconnectFailed = () => {
       gameContext.setConnectError('Connection failed.')
       gameContext.setGameScreen(GameScreen.FINDGAME)
     }
-    const handleReconnect = (attempt: number) => setMessages((m) => [...m, { text: `Reconnected after ${attempt} attempts.`, private: true }])
+    const handleReconnect = (attempt: number) => addMessage({ text: `Reconnected after ${attempt} attempts.`, private: true })
     const handleClose = (reason: string) => {
       if (reason === Object.keys(dcReasons)[0] || reason === Object.keys(dcReasons)[1]){
         gameContext.setConnectError(`Connection closed. ${dcReasons[reason]}`)
         gameContext.setGameScreen(GameScreen.FINDGAME)
         return
       }
-      setMessages((m) => [...m, { text: `Connection closed. ${dcReasons[reason]}`, private: true }])
+      addMessage({ text: `Connection closed. ${dcReasons[reason]}`, private: true })
     }
 
     const onConnect = () => {
       setGameKey(Math.random().toString(36).substring(2,  5))
-      setMessages((m) => [...m, { text: `Connected to ${ip}.`, private: true }])
+      addMessage({ text: `Connected to ${ip}.`, private: true })
       saveIpToLastIps(ip)
       setSocket(s)
       const player = { name: gameContext.settings.name, color: gameContext.settings.color } as Player
@@ -181,13 +193,50 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   }
 
   const endTurn = () => {
-    socket?.emit('endTurn')
+    socket?.emit('endTurn', (result) => {
+      if (!result.processed) {
+        addMessage({ text: 'Server was unable to process the action' })
+        return
+      }
+      if (!result.success) {
+        // TODO: show result.message
+        console.log(result.message)
+      }
+    })
     setStatReq(undefined)
   }
 
-  const invokeAction = (action: string, tile: [number, number]) => {
+  const playSoundEffect = (audioSrc?: string) => {
+    if (audioSrc === undefined) return
+    if (audio1.paused) {
+      audio1.src = audioSrc
+      audio1.play()
+    } else if (audio2.paused) {
+      audio2.src = audioSrc
+      audio2.play()
+    }
+  }
+
+  const getInvokeActionFn = (actionName: string, action: ConfigAction) => () => {
     setStatReq(undefined)
-    socket?.emit('action', { action, x: tile[0], y: tile[1] })
+    let tilex = selected[0]
+    let tiley = selected[1]
+    socket?.emit('action', { action: actionName, x: tilex, y: tiley }, (result) => {
+      if (!result.processed) {
+        addMessage({ text: 'Server was unable to process the action' })
+        return
+      }
+      if (result.success) {
+        let actionAudio = action.audio
+        const tile = getTile(tilex, tiley)
+        console.log(gameInfo?.map, tile)
+        if (typeof actionAudio === 'function') actionAudio = actionAudio(tile, gameInfo?.map!, currentPlayer!)
+        playSoundEffect(actionAudio)
+      } else {
+        // TODO: show result.message
+        console.log(result.message)
+      }
+    })
   }
 
   function EndTurnButton({ disabled }: { disabled?: boolean }): JSX.Element {
@@ -306,11 +355,14 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                 {!('endturn' in config.actions) && <EndTurnButton disabled={metaInfo.turn !== currentPlayer?.name} />}
                 {Object.entries(config.actions).map(([actionName, action]) => {
                   if (action === 'endturn') return <EndTurnButton key={actionName} disabled={metaInfo.turn !== currentPlayer?.name} />
+                  if (currentPlayer === undefined) return null
+                  const tile = getSelectedTile()
+                  if (!(action.showOnTile?.(tile, gameInfo.map, currentPlayer) ?? true)) return null
                   if (typeof action.button === 'function'){
                     const ActionElement = action.button
-                    return <ActionElement onClick={() => { invokeAction(actionName, selected) }} onMouseEnter={getFunctionSetStatReq(action.req)} onMouseLeave={clearStatReq} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getSelectedTile(), gameInfo.map, currentPlayer) ?? false)} key={actionName} hoverElement={<KeyIcon name={action.key} />} />
+                    return <ActionElement onClick={getInvokeActionFn(actionName, action)} onMouseEnter={getFunctionSetStatReq(action.req)} onMouseLeave={clearStatReq} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(tile, gameInfo.map, currentPlayer) ?? false)} key={actionName} hoverElement={<KeyIcon name={action.key} />} />
                   }
-                  return <SimpleAction img={action.button.img} name={action.button.name} onClick={() => { invokeAction(actionName, selected) }} onMouseEnter={getFunctionSetStatReq(action.req)} onMouseLeave={clearStatReq} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(getSelectedTile(), gameInfo.map, currentPlayer) ?? false)} key={actionName} hoverElement={<KeyIcon name={action.key} />} />
+                  return <SimpleAction img={action.button.img} name={action.button.name} onClick={getInvokeActionFn(actionName, action)} onMouseEnter={getFunctionSetStatReq(action.req)} onMouseLeave={clearStatReq} disabled={metaInfo.turn !== currentPlayer?.name || (!action.allowOnTile?.(tile, gameInfo.map, currentPlayer) ?? false)} key={actionName} hoverElement={<KeyIcon name={action.key} />} />
                 })}
               </>
             )}

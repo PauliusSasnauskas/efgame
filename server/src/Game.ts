@@ -1,5 +1,5 @@
 import { PlayerDTO, Stat } from "common/src/Player"
-import { GameState } from "common/src/SocketSpec"
+import { ActionResult, GameState } from "common/src/SocketSpec"
 import config from "./Config"
 import { groupBy } from "common/src/util/array"
 import { ServerAction, ServerEntity, ServerPlayer, ServerTile } from "./ConfigSpec"
@@ -149,9 +149,9 @@ export default class Game {
     this.state = GameState.PLAYING
   }
 
-  playerEndTurn (playerName: string) {
-    if (this.state !== GameState.PLAYING) return
-    if (this.turn !== playerName) return
+  playerEndTurn (playerName: string): ActionResult {
+    if (this.state !== GameState.PLAYING) return { processed: true, success: false, message: 'Game not in progress' }
+    if (this.turn !== playerName) return { processed: true, success: false, message: 'It is not your turn' }
 
     this.turnNumber += 1
     let nextTurnQueueIndex = this.turnQueue.indexOf(playerName) + 1
@@ -185,6 +185,8 @@ export default class Game {
       this.sendMessage(`Team ${winner} won the game by eliminating all teams!`)
       this.state = GameState.POSTGAME
     }
+
+    return { processed: true, success: true }
   }
 
   private doesMeetReq (action: ServerAction, tile: ServerTile, player: ServerPlayer, players: ServerPlayer[]) {
@@ -224,25 +226,27 @@ export default class Game {
     }
   }
 
-  playerAction (playerName: string, actionName: string, x: number, y: number) {
-    if (this.state !== GameState.PLAYING) return
-    if (this.turn !== playerName) return
+  playerAction (playerName: string, actionName: string, x: number, y: number): ActionResult {
+    if (this.state !== GameState.PLAYING) return { processed: true, success: false, message: 'Game not in progress' }
+    if (this.turn !== playerName) return { processed: true, success: false, message: 'It is not your turn' }
 
     const action = config.actions[actionName]
-    if (action === undefined) return
+    if (action === undefined) return { processed: true, success: false, message: 'Action is undefined' }
 
-    if (!this.isValidTile(x, y)) return
+    if (!this.isValidTile(x, y)) return { processed: true, success: false, message: 'Tile out of bounds' }
     const tile = this.getTile(x, y)
 
     const player = this.players[playerName]
-    if (player.stats === undefined) return
+    if (player.stats === undefined) return { processed: true, success: false, message: 'Could not find player stats' }
 
     const players = Object.values(this.players)
 
     const meetsReq = this.doesMeetReq(action, tile, player, players)
-    if (!meetsReq) return
-    if (!action.canInvoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })) return
+    if (!meetsReq) return { processed: true, success: false, message: 'You do not meet the requirements' }
+    if (!action.canInvoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })) return { processed: true, success: false, message: 'Cannot invoke action due to game rules' }
     action.invoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })
     this.subtractReq(action, tile, player, players)
+
+    return { processed: true, success: true }
   }
 }

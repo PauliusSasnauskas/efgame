@@ -13,8 +13,8 @@ export interface ClientEvents {
   setTeam: (team: string) => void
   chat: (message: string, recipient?: string) => void
   startGame: () => void
-  endTurn: () => void
-  action: (data: { action: string, x: number, y: number }) => void
+  endTurn: (callback: (result: ActionResult) => void) => void
+  action: (data: { action: string, x: number, y: number }, callback: (result: ActionResult) => void) => void
 }
 
 export interface Message {
@@ -55,4 +55,15 @@ export enum GameState {
   LOBBY = 0,
   PLAYING = 1,
   POSTGAME = 2
+}
+
+export type ActionResult = {
+  processed: false
+} | {
+  processed: true
+  success: false
+  message: string
+} | {
+  processed: true
+  success: true
 }

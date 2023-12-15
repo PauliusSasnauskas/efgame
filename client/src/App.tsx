@@ -49,8 +49,8 @@ function App (): JSX.Element {
   const [settings, updateSettings] = useState<SettingsSpec>({
     color: localStorage.getItem('settings.color') ?? '127,127,127',
     name: localStorage.getItem('settings.name') ?? 'player',
-    musicVolume: Number.parseInt(localStorage.getItem('settings.musicVolume') ?? '80'),
-    soundVolume: Number.parseInt(localStorage.getItem('settings.soundVolume') ?? '80'),
+    musicVolume: Number.parseInt(localStorage.getItem('settings.musicVolume') ?? '50'),
+    soundVolume: Number.parseInt(localStorage.getItem('settings.soundVolume') ?? '70'),
     lastIps: localStorage.getItem('settings.lastIps')?.split(',') ?? []
   })
 

@@ -17,6 +17,7 @@ export interface ConfigAction {
   req?: {[k: string]: number | string} | ((tile: Tile | undefined, map: Tile[], player: Player) => StatReq | undefined) // stat requirements to show on stat panel
   showOnTile?: (tile: Tile | undefined, map: Tile[], player: Player) => boolean // should this button be shown on a tile
   allowOnTile?: (tile: Tile | undefined, map: Tile[], player: Player) => boolean // should this button be enabled on a tile
+  audio?: string | ((tile: Tile | undefined, map: Tile[], player: Player) => string | undefined) // sound location to play after successful action
 }
 
 export interface ConfigSimpleAction {
