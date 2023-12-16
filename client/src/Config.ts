@@ -55,8 +55,8 @@ const config: ConfigSpec = {
     'v:action': { img: actionStatIcon },
     'v:gold': { img: goldStatIcon },
     'v:army': { img: armyStatIcon },
-    'v:territory': { img: territoryStatIcon },
     'v:xp': { img: xpStatIcon },
+    'v:territory': { img: territoryStatIcon },
   },
 }
 

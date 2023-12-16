@@ -42,8 +42,8 @@ const config: ConfigSpec = {
     'v:action': StatAction,
     'v:gold': StatGold,
     'v:army': StatArmy,
-    'v:territory': StatTerritory,
     'v:xp': StatXp,
+    'v:territory': StatTerritory,
   },
   mapNames: {
     "RMG": generateMapRMG
