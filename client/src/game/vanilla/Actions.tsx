@@ -52,12 +52,12 @@ const getBuildCapitolReq = (tile: Tile, map: Tile[], player: Player): StatReq | 
 const getAttackAudio = (tile: Tile): string => {
   if (tile.entity === undefined) return `sound/attack1.wav`
   if (tile.entity.health! > 1) return `sound/hit${getRandomInt(3)+1}.wav`
-  if (tile.entity.id === 'v:capitol') return 'sound/destroyBig.wav'
+  if (tile.entity.id === 'v:capitol') return 'sound/destroy-big.wav'
   return `sound/destroy${getRandomInt(3)+1}.wav`
 }
 
 const getRepairAudio = (tile: Tile): string | undefined => {
-  return undefined // TODO: repair sound
+  return 'sound/repair1.wav' // TODO: more repair sounds
 }
 
 const getDemolishAudio = (tile: Tile): string => {
@@ -65,14 +65,19 @@ const getDemolishAudio = (tile: Tile): string => {
   return `sound/destroy${getRandomInt(3)+1}.wav`
 }
 
+const getBuildMineAudio = (tile: Tile): string => {
+  if (tile.resource?.id === 'v:gold') return 'sound/build2.wav'
+  return 'sound/build1.wav'
+}
+
 export const AttackAction = { key: 'KeyA', button: VanillaAction(attack, "Attack", 'mb-4'), req: { 'v:action': 2, 'v:army': 1 }, allowOnTile: tileNotOwned, audio: getAttackAudio } as ConfigAction
 export const RepairAction = { key: 'KeyR', button: VanillaAction(repair, "Repair", 'mb-4'), req: getRepairReq, allowOnTile: tileOwned, audio: getRepairAudio } as ConfigAction
-export const TransferAction = { key: 'KeyT', button: { img: transfer, name: 'Transfer 50 Gold' }, req: { 'v:action': 1, 'v:gold': 50 }, allowOnTile: tileFromTeammate } as ConfigAction // TODO: transfer audio
-export const LeaveAction = { key: 'KeyL', button: { img: leave, name: "Leave Territory" }, req: { 'v:action': 1 }, allowOnTile: tileOwnedEmpty } as ConfigAction // TODO: leave audio
+export const TransferAction = { key: 'KeyT', button: { img: transfer, name: 'Transfer 50 Gold' }, req: { 'v:action': 1, 'v:gold': 50 }, allowOnTile: tileFromTeammate, audio: 'sound/transfer.wav' } as ConfigAction
+export const LeaveAction = { key: 'KeyL', button: { img: leave, name: "Leave Territory" }, req: { 'v:action': 1 }, allowOnTile: tileOwnedEmpty, audio: 'sound/leave.wav' } as ConfigAction
 export const DemolishAction = { key: 'KeyD', button: { img: demolish, name: 'Demolish' }, req: { 'v:action': 1, 'v:army': 1 }, allowOnTile: tileOwnedNotEmpty, audio: getDemolishAudio } as ConfigAction
 
-export const BuildCapitolAction = { key: ['Numpad1', 'Digit1'], button: VanillaAction(capitol, "Build Capitol", 'pl-1.5'), req: getBuildCapitolReq, allowOnTile: tileOwnedEmpty, audio: 'sound/build2.wav' } as ConfigAction
-export const BuildMineAction = { key: ['Numpad2', 'Digit2'], button: VanillaAction(mine, "Build Mine", 'pl-1.5'), req: buildingInfo['v:mine'].buildReq, allowOnTile: tileOwnedEmpty, audio: 'sound/build1.wav' } as ConfigAction
+export const BuildCapitolAction = { key: ['Numpad1', 'Digit1'], button: VanillaAction(capitol, "Build Capitol", 'pl-1.5'), req: getBuildCapitolReq, allowOnTile: tileOwnedEmpty, audio: 'sound/build3.wav' } as ConfigAction
+export const BuildMineAction = { key: ['Numpad2', 'Digit2'], button: VanillaAction(mine, "Build Mine", 'pl-1.5'), req: buildingInfo['v:mine'].buildReq, allowOnTile: tileOwnedEmpty, audio: getBuildMineAudio } as ConfigAction
 export const BuildBarracksAction = { key: ['Numpad3', 'Digit3'], button: VanillaAction(barracks, "Build Barracks", 'pl-1.5'), req: buildingInfo['v:barracks'].buildReq, allowOnTile: tileOwnedEmpty, audio: 'sound/build1.wav' } as ConfigAction
 export const BuildTowerAction = { key: ['Numpad4', 'Digit4'], button: VanillaAction(tower, "Build Tower", 'pl-1.5'), req: buildingInfo['v:tower'].buildReq, allowOnTile: tileOwnedEmpty, audio: 'sound/build1.wav' } as ConfigAction
 export const BuildWoodWallAction = { key: ['Numpad5', 'Digit5'], button: VanillaAction(woodWall, "Build Wooden Wall", 'pl-1.5'), req: buildingInfo['v:woodwall'].buildReq, allowOnTile: tileOwnedEmpty, audio: 'sound/build1.wav' } as ConfigAction
