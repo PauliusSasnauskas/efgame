@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { MouseEvent, MouseEventHandler, ReactNode, useContext, useEffect, useState } from 'react'
+import { MouseEvent, MouseEventHandler, ReactNode, useContext, useState } from 'react'
 import { MenuContext } from '../App'
 
 const hoverAudio = new Audio('sound/menu-hover.wav')
@@ -12,7 +12,6 @@ export function Button ({ children, onClick, onMouseEnter, onMouseLeave, icon, c
   clickSound.volume = gameContext.settings.soundVolume / 100
   if (sound != null) clickSound.src = sound
 
-  const [showHoverTimeout, setShowHoverTimeout] = useState<number | NodeJS.Timeout | undefined>(undefined)
   const [showHover, setShowHover] = useState(false)
 
   const onClickFull = (e: MouseEvent<any>) => {
@@ -22,26 +21,18 @@ export function Button ({ children, onClick, onMouseEnter, onMouseLeave, icon, c
   }
 
   const onMouseOverFull = (e: MouseEvent<any>) => {
-    if (showHoverTimeout !== undefined) {
-      clearTimeout(showHoverTimeout)
-    }
-    const timeout = setTimeout(() => setShowHover(true), 1000)
-    setShowHoverTimeout(timeout)
+    setShowHover(true)
+    onMouseEnter?.(e)
 
     if (disabled) return
 
     hoverAudio.play()
-    onMouseEnter?.(e)
   }
 
   const onMouseLeaveFull = (e: MouseEvent<any>) => {
     setShowHover(false)
-    clearTimeout(showHoverTimeout)
-    if (disabled) return
     onMouseLeave?.(e)
   }
-
-  useEffect(() => () => clearTimeout(showHoverTimeout))
   
   return (
     <div className={clsx('m-item m-button w-56 hover:text-gray-300 pl-2 relative', icon !== undefined && 'justify-start', disabled ? 'text-gray-300 m-button-hover cursor-default' : 'cursor-pointer', className)} onClick={onClickFull} onMouseEnter={onMouseOverFull} onMouseLeave={onMouseLeaveFull}>
