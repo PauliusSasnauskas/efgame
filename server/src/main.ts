@@ -65,12 +65,12 @@ io.on('connection', (socket) => {
       const player = game.getPlayer(socketIdToPlayerName[socket.id])
       delete socketIdToPlayerName[socket.id]
   
-      console.log(`[disconnect] ${player?.name} lost connection. Waiting 60 seconds to reconnect.`)
-      io.emit('chat', { text: `${player?.name} lost connection. Waiting 60 seconds to reconnect.` })
+      console.log(`[disconnect] ${player.name} lost connection. Waiting 60 seconds to reconnect.`)
+      io.emit('chat', { text: `${player.name} lost connection. Waiting 60 seconds to reconnect.` })
       playerNameReconnectTimeout[player.name] = setTimeout(() => {
-        io.emit('chat', { text: `${player?.name} lost connection and was unable to reconnect.` })
-        console.log(`[disconnect] ${player?.name} lost connection and was unable to reconnect.`)
-        game.removePlayer(socketIdToPlayerName[socket.id])
+        io.emit('chat', { text: `${player.name} lost connection and was unable to reconnect.` })
+        console.log(`[disconnect] ${player.name} lost connection and was unable to reconnect.`)
+        game.removePlayer(player.name)
         sendGameInfo(io, game)
       }, 60000)
     }else{
