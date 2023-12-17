@@ -22,6 +22,7 @@ export default class Game {
   turn: string = ''
 
   private addMessageCallbacks: Array<(message: string) => void> = []
+  private gameStateListeners: Array<(state: GameState) => void> = []
 
   private isValidTile (x: number, y: number): boolean {
     if (x < 0 || y < 0 || x >= this.mapSize || y >= this.mapSize) return false
@@ -135,6 +136,20 @@ export default class Game {
     this.turn = this.turnQueue[0]
   }
 
+  addGameStateListener(callback: (state: GameState) => void) {
+    this.gameStateListeners.push(callback)
+  }
+
+  private setGameState(state: GameState) {
+    this.state = state
+    this.gameStateListeners.forEach((callback) => callback(state))
+
+    if (state === GameState.POSTGAME) {
+      setTimeout(() => this.sendMessage('Starting new game in 5s...'), 5000)
+      setTimeout(() => this.lobby(), 10000)
+    }
+  }
+
   start () {
     if (this.state !== GameState.LOBBY) return
     log('(1/3) Generating map...')
@@ -147,7 +162,14 @@ export default class Game {
     this.setTurnQueue()
 
     log('Started.')
-    this.state = GameState.PLAYING
+    this.setGameState(GameState.PLAYING)
+  }
+
+  lobby () {
+    this.map = []
+    this.turnQueue = []
+    this.setGameState(GameState.LOBBY)
+    this.sendMessage('Starting new game.')
   }
 
   playerEndTurn (playerName: string): ActionResult {
@@ -181,10 +203,10 @@ export default class Game {
     const winner = config.checkWinner(this.map, this.mapSize, players, this.teams)
     if (winner !== undefined && typeof winner === 'object') {
       this.sendMessage(`${winner.name} won the game by eliminating all players!`)
-      this.state = GameState.POSTGAME
+      this.setGameState(GameState.POSTGAME)
     }else if(winner !== undefined && typeof winner === 'string') {
       this.sendMessage(`Team ${winner} won the game by eliminating all teams!`)
-      this.state = GameState.POSTGAME
+      this.setGameState(GameState.POSTGAME)
     }
 
     return { processed: true, success: true }

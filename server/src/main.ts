@@ -29,6 +29,7 @@ console.log(`Started server on port ${port}`)
 const game = new Game();
 
 const socketIdToPlayerName: {[k: string]: string} = {}
+const playerNameReconnectTimeout: {[k: string]: NodeJS.Timeout | number} = {}
 
 function sendGameInfo(io: Server<ClientEvents, ServerEvents>, game: Game) {
   if (game.state === GameState.LOBBY) {
@@ -45,21 +46,37 @@ game.addMessageListener((message) => {
   io.emit('chat', { text: message })
 })
 
+game.addGameStateListener(() => {
+  sendGameInfo(io, game)
+})
+
 io.on('connection', (socket) => {
-  // if (socket.recovered) {
-  //   console.log('recovered connection')
-  // } else {
-  //   console.log('new connection')
-  // }
-  console.log(`[connect] ${socket.id} ${socket.handshake.address}`);
+  if (socket.recovered) {
+    console.log(`[connect-recovered] ${socket.id} ${socket.handshake.address}`);
+  } else {
+    console.log(`[connect] ${socket.id} ${socket.handshake.address}`);
+  }
   socket.emit("welcome", { name: 'efgame server', version: '2.0.0', gamemode: config.name, gamemodeVersion: config.version, motd: 'Welcome to the server!' })
 
   socket.on('disconnect', (reason) => {
     console.log(`[disconnect] ${socket.id} ${dcReasons[reason]}. ${socket.handshake.address}`)
-    const player = game.removePlayer(socketIdToPlayerName[socket.id])
-    io.emit('chat', { text: `${player?.name} disconnected.` })
-    delete socketIdToPlayerName[socket.id]
-    sendGameInfo(io, game)
+
+    if (["io client disconnect", "client namespace disconnect"].includes(reason)){
+      const player = game.getPlayer(socketIdToPlayerName[socket.id])
+      delete socketIdToPlayerName[socket.id]
+  
+      console.log(`[disconnect] ${player?.name} lost connection. Waiting 60 seconds to reconnect.`)
+      io.emit('chat', { text: `${player?.name} lost connection. Waiting 60 seconds to reconnect.` })
+      playerNameReconnectTimeout[player.name] = setTimeout(() => {
+        io.emit('chat', { text: `${player?.name} lost connection and was unable to reconnect.` })
+        console.log(`[disconnect] ${player?.name} lost connection and was unable to reconnect.`)
+        game.removePlayer(socketIdToPlayerName[socket.id])
+        sendGameInfo(io, game)
+      }, 60000)
+    }else{
+      game.removePlayer(socketIdToPlayerName[socket.id])
+      sendGameInfo(io, game)
+    }
   })
 
   socket.on('welcome', ({ name, color }) => {
@@ -71,10 +88,14 @@ io.on('connection', (socket) => {
       socket.emit('chat', { text: 'Player name already taken' })
       socket.disconnect()
     }
-
+    if (playerNameReconnectTimeout[name] !== undefined){
+      clearTimeout(playerNameReconnectTimeout[name])
+      io.emit('chat', { text: `${name} has reconnected.` })
+    } else {
+      io.emit('chat', { text: `${name} connected.` })
+      game.addPlayer(name, color)
+    }
     socketIdToPlayerName[socket.id] = name
-    game.addPlayer(name, color)
-    io.emit('chat', { text: `${name} connected.` })
     sendGameInfo(io, game)
   })
 
@@ -103,10 +124,7 @@ io.on('connection', (socket) => {
     socket.emit('chat', fullMessage)
   })
 
-  socket.on('startGame', () => {
-    game.start()
-    sendGameInfo(io, game)
-  })
+  socket.on('startGame', () => game.start())
 
   socket.on('endTurn', (callback) => {
     const actionResult = game.playerEndTurn(socketIdToPlayerName[socket.id])
