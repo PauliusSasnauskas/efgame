@@ -41,11 +41,11 @@
 
   .m-bar {
     @apply border-6;
-    background: url('./img/menus/bar-bg.svg') 0 / 166px repeat padding-box;
+    background: url('./img/menus/bar-bg.svg') 0 0 / 200px repeat padding-box;
     border-image: url('./img/menus/bar-border.svg') 25% / 8px round;
   }
   .m-box {
-    @apply border-8 p-1;
+    @apply border-[10px] p-1;
     background: url('./img/menus/box-bg.svg') 0 / 112px repeat padding-box;
     border-image: url('./img/menus/box-border.svg') 20.8333% / 10px round;
   }
@@ -101,6 +101,17 @@
 }
 
 /* Images converted with Pixels to SVG https://codepen.io/shshaw/pen/XbxvNj */
+
+
+.m-box::-webkit-scrollbar {
+  background-clip: content-box;
+  border-image: url('./img/menus/frame.svg') 25% / 8px round;
+  width: 26px;
+}
+.m-box::-webkit-scrollbar-thumb {
+  border-image: url('./img/menus/slider-square.svg') 19.8% / 4px round;
+  background: url('./img/menus/bar-bg.svg') 0 0 / 200px repeat padding-box;
+}
 
 img {
   image-rendering: pixelated;
