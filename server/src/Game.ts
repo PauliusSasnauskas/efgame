@@ -56,7 +56,7 @@ export default class Game {
   }
 
   removePlayer (name: string): PlayerDTO {
-    const player = this.players[name].serialize()
+    const player = this.players[name]
     if (this.state === GameState.PLAYING){
       if (player.team !== 'spectator') {
         player.eliminated = true

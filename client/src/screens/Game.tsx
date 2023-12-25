@@ -27,6 +27,7 @@ const dcReasons: {[k: string]: string} = {
   "ping timeout": "Timed out",
   "transport close": "Lost connection",
   "transport error": "Error in network transport",
+  "forced close": "Server blocked connection"
 }
 
 const eliminatedColor = '127,127,127'
