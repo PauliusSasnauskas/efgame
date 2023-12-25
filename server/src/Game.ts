@@ -266,7 +266,8 @@ export default class Game {
 
     const meetsReq = this.doesMeetReq(action, tile, player, players)
     if (!meetsReq) return { processed: true, success: false, message: 'You do not meet the requirements' }
-    if (!action.canInvoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })) return { processed: true, success: false, message: 'Cannot invoke action due to game rules' }
+    const actionResult = action.canInvoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })
+    if (!actionResult.success) return { processed: true, success: false, message: actionResult.message }
     action.invoke({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })
     this.subtractReq(action, tile, player, players)
 

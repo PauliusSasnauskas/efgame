@@ -18,6 +18,7 @@ import StatBox from '../game/StatBox'
 import KeyIcon from '../menu/KeyIcon'
 import { ConfigAction } from '../ConfigSpec'
 import teamneutral from '../img/menus/player/neutral.svg'
+import { Box } from '../menu/Box'
 
 const reconnectionAttempts = 5
 
@@ -86,6 +87,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   const [messages, setMessages] = useState<Message[]>([])
   const [messageRecipient, setMessageRecipient] = useState<{ name: string, color: string } | undefined>(undefined)
   const [gameKey, setGameKey] = useState('')
+  const [toast, setToast] = useState<{text?: string, opacity: number, timeout?: NodeJS.Timeout | number}>({opacity: 0})
 
   const [selected, select] = useState<[number, number]>([0, 0])
   const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>()
@@ -221,6 +223,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
       setServerInfo(undefined)
       setMetaInfo(undefined)
       setGameInfo(undefined)
+      clearTimeout(toast.timeout)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -247,10 +250,21 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
         return
       }
       if (!result.success) {
-        // TODO: show result.message
-        console.log(result.message)
+        playSoundEffect('sound/bad.wav')
+        showToast(result.message)
       }
     })
+  }
+
+  const showToast = (message: string) => {
+    clearTimeout(toast.timeout)
+    setToast({ text: message, opacity: 1, timeout: setTimeout(() => {
+      setToast((oldToast) => ({...oldToast, opacity: 0.75, timeout: setTimeout(() => {
+        setToast((oldToast) => ({...oldToast, opacity: 0.5, timeout: setTimeout(() => {
+          setToast((oldToast) => ({...oldToast, opacity: 0}))
+        }, 250)}))
+      }, 250)}))
+    }, 2000)})
   }
 
   const playSoundEffect = (audioSrc?: string) => {
@@ -278,8 +292,8 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
         if (typeof actionAudio === 'function') actionAudio = actionAudio(tile, gameInfo?.map!, currentPlayer!)
         playSoundEffect(actionAudio)
       } else {
-        // TODO: show result.message
-        console.log(result.message)
+        playSoundEffect('sound/bad.wav')
+        showToast(result.message)
       }
     })
   }
@@ -364,6 +378,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                   {metaInfo.players.map((player) => `.m-map .p-${player.name} {--owner-bg: var(--p-${player.name}-bg); --owner: var(--p-${player.name});}`)}
                 </style>
                 <Map tiles={gameInfo.map} mapSize={metaInfo.mapSize} select={trySelect as any} selected={selected} player={currentPlayer} gameKey={gameKey} />
+                <Box className='relative top-8 w-112' style={{opacity: toast.opacity}}>{toast.text}</Box>
               </>
             )}
           </div>

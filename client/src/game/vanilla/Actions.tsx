@@ -72,7 +72,7 @@ const getBuildMineAudio = (tile: Tile): string => {
 
 export const AttackAction = { key: 'KeyA', button: VanillaAction(attack, "Attack", 'mb-4'), req: { 'v:action': 2, 'v:army': 1 }, allowOnTile: tileNotOwned, audio: getAttackAudio } as ConfigAction
 export const RepairAction = { key: 'KeyR', button: VanillaAction(repair, "Repair", 'mb-4'), req: getRepairReq, allowOnTile: tileOwned, audio: getRepairAudio } as ConfigAction
-export const TransferAction = { key: 'KeyT', button: { img: transfer, name: 'Transfer 50 Gold' }, req: { 'v:action': 1, 'v:gold': 50 }, allowOnTile: tileFromTeammate, audio: 'sound/transfer.wav' } as ConfigAction
+export const TransferAction = { key: 'KeyT', button: { img: transfer, name: 'Transfer 50 Gold' }, req: { 'v:action': 1, 'v:gold': 50 }, audio: 'sound/transfer.wav' } as ConfigAction
 export const LeaveAction = { key: 'KeyL', button: { img: leave, name: "Leave Territory" }, req: { 'v:action': 1 }, allowOnTile: tileOwnedEmpty, audio: 'sound/leave.wav' } as ConfigAction
 export const DemolishAction = { key: 'KeyD', button: { img: demolish, name: 'Demolish' }, req: { 'v:action': 1, 'v:army': 1 }, allowOnTile: tileOwnedNotEmpty, audio: getDemolishAudio } as ConfigAction
 

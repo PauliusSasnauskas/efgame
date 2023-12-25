@@ -1,9 +1,9 @@
 import clsx from 'clsx'
-import { ReactNode } from 'react'
+import { CSSProperties, ReactNode } from 'react'
 
-export function Box ({ children, className, reff }: { children: ReactNode, className?: string, reff?: any }): JSX.Element {
+export function Box ({ children, className, style, reff }: { children: ReactNode, className?: string, style?: CSSProperties, reff?: any }): JSX.Element {
   return (
-    <div className={clsx('m-box', className)} ref={reff}>
+    <div className={clsx('m-box', className)} style={style} ref={reff}>
       {children}
     </div>
   )

@@ -1,21 +1,20 @@
 import { Player } from "common/src/Player"
-import { ServerAction, ServerPlayer, ServerTile } from "../ConfigSpec"
+import { ServerAction, ServerActionResult, ServerPlayer, ServerTile } from "../ConfigSpec"
 import { Barracks, Mine, Tower, WoodWall, StoneWall, Capitol } from "./Building"
 import { countTilesWhere, hasStat, isOwned, isOwnedEntity, isOwnedNoEntity, isTileSurrounded } from "../util"
 import { buildingInfo } from "common/src/vanilla/Building"
 
-function isAttackable (tile: ServerTile, player: Player) {
-  if (tile.owner === undefined && tile.entity === undefined){
-    return true
-  }
-  if (tile.entity !== undefined && ['v:tree1', 'v:tree2', 'v:tree3', 'v:bush1', 'v:rock1', 'v:mountain1'].includes(tile.entity.id)){
-    return false
-  }
-  if (tile.owner?.name !== player.name && (player.team === undefined || tile.owner?.team !== player.team)){
-    return true
-  }
+const success: ServerActionResult = { success: true }
+const noStatsResult: ServerActionResult = { success: false, message: 'You do not meet the requirements' }
+const notOwnedOrEntityResult: ServerActionResult = { success: false, message: 'You do not own the tile or there is a building on it' }
 
-  return false
+function isAttackable (tile: ServerTile, player: Player): ServerActionResult {
+  if (tile.owner === undefined && tile.entity === undefined) return success
+  if (tile.entity !== undefined && ['v:tree1', 'v:tree2', 'v:tree3', 'v:bush1', 'v:rock1', 'v:mountain1'].includes(tile.entity.id))
+    return { success: false, message: 'Blocked by object' }
+  if (tile.owner?.name === player.name) return { success: false, message: 'Cannot attack yourself' }
+  if (tile.owner?.team !== undefined && tile.owner.team === player.team) return { success: false, message: 'Cannot attack teammate' } // TODO: check if can attack eliminated teammate
+  return success
 }
 
 function getTile (map: ServerTile[][], mapSize: number, x: number, y: number): ServerTile | undefined {
@@ -101,9 +100,10 @@ function tryClaimSurrounded (x: number, y: number, player: ServerPlayer, map: Se
 
 export const AttackAction: ServerAction = {
   canInvoke: ({ tile, player, map, mapSize }) => {
-    if (!isAttackable(tile, player)) return false
-    if (!isConnected(tile, player, map, mapSize)) return false
-    return true
+    const attackable = isAttackable(tile, player)
+    if (!attackable.success) return attackable
+    if (!isConnected(tile, player, map, mapSize)) return { success: false, message: 'Tile must be connected with a Capitol or at least two tiles' }
+    return success
   },
   statsCost: { "v:action": 2, "v:army": 1 },
   invoke: ({ tile, player, map, mapSize, players, sendMessage }) => {
@@ -139,7 +139,9 @@ export const AttackAction: ServerAction = {
 
 export const LeaveAction: ServerAction = {
   canInvoke: ({ tile, player }) => {
-    return (tile.owner?.name === player.name && tile.entity === undefined)
+    if (tile.owner?.name !== player.name) return { success: false, message: 'Cannot leave territory which is not yours' }
+    if (tile.entity !== undefined) return { success: false, message: 'Cannot leave territory which has a building on it' }
+    return success
   },
   statsCost: { "v:action": 1 },
   invoke: ({ tile, player }) => {
@@ -150,12 +152,12 @@ export const LeaveAction: ServerAction = {
 
 export const TransferAction: ServerAction = {
   canInvoke: ({tile, player}) => {
-    if (tile.owner?.name === undefined) return false
+    if (tile.owner?.name === undefined) return { success: false, message: 'Cannot transfer to unoccupied tile' }
     const isOwn = tile.owner?.name === player.name
-    if (isOwn) return false
+    if (isOwn) return { success: false, message: 'Cannot transfer to yourself' }
     const isTeammate = player.team !== undefined && tile.owner?.team === player.team
-    if (!isTeammate) return false
-    return true
+    if (!isTeammate) return { success: false, message: 'Cannot transfer to enemy' }
+    return success
   },
   statsCost: { "v:action": 1, "v:gold": 50 },
   invoke: ({ tile, players }) => {
@@ -167,8 +169,11 @@ export const TransferAction: ServerAction = {
 }
 
 export const DemolishAction: ServerAction = {
-  canInvoke: ({ tile, player }) => {
-    return isOwnedEntity(tile, player)
+  canInvoke: ({ tile, player, map, mapSize }) => {
+    if (!isOwnedEntity(tile, player)) return { success: false, message: 'Cannot demolish building that is not yours' }
+    const numOwnedCapitols = countTilesWhere(map, mapSize, (t) => isOwned(t, player) && t.entity?.id === 'v:capitol')
+    if (numOwnedCapitols === 1) return { success: false, message: 'Cannot demolish your only Capitol' }
+    return success
   },
   statsCost: { 'v:action': 1, 'v:army': 1 },
   invoke: ({ tile }) => {
@@ -178,17 +183,15 @@ export const DemolishAction: ServerAction = {
 
 export const RepairAction: ServerAction = {
   canInvoke: ({ tile, player }) => {
-    if (!isOwnedEntity(tile, player)) return false
+    if (!isOwnedEntity(tile, player)) return { success: false, message: 'Cannot repair tile that is not yours' }
 
     const building = tile.entity!
     const repairReq = buildingInfo[building.id].repairReq
     const hasStats = Object.entries(repairReq).map(([statName, statReq]) => hasStat(statName, player, statReq as number))
     const hasStatsAll = hasStats.reduce((prev, cur) => prev && cur, true)
-    if (!hasStatsAll) return false
-
-    if (building.health! < buildingInfo[building.id].maxHealth) return true
-
-    return false
+    if (!hasStatsAll) return noStatsResult
+    if (building.health! >= buildingInfo[building.id].maxHealth) return { success: false, message: 'Building is already repaired' }
+    return success
   },
   invoke: ({ tile, player }) => {
     const building = tile.entity!
@@ -201,11 +204,14 @@ export const RepairAction: ServerAction = {
 }
 
 export const BuildCapitolAction: ServerAction = {
-  canInvoke: ({ tile, player, map, mapSize, turnNumber }) => {
+  canInvoke: ({ tile, player, map, mapSize }) => {
+    if (!isOwnedNoEntity(tile, player)) return notOwnedOrEntityResult
     const capitols = countTilesWhere(map, mapSize, (tile) => isOwned(tile, player) && tile.entity?.id === 'v:capitol')
     const reqGold = 475 + capitols * 25
     const reqXp = 125 + capitols * 25
-    return isOwnedNoEntity(tile, player) && hasStat('v:xp', player, reqXp) && hasStat('v:gold', player, reqGold)
+    if (!hasStat('v:xp', player, reqXp)) return noStatsResult
+    if (!hasStat('v:gold', player, reqGold)) return noStatsResult
+    return success
   },
   statsCost: { 'v:action': 8, 'v:army': 6 },
   invoke: ({ tile, player, map, mapSize, turnNumber }) => {
@@ -220,7 +226,7 @@ export const BuildCapitolAction: ServerAction = {
 }
 
 export const BuildMineAction: ServerAction = {
-  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player),
+  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) ? success : notOwnedOrEntityResult,
   statsCost: buildingInfo['v:mine'].buildReq,
   invoke: ({ tile, player, turnNumber }) => {
     addStat('v:xp', player, 0.5)
@@ -229,7 +235,7 @@ export const BuildMineAction: ServerAction = {
 }
 
 export const BuildBarracksAction: ServerAction = {
-  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player),
+  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) ? success : notOwnedOrEntityResult,
   statsCost: buildingInfo['v:barracks'].buildReq,
   invoke: ({ tile, player, map, mapSize, turnNumber }) => {
     const barracksHealthy = countTilesWhere(map, mapSize, (tile) => isOwned(tile, player) && tile.entity?.id === 'v:barracks' && tile.entity.health === 2)
@@ -242,7 +248,11 @@ export const BuildBarracksAction: ServerAction = {
 }
 
 export const BuildTowerAction: ServerAction = {
-  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, buildingInfo['v:tower'].xpReq!),
+  canInvoke: ({ tile, player }) => {
+    if (!isOwnedNoEntity(tile, player)) return notOwnedOrEntityResult
+    if (!hasStat('v:xp', player, buildingInfo['v:tower'].xpReq!)) return noStatsResult
+    return success
+  },
   statsCost: buildingInfo['v:tower'].buildReq,
   invoke: ({ tile, player, turnNumber }) => {
     addStat('v:xp', player, 0.5)
@@ -251,7 +261,11 @@ export const BuildTowerAction: ServerAction = {
 }
 
 export const BuildWoodWallAction: ServerAction = {
-  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, buildingInfo['v:woodwall'].xpReq!),
+  canInvoke: ({ tile, player }) => {
+    if (!isOwnedNoEntity(tile, player)) return notOwnedOrEntityResult
+    if (!hasStat('v:xp', player, buildingInfo['v:woodwall'].xpReq!)) return noStatsResult
+    return success
+  },
   statsCost: buildingInfo['v:woodwall'].buildReq,
   invoke: ({ tile, player, turnNumber }) => {
     addStat('v:xp', player, 0.5)
@@ -260,7 +274,11 @@ export const BuildWoodWallAction: ServerAction = {
 }
 
 export const BuildStoneWallAction: ServerAction = {
-  canInvoke: ({ tile, player }) => isOwnedNoEntity(tile, player) && hasStat('v:xp', player, buildingInfo['v:stonewall'].xpReq!),
+  canInvoke: ({ tile, player }) => {
+    if (!isOwnedNoEntity(tile, player)) return notOwnedOrEntityResult
+    if (!hasStat('v:xp', player, buildingInfo['v:stonewall'].xpReq!)) return noStatsResult
+    return success
+  },
   statsCost: buildingInfo['v:stonewall'].buildReq,
   invoke: ({ tile, player, turnNumber }) => {
     addStat('v:xp', player, 0.5)

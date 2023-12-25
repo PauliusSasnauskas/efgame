@@ -43,6 +43,7 @@
     @apply border-6;
     background: url('./img/menus/bar-bg.svg') 0 0 / 200px repeat padding-box;
     border-image: url('./img/menus/bar-border.svg') 25% / 8px round;
+    scrollbar-width: 26px;
   }
   .m-box {
     @apply border-[10px] p-1;

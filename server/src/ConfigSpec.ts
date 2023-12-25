@@ -16,9 +16,16 @@ export default interface ConfigSpec {
 }
 
 export interface ServerAction {
-  canInvoke: (data: ServerTileEventArgs) => boolean
+  canInvoke: (data: ServerTileEventArgs) => ServerActionResult
   statsCost?: StatReq | ((data: ServerTileEventArgs) => StatReq)
   invoke: (data: ServerTileEventArgs) => void
+}
+
+export type ServerActionResult = {
+  success: false
+  message: string
+} | {
+  success: true
 }
 
 export interface ServerEntity extends Entity {
