@@ -7,6 +7,12 @@ Consists of: Client and Server
 
 Idea taken from http://www.enemyflag.net/ (which is a lovely game, big thanks to Bartłomiej Baron).
 
+### Setup
+```bash
+cd common
+yarn install
+```
+
 ## Client
 Built with react, runs in your browser.
 ```bash
