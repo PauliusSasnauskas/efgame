@@ -220,12 +220,12 @@ export default class Game {
       req = req({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })
     }
 
-    for (const [statName, reqStat] of Object.entries(action.statsCost)) {
+    for (const [statName, reqStat] of Object.entries(req)) {
       const playerStat = (player.stats!)[statName]
       if (playerStat === undefined) return false
       if (typeof playerStat.val === 'string' && playerStat.val !== reqStat) {
         return false // Question: is string equality a good rule?
-      } else if (typeof playerStat.val === 'number' && playerStat.val < reqStat){
+      } else if (typeof playerStat.val === 'number' && playerStat.val < (reqStat as number)){
         return false
       }
     }
@@ -241,10 +241,10 @@ export default class Game {
       req = req({ tile, player, map: this.map, mapSize: this.mapSize, players, turnNumber: this.turnNumber, sendMessage: this.sendMessage.bind(this) })
     }
 
-    for (const [statName, reqStat] of Object.entries(action.statsCost)) {
+    for (const [statName, reqStat] of Object.entries(req)) {
       const playerStat = (player.stats!)[statName]
       if (typeof playerStat.val === 'number'){
-        playerStat.deduct(reqStat)
+        playerStat.deduct(reqStat as number)
       }
     }
   }
