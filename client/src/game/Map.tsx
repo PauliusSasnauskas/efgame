@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react"
+import { ReactNode, WheelEvent, useEffect, useState } from "react"
 import { Tile } from "common/src/Tile"
 import MapTile from "./MapTile"
 import { PlayerDTO } from "common/src/Player"
@@ -72,37 +72,53 @@ export function Map ({ tiles, mapSize, select, selected, player, gameKey }: { ti
   const showCols = 20 - (seeAllLeft ? 0 : 1) - (seeAllRight ? 0 : 1)
   const showRows = 20 - (seeAllTop ? 0 : 1) - (seeAllBottom ? 0 : 1)
 
+  const scrollBy = (scrollX: number, scrollY: number, callback?: (newX: number, newY: number) => void) => {
+    if (mapSize <= 20) return
+    setOffset((oldOffset) => {
+      let newX = oldOffset[0] + scrollX
+      let newY = oldOffset[1] + scrollY
+      if (newX === 1 && scrollX > 0) newX = 2
+      if (newX === 1 && scrollX < 0) newX = 0
+      if (newY === 1 && scrollY > 0) newY = 2
+      if (newY === 1 && scrollY < 0) newY = 0
+      newX = Math.max(0, Math.min(mapSize-19, newX))
+      newY = Math.max(0, Math.min(mapSize-19, newY))
+      callback?.(newX, newY)
+      return [newX, newY]
+    })
+  }
+
   const getScrollFn = (scrollX: number, scrollY: number) => () => {
+    if (mapSize <= 20) return
     clearInterval(scrollOffsetInterval)
-    const scrollFn = () => {
-      setOffset((oldOffset) => {
-        let newX = oldOffset[0] + scrollX
-        let newY = oldOffset[1] + scrollY
-        if (newX === 1 && scrollX > 0) newX = 2
-        if (newX === 1 && scrollX < 0) newX = 0
-        if (newY === 1 && scrollY > 0) newY = 2
-        if (newY === 1 && scrollY < 0) newY = 0
-        newX = Math.max(0, Math.min(mapSize-19, newX))
-        newY = Math.max(0, Math.min(mapSize-19, newY))
+    scrollBy(scrollX, scrollY)
+    setScrollOffsetInterval(setInterval(() => {
+      scrollBy(scrollX, scrollY, (newX, newY) => {
         if (((newX === 0 || newX === mapSize-19) && scrollX !== 0) || ((newY === mapSize-19 || newY === 0) && scrollY !== 0)){
           setScrollOffsetInterval((scrollOffsetInterval) => {
             clearInterval(scrollOffsetInterval)
             return undefined
           })
         }
-        return [newX, newY]
       })
-    }
-    scrollFn()
-    setScrollOffsetInterval(setInterval(scrollFn, 100))
+    }, 100))
   }
   const stopScroll = () => setScrollOffsetInterval((scrollOffsetInterval) => {
     clearInterval(scrollOffsetInterval)
     return undefined
   })
 
+  const onWheel = (param: WheelEvent) => {
+    if (mapSize <= 20) return
+    if (param.shiftKey || param.nativeEvent.deltaX !== 0) {
+      scrollBy(param.nativeEvent.deltaX > 0 ? 1 : param.nativeEvent.deltaY > 0 ? 1 : -1, 0)
+    }else{
+      scrollBy(0, param.nativeEvent.deltaY > 0 ? 1 : -1)
+    }
+  }
+
   return (
-    <div className='m-map'>
+    <div className='m-map' onWheel={onWheel}>
       {!seeAllLeft && <div className='row-span-full col-start-1 col-end-2 flexc bg-grey-darker hover:text-grey-lighter cursor-pointer' onMouseDown={getScrollFn(-1, 0)} onMouseUp={stopScroll}>{'<'}</div>}
       {!seeAllRight && <div className='row-span-full col-start-[20] col-end-[21] flexc bg-grey-darker hover:text-grey-lighter cursor-pointer' onMouseDown={getScrollFn(1, 0)} onMouseUp={stopScroll}>{'>'}</div>}
       {!seeAllTop && <div className='col-span-full row-start-1 row-end-2 flexc text-vertical bg-grey-darker hover:text-grey-lighter cursor-pointer' onMouseDown={getScrollFn(0, -1)} onMouseUp={stopScroll}>{'<'}</div>}

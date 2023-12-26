@@ -168,6 +168,7 @@ export default class Game {
   lobby () {
     this.map = []
     this.turnQueue = []
+    Object.values(this.players).forEach((player) => player.eliminated = false)
     this.setGameState(GameState.LOBBY)
     this.sendMessage('Starting new game.')
   }
