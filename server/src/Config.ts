@@ -6,7 +6,7 @@ import { Barracks, Capitol, Mine, StoneWall, Tower, WoodWall } from "./vanilla/B
 import { checkWinner, getMapForPlayer, processEndTurnForPlayer } from "./vanilla/GameLogic"
 
 const config: ConfigSpec = {
-  name: 'Vanilla',
+  name: 'Enemy Flag Classic',
   version: '1',
   actions: {
     'v:attack': AttackAction,

@@ -5,7 +5,7 @@ Attempted to update in 2020-2021.
 Fully rewrote in Dec 2023.
 Consists of: Client and Server
 
-Idea taken from http://www.enemyflag.net/ (which is a lovely game, big thanks to Bartłomiej Baron).
+Idea is from http://www.enemyflag.net/ (which is a lovely game, big thanks to Bartłomiej Baron).
 
 ### Setup
 ```bash
@@ -35,3 +35,19 @@ yarn start
 ![](./preview/lobby.png)
 ![](./preview/title.png)
 ![](./preview/settings.png)
+
+## Wishlist
+
+Things I'd like to implement:
+- Game won sound
+- Show gained stats after turn
+- Scrollable map (and mapsize greater than 20)
+- Hear enemy-invoked-action sounds
+- Configurable keyboard shortcuts
+- Configurable mod from title screen
+
+Enemy Flag Classic:
+- RMG generates winnable map
+
+Another gamemode:
+- Another gamemode

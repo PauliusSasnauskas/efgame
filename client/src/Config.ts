@@ -18,7 +18,7 @@ import xpStatIcon from './img/vanilla/stats/xp.svg'
 import ConfigSpec from "./ConfigSpec"
 
 const config: ConfigSpec = {
-  name: 'Vanilla',
+  name: 'Enemy Flag Classic',
   version: '1',
   actions: {
     'v:attack': AttackAction,
