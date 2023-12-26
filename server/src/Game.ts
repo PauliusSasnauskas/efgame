@@ -12,7 +12,7 @@ function log(...params: any[]) {
 export default class Game {
   state: GameState = GameState.LOBBY
   players: {[k: string]: ServerPlayer} = {}
-  mapSize: number = 20
+  mapSize: number = 30
   mapName: string = 'RMG'
   map: ServerTile[][] = []
   teams: string[] = ['Blue Triangle', 'Green Star', 'Orange Circle', 'Red Rectangle']

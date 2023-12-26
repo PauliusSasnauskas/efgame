@@ -388,7 +388,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
                 <Bar>Join Team</Bar>
                 <Button icon={teamneutral} iconClass='h-5 w-5 mb-0.25' onClick={getTeamSetFunction('neutral')}>Neutral</Button>
                 {metaInfo.teams.map((team) => (
-                  <Button icon={getTeamIcon[team] ?? teamneutral} iconClass='h-5 w-5 mb-0.5' onClick={getTeamSetFunction(team)}>{team}</Button>
+                  <Button icon={getTeamIcon[team] ?? teamneutral} iconClass='h-5 w-5 mb-0.5' onClick={getTeamSetFunction(team)} key={team}>{team}</Button>
                 ))}
               </>
             )}

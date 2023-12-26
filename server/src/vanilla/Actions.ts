@@ -102,7 +102,7 @@ export const AttackAction: ServerAction = {
   canInvoke: ({ tile, player, map, mapSize }) => {
     const attackable = isAttackable(tile, player)
     if (!attackable.success) return attackable
-    if (!isConnected(tile, player, map, mapSize)) return { success: false, message: 'Tile must be connected with a Capitol or at least two tiles' }
+    if (!isConnected(tile, player, map, mapSize)) return { success: false, message: 'Tile must be connected with at least two tiles or a Capitol' }
     return success
   },
   statsCost: { "v:action": 2, "v:army": 1 },

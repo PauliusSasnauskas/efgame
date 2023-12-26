@@ -3,6 +3,7 @@ import { Tile } from "common/src/Tile"
 import MapTile from "./MapTile"
 import { PlayerDTO } from "common/src/Player"
 
+const offsetScrollThreshold = 3
 
 function range (n: number): number[] {
   return Array.from(Array(n).keys())
@@ -12,12 +13,13 @@ function MapError ({ children }: { children?: ReactNode }): JSX.Element {
   return <div className='w-full h-full flexc text-red-500'>{children}</div>
 }
 
-export function Map ({ tiles, mapSize, select, selected, player, gameKey }: { tiles: Tile[], mapSize: number, select: (newx: number, newy: number) => void, selected: [number, number], player?: PlayerDTO, gameKey: string }): JSX.Element {
-  const initialOffset = [Math.floor(mapSize / 2) - 10, Math.floor(mapSize / 2) - 10]
-  
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [offset, setOffset] = useState<[number, number]>([0, 0])
+function ifOneSetZero (val: number): number {
+  return val === 1 ? 0 : val
+}
 
+export function Map ({ tiles, mapSize, select, selected, player, gameKey }: { tiles: Tile[], mapSize: number, select: (newx: number, newy: number) => void, selected: [number, number], player?: PlayerDTO, gameKey: string }): JSX.Element {
+  const [offset, setOffset] = useState<[number, number]>([Math.floor(mapSize / 2) - 10, Math.floor(mapSize / 2) - 10])
+  const [scrollOffsetInterval, setScrollOffsetInterval] = useState<NodeJS.Timeout | number | undefined>()
   const [oldMap, setOldMap] = useState<{[k: number]: {[k: number]: Tile}}>(Object.assign({}, ...range(mapSize).map((i) => ({ [i]: {} }))))
 
   useEffect(() => {
@@ -29,15 +31,18 @@ export function Map ({ tiles, mapSize, select, selected, player, gameKey }: { ti
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tiles, mapSize])
 
+  useEffect(() => {
+    if (mapSize <= 20) return
+    if (selected[0] < offset[0]+offsetScrollThreshold) setOffset((oldOffset) => [Math.max(0, ifOneSetZero(selected[0]-offsetScrollThreshold)), oldOffset[1]])
+    if (selected[1] < offset[1]+offsetScrollThreshold) setOffset((oldOffset) => [oldOffset[0], Math.max(0, ifOneSetZero(selected[1]-offsetScrollThreshold))])
+    if (selected[0] > offset[0]+17-offsetScrollThreshold) setOffset((oldOffset) => [Math.min(mapSize - 19, ifOneSetZero(selected[0] - 20 + 2 * offsetScrollThreshold)), oldOffset[1]])
+    if (selected[1] > offset[1]+17-offsetScrollThreshold) setOffset((oldOffset) => [oldOffset[0], Math.min(mapSize-19, ifOneSetZero(selected[1]-20+2*offsetScrollThreshold))])
+  }, [selected])
+
   useEffect(() => setOldMap(Object.assign({}, ...range(mapSize).map((i) => ({ [i]: {} })))), [gameKey, mapSize])
 
   if (mapSize === 0 || tiles.length === 0) {
     return <MapError>Error retrieving tile data.</MapError>
-  }
-
-  if (mapSize > 20) {
-    // TODO: support for larger maps
-    return <MapError>Map size {'>'} 20 not yet implemented</MapError>
   }
 
   function getTile(x: number, y: number, includeOld: boolean = false): Tile | undefined {
@@ -59,14 +64,54 @@ export function Map ({ tiles, mapSize, select, selected, player, gameKey }: { ti
     return borderTop + borderRight + borderBottom + borderLeft
   }
 
+  const seeAllTop = mapSize <= 20 || offset[1] === 0
+  const seeAllLeft = mapSize <= 20 || offset[0] === 0
+  const seeAllBottom = mapSize <= 20 || offset[1] === mapSize - 19
+  const seeAllRight = mapSize <= 20 || offset[0] === mapSize - 19
+
+  const showCols = 20 - (seeAllLeft ? 0 : 1) - (seeAllRight ? 0 : 1)
+  const showRows = 20 - (seeAllTop ? 0 : 1) - (seeAllBottom ? 0 : 1)
+
+  const getScrollFn = (scrollX: number, scrollY: number) => () => {
+    clearInterval(scrollOffsetInterval)
+    const scrollFn = () => {
+      setOffset((oldOffset) => {
+        let newX = oldOffset[0] + scrollX
+        let newY = oldOffset[1] + scrollY
+        if (newX === 1 && scrollX > 0) newX = 2
+        if (newX === 1 && scrollX < 0) newX = 0
+        if (newY === 1 && scrollY > 0) newY = 2
+        if (newY === 1 && scrollY < 0) newY = 0
+        newX = Math.max(0, Math.min(mapSize-19, newX))
+        newY = Math.max(0, Math.min(mapSize-19, newY))
+        if (((newX === 0 || newX === mapSize-19) && scrollX !== 0) || ((newY === mapSize-19 || newY === 0) && scrollY !== 0)){
+          setScrollOffsetInterval((scrollOffsetInterval) => {
+            clearInterval(scrollOffsetInterval)
+            return undefined
+          })
+        }
+        return [newX, newY]
+      })
+    }
+    scrollFn()
+    setScrollOffsetInterval(setInterval(scrollFn, 100))
+  }
+  const stopScroll = () => setScrollOffsetInterval((scrollOffsetInterval) => {
+    clearInterval(scrollOffsetInterval)
+    return undefined
+  })
+
   return (
     <div className='m-map'>
-      {range(20*20).map((index) => {
-        const [rowOffsetI, colOffsetI] = initialOffset
-        const [rowOffset, colOffset] = offset
+      {!seeAllLeft && <div className='row-span-full col-start-1 col-end-2 flexc bg-grey-darker hover:text-grey-lighter cursor-pointer' onMouseDown={getScrollFn(-1, 0)} onMouseUp={stopScroll}>{'<'}</div>}
+      {!seeAllRight && <div className='row-span-full col-start-[20] col-end-[21] flexc bg-grey-darker hover:text-grey-lighter cursor-pointer' onMouseDown={getScrollFn(1, 0)} onMouseUp={stopScroll}>{'>'}</div>}
+      {!seeAllTop && <div className='col-span-full row-start-1 row-end-2 flexc text-vertical bg-grey-darker hover:text-grey-lighter cursor-pointer' onMouseDown={getScrollFn(0, -1)} onMouseUp={stopScroll}>{'<'}</div>}
+      {!seeAllBottom && <div className='col-span-full row-start-[20] row-end-[21] flexc text-vertical bg-grey-darker hover:text-grey-lighter cursor-pointer' onMouseDown={getScrollFn(0, 1)} onMouseUp={stopScroll}>{'>'}</div>}
+      {range(showRows*showCols).map((index) => {
+        const [colOffset, rowOffset] = offset
 
-        const row = rowOffsetI + rowOffset + Math.floor(index / 20)
-        const col = colOffsetI + colOffset + index % 20
+        const row = rowOffset + Math.floor(index / showCols)
+        const col = colOffset + index % showCols
 
         if (row < 0 || row >= mapSize || col < 0 || col >= mapSize) return <div className='bg-black' key={index} />
         let tile = getTile(col, row)
@@ -76,7 +121,7 @@ export function Map ({ tiles, mapSize, select, selected, player, gameKey }: { ti
           if (tile !== undefined) old = true
         }
         const borders = checkTileBorders(tile, mapSize)
-        return <MapTile tile={tile} x={col} y={row} key={index} select={select} selected={col === selected[0] && row === selected[1]} borders={borders} old={old} />
+        return <MapTile tile={tile} x={col} y={row} key={`${col}x${row}`} select={select} selected={col === selected[0] && row === selected[1]} borders={borders} old={old} />
       })}
     </div>
   )

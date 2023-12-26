@@ -41,7 +41,6 @@ yarn start
 Things I'd like to implement:
 - Game won sound
 - Show gained stats after turn
-- Scrollable map (and mapsize greater than 20)
 - Hear enemy-invoked-action sounds
 - Configurable keyboard shortcuts
 - Configurable mod from title screen

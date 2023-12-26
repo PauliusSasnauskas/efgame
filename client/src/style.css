@@ -99,6 +99,9 @@
     border-image: url('./img/menus/key.svg') 33.3% / 10px round;
     background: #2c2f35 content-box;
   }
+  .text-vertical {
+    writing-mode: vertical-rl;
+  }
 }
 
 /* Images converted with Pixels to SVG https://codepen.io/shshaw/pen/XbxvNj */
