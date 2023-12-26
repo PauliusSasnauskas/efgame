@@ -1,11 +1,16 @@
 import clsx from "clsx"
-import { KeyboardEvent, useEffect, useRef, useState } from "react"
+import { KeyboardEvent, useContext, useEffect, useRef, useState } from "react"
 import { Box } from "./Box"
-import { Message } from "common/src/SocketSpec";
+import { Message } from "common/src/SocketSpec"
+import { MenuContext } from "../App"
 
 export function ChatPanel ({ active, className, messages, sendMessage, recipient, recipientColor }: { active: boolean, className?: string, messages: Message[], sendMessage: (message: string, recipient?: string) => void, recipient?: string, recipientColor?: string }): JSX.Element {
+  const gameContext = useContext(MenuContext)
   const [chatMessage, setChatMessage] = useState('')
-  const messageRef = useRef<HTMLElement>(null);
+  const messageRef = useRef<HTMLElement>(null)
+
+  const chatSound = new Audio('sound/chat.wav')
+  chatSound.volume = gameContext.settings.soundVolume / 100
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.code !== 'Enter') return
@@ -22,6 +27,8 @@ export function ChatPanel ({ active, className, messages, sendMessage, recipient
 
   useEffect(() => {
     messageRef?.current?.scrollTo(0, messageRef.current.scrollHeight)
+    chatSound.play()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages])
 
   const MessageElement = ({ message }: { message: Message }): JSX.Element => {
