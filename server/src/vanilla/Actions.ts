@@ -127,8 +127,8 @@ export const AttackAction: ServerAction = {
       addStat('v:xp', player, tileIsNeutral ? 0.25 : 1)
     }
     if (tile.owner !== undefined) {
-      const defendingPlayer = findPlayer(tile.owner!.name, players)!
-      deductStat('v:territory', defendingPlayer, 1)
+      const defendingPlayer = findPlayer(tile.owner.name, players)
+      if (defendingPlayer != null) deductStat('v:territory', defendingPlayer, 1)
     }
     tile.entity = undefined
     tile.owner = { name: player.name, isPlayer: true, team: player.team }

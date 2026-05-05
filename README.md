@@ -46,7 +46,7 @@ Things I'd like to implement:
 - Configurable mod from title screen
 
 Enemy Flag Classic:
-- RMG generates winnable map
+- Fire animation
 
 Another gamemode:
 - Another gamemode

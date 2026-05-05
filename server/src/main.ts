@@ -59,9 +59,13 @@ io.on('connection', (socket) => {
   socket.emit("welcome", { name: 'efgame server', version: '2.0.0', gamemode: config.name, gamemodeVersion: config.version, motd: 'Welcome to the server!' })
 
   socket.on('disconnect', (reason) => {
-    if (["io client disconnect", "client namespace disconnect"].includes(reason)){
-      const player = game.getPlayer(socketIdToPlayerName[socket.id])
-  
+    const player = game.getPlayer(socketIdToPlayerName[socket.id])
+    if (player === undefined) {
+      console.log(`[disconnect] ${socket.id} ${dcReasons[reason]}. ${socket.handshake.address} (no player)`)
+      delete socketIdToPlayerName[socket.id]
+      return
+    }
+    if (["io client disconnect", "client namespace disconnect"].includes(reason)) {
       console.log(`[disconnect-wait] ${socket.id} (${socket.handshake.address}) lost connection (${dcReasons[reason]}). Waiting 60 seconds to reconnect.`)
       io.emit('chat', { text: `${player.name} lost connection. Waiting 60 seconds to reconnect.` })
       playerNameReconnectTimeout[player.name] = setTimeout(() => {
@@ -72,7 +76,7 @@ io.on('connection', (socket) => {
       }, 60000)
     }else{
       console.log(`[disconnect] ${socket.id} ${dcReasons[reason]}. ${socket.handshake.address}`)
-      game.removePlayer(socketIdToPlayerName[socket.id])
+      game.removePlayer(player.name)
       sendGameInfo(io, game)
     }
     delete socketIdToPlayerName[socket.id]
@@ -114,6 +118,7 @@ io.on('connection', (socket) => {
       return
     }
     const recipientPlayer = game.getPlayer(recipient)
+    if (recipientPlayer == null) return
     const recipientSocketId = Object.entries(socketIdToPlayerName).find(([_, playerName]) => playerName === recipientPlayer.name)?.[0]
     const fullMessage: Message = { private: true, from: senderPlayer.name, fromColor: senderPlayer.color, to: recipientPlayer.name, toColor: recipientPlayer.color, text: message }
     io.fetchSockets().then((sockets) => sockets.forEach((s) => {

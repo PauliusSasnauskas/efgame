@@ -179,8 +179,8 @@ export default class Game {
 
     this.turnNumber += 1
     let nextTurnQueueIndex = this.turnQueue.indexOf(playerName) + 1
-    if (nextTurnQueueIndex >= this.turnQueue.length) nextTurnQueueIndex %= this.turnQueue.length
-    this.turn = this.turnQueue[nextTurnQueueIndex]
+    if (this.turnQueue.length > 0 && nextTurnQueueIndex >= this.turnQueue.length) nextTurnQueueIndex %= this.turnQueue.length
+    this.turn = this.turnQueue[nextTurnQueueIndex] ?? ''
 
     const player = this.players[playerName]
     const players = Object.values(this.players)
