@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { MenuContext, GameScreen } from '../App'
 import { Button } from '../menu/Button'
 import { Bar } from '../menu/Bar'
@@ -34,7 +34,7 @@ const dcReasons: {[k: string]: string} = {
 const eliminatedColor = '127,127,127'
 
 
-function StatActionPanel ({ endTurn, currentPlayer, gameInfo, currentTurn, selectedTile, getInvokeActionFn }: { endTurn: () => void, currentPlayer: Player, gameInfo: {stats: {[k: string]: Stat}, map: Tile[]}, currentTurn: string, selectedTile?: Tile, getInvokeActionFn: (actionName: string, action: ConfigAction) => () => void }): JSX.Element {
+function StatActionPanel ({ endTurn, currentPlayer, gameInfo, currentTurn, selectedTile, getInvokeActionFn, statGains }: { endTurn: () => void, currentPlayer: Player, gameInfo: {stats: {[k: string]: Stat}, map: Tile[]}, currentTurn: string, selectedTile?: Tile, getInvokeActionFn: (actionName: string, action: ConfigAction) => () => void, statGains: {[k: string]: number} }): JSX.Element {
   function EndTurnButton({ disabled }: { disabled?: boolean }): JSX.Element {
     return <SimpleAction img={leaveActionIcon} name='End Turn' onClick={endTurn} disabled={disabled} hoverElement={<KeyIcon name={'Space'} />} />
   }
@@ -60,7 +60,7 @@ function StatActionPanel ({ endTurn, currentPlayer, gameInfo, currentTurn, selec
   return (
     <>
       {Object.entries(gameInfo.stats).map(([statName, stat]) => (
-        <StatBox src={config.stats[statName].img} stat={stat} key={statName} showReq={statReq?.[statName]} />
+        <StatBox src={config.stats[statName].img} stat={stat} key={statName} showReq={statReq?.[statName]} gain={statGains[statName]} />
       ))}
       {!('endturn' in config.actions) && <EndTurnButton disabled={currentTurn !== currentPlayer?.name} />}
       {Object.entries(config.actions).map(([actionName, action]) => {
@@ -88,6 +88,9 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   const [messageRecipient, setMessageRecipient] = useState<{ name: string, color: string } | undefined>(undefined)
   const [gameKey, setGameKey] = useState('')
   const [toast, setToast] = useState<{text?: string, opacity: number, timeout?: NodeJS.Timeout | number}>({opacity: 0})
+
+  const snapshotGameInfo = useRef<{ [k: string]: Stat } | null>(null)
+  const [statGains, setStatGains] = useState<{ [k: string]: number }>({})
 
   const [selected, select] = useState<[number, number]>([0, 0])
   const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>()
@@ -154,7 +157,10 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   }, [chatActive, selected, gameInfo?.map])
 
   useEffect(() => {
-    if (metaInfo?.gameState === GameState.PLAYING && metaInfo.turn === currentPlayer?.name) playSoundEffect('sound/turn.wav')
+    if (metaInfo?.gameState === GameState.PLAYING && metaInfo.turn === currentPlayer?.name) {
+      playSoundEffect('sound/turn.wav')
+      setStatGains({})
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metaInfo?.turn])
 
@@ -209,7 +215,21 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
       const me = info.players.find((player) => player.name === gameContext.settings.name)
       setCurrentPlayer(me as Player)
     })
-    s.on('gameInfo', setGameInfo)
+    s.on('gameInfo', (info) => {
+      if (snapshotGameInfo.current !== null) {
+        const gains: { [k: string]: number } = {}
+        Object.entries(info.stats).forEach(([statName, stat]: [string, Stat]) => {
+          const prev = snapshotGameInfo.current![statName]
+          if (prev !== undefined && typeof stat.val === 'number' && typeof prev.val === 'number') {
+            const diff = stat.val - prev.val
+            if (diff !== 0) gains[statName] = diff
+          }
+        })
+        setStatGains(gains)
+        snapshotGameInfo.current = null
+      }
+      setGameInfo(info)
+    })
 
     return () => {
       s.io.removeListener('error', handleError)
@@ -244,12 +264,15 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
   }
 
   const endTurn = () => {
+    snapshotGameInfo.current = gameInfo !== undefined ? { ...gameInfo.stats } : null
     socket?.emit('endTurn', (result) => {
       if (!result.processed) {
+        snapshotGameInfo.current = null
         addMessage({ text: 'Server was unable to process the action' })
         return
       }
       if (!result.success) {
+        snapshotGameInfo.current = null
         playSoundEffect('sound/bad.wav')
         showToast(result.message)
       }
@@ -394,7 +417,7 @@ export function Game ({ ip }: { ip: string }): JSX.Element {
             )}
             {metaInfo.gameState === GameState.PLAYING && gameInfo !== undefined && currentPlayer !== undefined && (<>
               <Bar>Turn: {metaInfo.turnNumber}</Bar>
-              <StatActionPanel endTurn={endTurn} currentPlayer={currentPlayer} gameInfo={gameInfo} currentTurn={metaInfo.turn} selectedTile={getSelectedTile()} getInvokeActionFn={getInvokeActionFn} />
+              <StatActionPanel endTurn={endTurn} currentPlayer={currentPlayer} gameInfo={gameInfo} currentTurn={metaInfo.turn} selectedTile={getSelectedTile()} getInvokeActionFn={getInvokeActionFn} statGains={statGains} />
             </>)}
           </div>
         </>

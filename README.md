@@ -40,7 +40,6 @@ yarn start
 
 Things I'd like to implement:
 - Game won sound
-- Show gained stats after turn
 - Hear enemy-invoked-action sounds
 - Configurable keyboard shortcuts
 - Configurable mod from title screen
